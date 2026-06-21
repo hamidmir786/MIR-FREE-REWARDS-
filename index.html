@@ -18,24 +18,22 @@
             background-color: #f3f4fa;
             color: #1a1c22;
             min-height: 100vh;
-            padding-bottom: 80px;
+            padding-bottom: 90px;
             transition: background 0.3s, color 0.3s;
         }
 
-        /* DARK MODE STYLES */
         body.dark-theme {
             background-color: #12141c;
             color: #ffffff;
         }
         body.dark-theme .app-header { background: #1c1e24; }
-        body.dark-theme .premium-card, 
         body.dark-theme .settings-box, 
-        body.dark-theme .history-card { background: #1c1e24; color: white; }
+        body.dark-theme .friend-row-card,
+        body.dark-theme .feature-card,
+        body.dark-theme .history-headline { background: #1c1e24; color: white; }
         body.dark-theme .menu-item { border-bottom: 1px solid #2a2d37; color: #e0e0e0; }
-        body.dark-theme .bottom-navigation-bar { background: #1c1e24; }
+        body.dark-theme .bottom-navigation-bar { background: #1c1e24; border-top: 1px solid #2a2d37; }
         body.dark-theme .milestone-step { background: #252932; }
-
-        .hidden { display: none !important; }
 
         /* HEADER UI */
         .app-header {
@@ -50,17 +48,8 @@
             z-index: 100;
         }
 
-        .app-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1a1c22;
-        }
+        .app-title { font-size: 20px; font-weight: 700; color: #1a1c22; }
         body.dark-theme .app-title { color: #ffffff; }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-        }
 
         .coin-badge {
             background: #fff8e1;
@@ -73,19 +62,13 @@
             align-items: center;
             gap: 6px;
             border: 1px solid #ffe082;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .coin-gold-icon {
-            width: 20px;
-            height: 20px;
-            background: #ffd700;
-            border-radius: 50%;
-            display: inline-block;
-            border: 2px dashed #b8860b;
+            width: 15px; height: 15px; background: #ffd700;
+            border-radius: 50%; display: inline-block; border: 2px dashed #b8860b;
         }
 
-        /* MAIN CONTENT HOLDER */
         .page-content {
             padding: 15px;
             width: 100%;
@@ -93,7 +76,7 @@
             margin: 0 auto;
         }
 
-        /* --- LOGIN GATEWAY --- */
+        /* LOGIN GATEWAY */
         #gateway-screen {
             text-align: center;
             padding: 40px 20px;
@@ -104,231 +87,186 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         body.dark-theme #gateway-screen { background: #1c1e24; }
-
         .btn-google {
-            width: 100%;
-            padding: 14px;
-            background: #1a1c22;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            margin-top: 25px;
+            width: 100%; padding: 14px; background: #1a1c22; color: white;
+            border: none; border-radius: 12px; font-weight: 600; cursor: pointer; margin-top: 25px;
         }
         body.dark-theme .btn-google { background: white; color: #111; }
 
-        /* --- PAGE 5: SETTINGS PAGE UI --- */
-        .profile-container {
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        .avatar-large {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: #f43f5e;
-            color: white;
-            font-size: 36px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 12px;
-            border: 3px solid white;
-            box-shadow: 0 4px 15px rgba(244,63,94,0.3);
-        }
-
-        .profile-name { font-size: 18px; font-weight: 700; }
-        .profile-email { font-size: 13px; color: #666; margin-top: 2px; }
-        body.dark-theme .profile-email { color: #aaa; }
-
-        .settings-box {
+        /* FEATURE CARD GENERAL */
+        .feature-card {
             background: white;
             border-radius: 16px;
-            padding: 8px 16px;
-            margin-top: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            text-align: center;
         }
 
-        .menu-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 0;
-            border-bottom: 1px solid #f0f1f7;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+        /* 🏠 EARN TAB UI */
+        .reward-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white; border: none; padding: 12px 30px;
+            border-radius: 25px; font-weight: 600; cursor: pointer;
+            margin-top: 15px; box-shadow: 0 4px 15px rgba(59,130,246,0.4);
         }
+
+        /* 🎁 SPIN WHEEL SYSTEM */
+        .wheel-container {
+            position: relative; width: 260px; height: 260px; margin: 20px auto;
+        }
+        .main-spin-wheel {
+            width: 100%; height: 100%; border-radius: 50%;
+            border: 8px solid #1a1c22; background: conic-gradient(
+                #ef4444 0deg 60deg, #3b82f6 60deg 120deg, 
+                #10b981 120deg 180deg, #f59e0b 180deg 240deg, 
+                #8b5cf6 240deg 300deg, #ec4899 300deg 360deg
+            );
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+        .wheel-pointer {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; 
+            border-left: 15px solid transparent; border-right: 15px solid transparent;
+            border-top: 25px solid #ff0055; z-index: 10;
+        }
+        .spin-center-hub {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 50px; height: 50px; background: white; border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 5;
+        }
+
+        /* ⚙️ SETTINGS & PROFILE */
+        .profile-container { text-align: center; padding: 15px 0; }
+        .avatar-large {
+            width: 80px; height: 80px; border-radius: 50%; background: #f43f5e;
+            color: white; font-size: 32px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+            border: 3px solid white; box-shadow: 0 4px 15px rgba(244,63,94,0.3);
+        }
+        .settings-box { background: white; border-radius: 16px; padding: 8px 16px; margin-top: 15px; }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #f0f1f7; cursor: pointer; font-size: 14px; }
         .menu-item:last-child { border-bottom: none; }
-
-        .menu-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .icon-wrapper {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: #eff6ff;
-            color: #3b82f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .arrow-right { color: #b0b5bc; font-weight: bold; }
+        .menu-left { display: flex; align-items: center; gap: 12px; }
+        .icon-wrapper { width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; }
+        .arrow-right { color: #b0b5bc; }
 
         /* SWITCH TOGGLE */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-        }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { display: none; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            transition: .3s;
-            border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px; width: 18px;
-            left: 3px; bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: #3b82f6; }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* --- REFER HISTORY SCREEN UI --- */
-        .history-headline {
-            font-size: 15px;
-            font-weight: 600;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            line-shadow: 0 2px 10px rgba(0,0,0,0.02);
-        }
-        body.dark-theme .history-headline { background: #1c1e24; }
-
-        .friend-row-card {
-            background: white;
-            border-radius: 14px;
-            padding: 15px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        }
-        body.dark-theme .friend-row-card { background: #1c1e24; }
-
-        .friend-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
+        /* ⏳ REFER CHECK OVERLAY */
+        .history-headline { font-size: 14px; font-weight: 600; background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center;}
+        .friend-row-card { background: white; border-radius: 14px; padding: 15px; margin-bottom: 12px; }
+        .friend-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .friend-profile { display: flex; gap: 12px; align-items: center; }
-        .friend-avatar {
-            width: 40px; height: 40px; border-radius: 8px;
-            background: #5856d6; color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700;
-        }
-
-        .token-badge {
-            background: #fff8e1; color: #111;
-            padding: 4px 10px; border-radius: 6px;
-            font-weight: 700; font-size: 13px;
-            display: flex; align-items: center; gap: 4px;
-        }
-
-        /* Vertical Matrix/Grid for Milestones */
-        .milestone-matrix {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .milestone-step {
-            background: #f8f9fe;
-            padding: 10px 5px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 11px;
-        }
-
-        .m-date { color: #888; font-size: 10px; display: block; }
-        .m-coins { font-weight: 700; color: #b8860b; margin: 2px 0; display: block; }
+        .friend-avatar { width: 40px; height: 40px; border-radius: 8px; background: #5856d6; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .token-badge { background: #fff8e1; color: #111; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 13px; }
+        .milestone-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .milestone-step { background: #f8f9fe; padding: 10px 5px; border-radius: 10px; text-align: center; font-size: 11px; }
+        .m-date { color: #888; font-size: 9px; display: block; }
+        .m-coins { font-weight: 700; color: #b8860b; display: block; }
         .m-status { font-weight: 600; color: #1a1c22; }
         body.dark-theme .m-status { color: #fff; }
 
-        /* LEGAL OVERLAY VIEW */
-        .legal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #f3f4fa; z-index: 200;
-            padding: 20px; overflow-y: auto;
-        }
+        /* PRIVACY OVERLAY */
+        .legal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f3f4fa; z-index: 200; padding: 20px; overflow-y: auto; display: none; }
         body.dark-theme .legal-overlay { background: #12141c; }
-        
         .legal-title { font-size: 20px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
         .back-btn { cursor: pointer; color: #3b82f6; }
 
-        /* BOTTOM NAV BAR */
+        /* NAVIGATION */
         .bottom-navigation-bar {
-            position: fixed;
-            bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 100%; max-width: 480px;
-            background: #ffffff; height: 65px;
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; background: #ffffff; height: 65px;
             display: flex; justify-content: space-around; align-items: center;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100;
         }
-
-        .nav-tab {
-            display: flex; flex-direction: column; align-items: center;
-            font-size: 11px; color: #a0a5ae; cursor: pointer; flex: 1;
-        }
-
+        .nav-tab { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #a0a5ae; cursor: pointer; flex: 1; }
         .nav-tab.active-tab { color: #3b82f6; font-weight: 600; }
         .nav-icon { font-size: 20px; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
+    <!-- APP HEADER -->
     <header class="app-header">
-        <span class="app-title">Settings</span>
+        <span class="app-title" id="main-navbar-title">MIR FREE REWARDS</span>
         <div class="header-right">
             <div class="coin-badge">
                 <span class="coin-gold-icon"></span>
-                <span id="global-coins">3327</span>
+                <span id="global-coins-counter">3327</span>
             </div>
         </div>
     </header>
 
     <main class="page-content">
 
-        <div id="gateway-screen">
+        <!-- SCREEN 1: LOGIN GATEWAY -->
+        <div id="gateway-screen" style="display: block;">
             <h2 style="font-size: 22px; color: #3b82f6;">MIR FREE REWARDS</h2>
-            <p style="color: #666; font-size: 12px; margin-top: 4px;">Sign in to check your ledger dashboard</p>
-            <button class="btn-google" onclick="bypassLoginGate()">Enter Dashboard Directly</button>
+            <p style="color: #666; font-size: 12px; margin-top: 4px;">Sign in to check your personal dashboard</p>
+            <button class="btn-google" onclick="initAppDashboard()">Enter Dashboard Directly</button>
         </div>
 
-        <div id="view-settings-page" class="hidden">
+        <!-- SCREEN 2: 🏠 EARN MODULE -->
+        <div id="view-earn-tab" style="display: none;">
+            <div class="feature-card">
+                <h3 style="font-size: 18px;">Daily Login Check-In</h3>
+                <p style="font-size: 12px; color:#777; margin-top:5px;">Claim your free daily premium diamond coins instantly</p>
+                <button class="reward-btn" id="daily-claim-node" onclick="claimDailyBonusPoints()">Claim +50 Tokens</button>
+            </div>
+            <div class="feature-card" style="text-align: left;">
+                <h4 style="font-size: 14px; margin-bottom:8px;">🚀 Available Tasks</h4>
+                <div style="padding:12px; background:#f8f9fe; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><b style="font-size:13px; display:block;">Watch Integration Video Ad</b><span style="font-size:11px; color:#888;">Unity / AdMob Node</span></div>
+                    <span style="color:#16a34a; font-weight:700;">+20 🪙</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: 🎁 BOXES (LUCKY SPIN SYSTEM) -->
+        <div id="view-boxes-tab" style="display: none;">
+            <div class="feature-card">
+                <h3 style="font-size: 18px;">Lucky Dynamic Spin Wheel</h3>
+                <p style="font-size: 12px; color:#777;">Test your fortune algorithms to win massive diamonds</p>
+                
+                <div class="wheel-container">
+                    <div class="wheel-pointer"></div>
+                    <div class="spin-center-hub"></div>
+                    <div class="main-spin-wheel" id="target-wheel-node"></div>
+                </div>
+
+                <button class="reward-btn" style="background:linear-gradient(135deg, #10b981, #059669);" onclick="executeSpinSequence()">Spin Now (-10 Coins)</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: 🏆 RANKS PLATFORM -->
+        <div id="view-ranks-tab" style="display: none;">
+            <div class="feature-card">
+                <h3 style="font-size: 18px; margin-bottom:15px;">Global Leaderboard</h3>
+                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;"><span>🥇 1. Mir Shahbaz</span><span style="font-weight:700;">58,250 🪙</span></div>
+                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;"><span>🥈 2. Abdul Hadii</span><span style="font-weight:700;">42,100 🪙</span></div>
+                <div style="display:flex; justify-content:space-between; padding:10px 0;"><span>🥉 3. Sajad Dar</span><span style="font-weight:700;">31,450 🪙</span></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: 💼 WALLET LEDGER -->
+        <div id="view-wallet-tab" style="display: none;">
+            <div class="feature-card">
+                <h3 style="font-size: 16px; color:#666;">Total Redeemable Balance</h3>
+                <h1 style="font-size: 36px; color:#3b82f6; margin: 10px 0;" id="wallet-balance-display">3327</h1>
+                <p style="font-size: 11px; color:#aaa;">Minimum withdrawal threshold node: 10,000 Tokens</p>
+                <button class="reward-btn" style="width:100%;" onclick="alert('Auditing records... Database synchronization takes up to 48 hours.')">Redeem Rewards Code</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 6: ⚙️ SETTINGS SYSTEM MODULE -->
+        <div id="view-settings-tab" style="display: none;">
             <div class="profile-container">
                 <div class="avatar-large">M</div>
                 <h3 class="profile-name">Mir Hamid</h3>
@@ -351,70 +289,50 @@
                 </div>
             </div>
 
-            <p style="font-size:12px; font-weight:700; color:#888; margin: 20px 0 5px 5px;">GENERAL</p>
+            <p style="font-size:12px; font-weight:700; color:#888; margin: 20px 0 5px 5px;">GENERAL OPERATIONS</p>
             <div class="settings-box">
-                <div class="menu-item" onclick="showHistoryTab()">
-                    <div class="menu-left">
-                        <div class="icon-wrapper" style="background:#e0e7ff; color:#4f46e5;">⏳</div>
-                        <span style="font-weight:600;">Refer History Check</span>
-                    </div>
+                <div class="menu-item" onclick="triggerOverlayDisplay('history')">
+                    <div class="menu-left"><div class="icon-wrapper" style="background:#e0e7ff; color:#4f46e5;">⏳</div><span style="font-weight:600;">Refer History Check</span></div>
                     <span class="arrow-right">❯</span>
                 </div>
                 <div class="menu-item" onclick="openLegalDocument('About Us')">
-                    <div class="menu-left">
-                        <div class="icon-wrapper" style="background:#e0f2fe; color:#0369a1;">ℹ️</div>
-                        <span style="font-weight:600;">About Us</span>
-                    </div>
+                    <div class="menu-left"><div class="icon-wrapper" style="background:#e0f2fe; color:#0369a1;">ℹ️</div><span style="font-weight:600;">About Us</span></div>
                     <span class="arrow-right">❯</span>
                 </div>
                 <div class="menu-item" onclick="openLegalDocument('Contact Us')">
-                    <div class="menu-left">
-                        <div class="icon-wrapper" style="background:#fef2f2; color:#b91c1c;">💬</div>
-                        <span style="font-weight:600;">Contact Us</span>
-                    </div>
+                    <div class="menu-left"><div class="icon-wrapper" style="background:#fef2f2; color:#b91c1c;">💬</div><span style="font-weight:600;">Contact Us</span></div>
                     <span class="arrow-right">❯</span>
                 </div>
                 <div class="menu-item" onclick="openLegalDocument('FAQs')">
-                    <div class="menu-left">
-                        <div class="icon-wrapper" style="background:#fef3c7; color:#d97706;">❓</div>
-                        <span style="font-weight:600;">FAQs</span>
-                    </div>
+                    <div class="menu-left"><div class="icon-wrapper" style="background:#fef3c7; color:#d97706;">❓</div><span style="font-weight:600;">FAQs</span></div>
                     <span class="arrow-right">❯</span>
                 </div>
                 <div class="menu-item" onclick="openLegalDocument('Terms')">
-                    <div class="menu-left">
-                        <div class="icon-wrapper" style="background:#f0fdf4; color:#16a34a;">📄</div>
-                        <span style="font-weight:600;">Terms</span>
-                    </div>
+                    <div class="menu-left"><div class="icon-wrapper" style="background:#f0fdf4; color:#16a34a;">📄</div><span style="font-weight:600;">Terms</span></div>
                     <span class="arrow-right">❯</span>
                 </div>
                 <div class="menu-item" onclick="openLegalDocument('Privacy')">
-                    <div class="menu-left">
-                        <div class="icon-wrapper" style="background:#fae8ff; color:#c026d3;">🛡️</div>
-                        <span style="font-weight:600;">Privacy</span>
-                    </div>
+                    <div class="menu-left"><div class="icon-wrapper" style="background:#fae8ff; color:#c026d3;">🛡️</div><span style="font-weight:600;">Privacy Content</span></div>
                     <span class="arrow-right">❯</span>
                 </div>
                 <div class="menu-item" onclick="location.reload()">
-                    <div class="menu-left">
-                        <div class="icon-wrapper" style="background:#fff1f2; color:#e11d48;">👉</div>
-                        <span style="font-weight:600; color:#e11d48;">Sign Out</span>
-                    </div>
+                    <div class="menu-left"><div class="icon-wrapper" style="background:#fff1f2; color:#e11d48;">👉</div><span style="font-weight:600; color:#e11d48;">Sign Out</span></div>
                     <span class="arrow-right">❯</span>
                 </div>
             </div>
         </div>
 
-        <div id="view-history-overlay" class="hidden">
+        <!-- OVERLAY SUB-VIEW: REFER HISTORY SUB-GRID -->
+        <div id="view-history-overlay" style="display: none;">
             <div class="legal-title">
-                <span class="back-btn" onclick="hideHistoryTab()">⬅</span>
+                <span class="back-btn" onclick="triggerOverlayDisplay('settings')">⬅</span>
                 <span>History Log</span>
             </div>
-
             <div class="history-headline">
                 You Earned Total <span style="color:#3b82f6; font-size:18px; font-weight:700;">2850</span> Tokens By Inviting Your <span style="color:#3b82f6; font-size:18px; font-weight:700;">11</span> Friends
             </div>
 
+            <!-- MOHD SHAHBAZ MIR COMPLETE MILESTONE LOG -->
             <div class="friend-row-card">
                 <div class="friend-header">
                     <div class="friend-profile">
@@ -426,78 +344,28 @@
                     </div>
                     <div class="token-badge">🪙 350</div>
                 </div>
-
                 <div class="milestone-matrix">
-                    <div class="milestone-step">
-                        <span class="m-date">June 18, 2026</span>
-                        <span class="m-coins">🪙 50</span>
-                        <span class="m-status">Day: 5</span>
-                    </div>
-                    <div class="milestone-step">
-                        <span class="m-date">June 17, 2026</span>
-                        <span class="m-coins">🪙 50</span>
-                        <span class="m-status">Day: 4</span>
-                    </div>
-                    <div class="milestone-step">
-                        <span class="m-date">June 15, 2026</span>
-                        <span class="m-coins">🪙 50</span>
-                        <span class="m-status">Day: 3</span>
-                    </div>
-                    <div class="milestone-step">
-                        <span class="m-date">June 14, 2026</span>
-                        <span class="m-coins">🪙 50</span>
-                        <span class="m-status">Day: 2</span>
-                    </div>
-                    <div class="milestone-step">
-                        <span class="m-date">June 13, 2026</span>
-                        <span class="m-coins">🪙 50</span>
-                        <span class="m-status">Day: 1</span>
-                    </div>
-                    <div class="milestone-step" style="background: #fff8e1; border: 1px dashed #ffd700;">
-                        <span class="m-date">June 13, 2026</span>
-                        <span class="m-coins" style="color:#b8860b;">🪙 100</span>
-                        <span class="m-status" style="color:#b8860b;">Signed Up</span>
-                    </div>
+                    <div class="milestone-step"><span class="m-date">June 18, 2026</span><span class="m-coins">🪙 50</span><span class="m-status">Day: 5</span></div>
+                    <div class="milestone-step"><span class="m-date">June 17, 2026</span><span class="m-coins">🪙 50</span><span class="m-status">Day: 4</span></div>
+                    <div class="milestone-step"><span class="m-date">June 15, 2026</span><span class="m-coins">🪙 50</span><span class="m-status">Day: 3</span></div>
+                    <div class="milestone-step"><span class="m-date">June 14, 2026</span><span class="m-coins">🪙 50</span><span class="m-status">Day: 2</span></div>
+                    <div class="milestone-step"><span class="m-date">June 13, 2026</span><span class="m-coins">🪙 50</span><span class="m-status">Day: 1</span></div>
+                    <div class="milestone-step" style="background:#fff8e1; border:1px dashed #ffd700;"><span class="m-date">June 13, 2026</span><span class="m-coins" style="color:#b8860b;">🪙 100</span><span class="m-status" style="color:#b8860b;">Signed Up</span></div>
                 </div>
             </div>
-
-            <div class="friend-row-card"><div class="friend-header"><div class="friend-profile"><div class="friend-avatar" style="background:#22c55e;">A</div><div><h4 style="font-size:14px;">Abdul Hadii</h4><p style="font-size:10px; color:#888;">Jun 13, 2026</p></div></div><div class="token-badge">🪙 150</div></div></div>
-            <div class="friend-row-card"><div class="friend-header"><div class="friend-profile"><div class="friend-avatar" style="background:#eab308;">F</div><div><h4 style="font-size:14px;">Fayaz Dar</h4><p style="font-size:10px; color:#888;">Jun 13, 2026</p></div></div><div class="token-badge">🪙 200</div></div></div>
-            <div class="friend-row-card"><div class="friend-header"><div class="friend-profile"><div class="friend-avatar" style="background:#3b82f6;">S</div><div><h4 style="font-size:14px;">sajad dar</h4><p style="font-size:10px; color:#888;">Jun 11, 2026</p></div></div><div class="token-badge">🪙 150</div></div></div>
-            <div class="friend-row-card"><div class="friend-header"><div class="friend-profile"><div class="friend-avatar" style="background:#ef4444;">F</div><div><h4 style="font-size:14px;">FREE FIRE MAX</h4><p style="font-size:10px; color:#888;">Jun 15, 2026</p></div></div><div class="token-badge">🪙 350</div></div></div>
         </div>
 
-        <div id="view-legal-overlay" class="legal-overlay hidden">
+        <!-- OVERLAY SUB-VIEW: LEGAL AND TERMS DOCUMENTATION -->
+        <div id="view-legal-overlay" class="legal-overlay">
             <div class="legal-title">
                 <span class="back-btn" onclick="closeLegalDocument()">⬅</span>
-                <span id="legal-title-text">Document View</span>
+                <span id="legal-title-text">Document Module</span>
             </div>
-            <div id="legal-body-text" style="font-size:13px; line-height:1.6; white-space:pre-wrap; color:#555;">
-                Loading Document...
-            </div>
+            <div id="legal-body-text" style="font-size:13px; line-height:1.6; white-space:pre-wrap; color:#555;"></div>
         </div>
 
     </main>
 
-    <nav class="bottom-navigation-bar hidden" id="app-floating-nav">
-        <div class="nav-tab"><div class="nav-icon">🏠</div><div>Earn</div></div>
-        <div class="nav-tab"><div class="nav-icon">🎁</div><div>Boxes</div></div>
-        <div class="nav-tab"><div class="nav-icon">🏆</div><div>Ranks</div></div>
-        <div class="nav-tab"><div class="nav-icon">💼</div><div>Wallet</div></div>
-        <div class="nav-tab active-tab"><div class="nav-icon">⚙️</div><div>Settings</div></div>
-    </nav>
-
-    <script>
-        function bypassLoginGate() {
-            document.getElementById('gateway-screen').classList.add('hidden');
-            document.getElementById('view-settings-page').classList.remove('hidden');
-            document.getElementById('app-floating-nav').classList.remove('hidden');
-        }
-
-        function toggleDarkThemeEngine() {
-            let chk = document.getElementById('dark-theme-toggle').checked;
-            let statusText = document.getElementById('mode-status-text');
-            if(chk) {
-                document.body.classList.add('dark-theme');
-                statusText.innerText = "On";
-  
+    <!-- FLOATING DECK BAR -->
+    <nav class="bottom-navigation-bar" id="app-floating-nav" style="display: none;">
+        <div class="nav-tab active-tab" id="tab-earn" onclick="switchActiveTabEngine('earn')"><div class="nav
