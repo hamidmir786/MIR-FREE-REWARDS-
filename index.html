@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIR FREE REWARDS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f3f4fa;
+            color: #1a1c22;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* DARK MODE STYLES */
+        body.dark-theme {
+            background-color: #12141c;
+            color: #ffffff;
+        }
+        body.dark-theme .app-header { background: #1c1e24; }
+        body.dark-theme .premium-card, 
+        body.dark-theme .settings-box, 
+        body.dark-theme .history-card { background: #1c1e24; color: white; }
+        body.dark-theme .menu-item { border-bottom: 1px solid #2a2d37; color: #e0e0e0; }
+        body.dark-theme .bottom-navigation-bar { background: #1c1e24; }
+        body.dark-theme .milestone-step { background: #252932; }
+
+        .hidden { display: none !important; }
+
+        /* HEADER UI */
+        .app-header {
+            background: #ffffff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1c22;
+        }
+        body.dark-theme .app-title { color: #ffffff; }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .coin-badge {
+            background: #fff8e1;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #111;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #ffe082;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .coin-gold-icon {
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+            display: inline-block;
+            border: 2px dashed #b8860b;
+        }
+
+        /* MAIN CONTENT HOLDER */
+        .page-content {
+            padding: 15px;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* --- LOGIN GATEWAY --- */
+        #gateway-screen {
+            text-align: center;
+            padding: 40px 20px;
+            max-width: 380px;
+            margin: 60px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        body.dark-theme #gateway-screen { background: #1c1e24; }
+
+        .btn-google {
+            width: 100%;
+            padding: 14px;
+            background: #1a1c22;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 25px;
+        }
+        body.dark-theme .btn-google { background: white; color: #111; }
+
+        /* --- PAGE 5: SETTINGS PAGE UI --- */
+        .profile-container {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .avatar-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #f43f5e;
+            color: white;
+            font-size: 36px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            border: 3px solid white;
+            box-shadow: 0 4px 15px rgba(244,63,94,0.3);
+        }
+
+        .profile-name { font-size: 18px; font-weight: 700; }
+        .profile-email { font-size: 13px; color: #666; margin-top: 2px; }
+        body.dark-theme .profile-email { color: #aaa; }
+
+        .settings-box {
+            background: white;
+            border-radius: 16px;
+            padding: 8px 16px;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f1f7;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .menu-item:last-child { border-bottom: none; }
+
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-wrapper {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .arrow-right { color: #b0b5bc; font-weight: bold; }
+
+        /* SWITCH TOGGLE */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { display: none; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .3s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #3b82f6; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* --- REFER HISTORY SCREEN UI --- */
+        .history-headline {
+            font-size: 15px;
+            font-weight: 600;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            line-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        body.dark-theme .history-headline { background: #1c1e24; }
+
+        .friend-row-card {
+            background: white;
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        body.dark-theme .friend-row-card { background: #1c1e24; }
+
+        .friend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .friend-profile { display: flex; gap: 12px; align-items: center; }
+        .friend-avatar {
+            width: 40px; height: 40px; border-radius: 8px;
+            background: #5856d6; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+        }
+
+        .token-badge {
+            background: #fff8e1; color: #111;
+            padding: 4px 10px; border-radius: 6px;
+            font-weight: 700; font-size: 13px;
+            display: flex; align-items: center; gap: 4px;
+        }
+
+        /* Vertical Matrix/Grid for Milestones */
+        .milestone-matrix {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .milestone-step {
+            background: #f8f9fe;
+            padding: 10px 5px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .m-date { color: #888; font-size: 10px; display: block; }
+        .m-coins { font-weight: 700; color: #b8860b; margin: 2px 0; display: block; }
+        .m-status { font-weight: 600; color: #1a1c22; }
+        body.dark-theme .m-status { color: #fff; }
+
+        /* LEGAL OVERLAY VIEW */
+        .legal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #f3f4fa; z-index: 200;
+            padding: 20px; overflow-y: auto;
+        }
+        body.dark-theme .legal-overlay { background: #12141c; }
+        
+        .legal-title { font-size: 20px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .back-btn { cursor: pointer; color: #3b82f6; }
+
+        /* BOTTOM NAV BAR */
+        .bottom-navigation-bar {
+            position: fixed;
+            bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px;
+            background: #ffffff; height: 65px;
+            display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .nav-tab {
+            display: flex; flex-direction: column; align-items: center;
+            font-size: 11px; color: #a0a5ae; cursor: pointer; flex: 1;
+        }
+
+        .nav-tab.active-tab { color: #3b82f6; font-weight: 600; }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <span class="app-title">Settings</span>
+        <div class="header-right">
+            <div class="coin-badge">
+                <span class="coin-gold-icon"></span>
+                <span id="global-coins">3327</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div id="gateway-screen">
+            <h2 style="font-size: 22px; color: #3b82f6;">MIR FREE REWARDS</h2>
+            <p style="color: #666; font-size: 12px; margin-top: 4px;">Sign in to check your ledger dashboard</p>
+            <button class="btn-google" onclick="bypassLoginGate()">Enter Dashboard Directly</button>
+        </div>
+
+        <div id="view-settings-page" class="hidden">
+            <div class="profile-container">
+                <div class="avatar-large">M</div>
+                <h3 class="profile-name">Mir Hamid</h3>
+                <p class="profile-email">hamidmir12390@gmail.com</p>
+            </div>
+
+            <div class="settings-box">
+                <div class="menu-item">
+                    <div class="menu-left">
+                        <div class="icon-wrapper" style="background:#e0f2fe; color:#0284c7;">☀️</div>
+                        <div>
+                            <span style="display:block; font-weight:600;">Dark Mode</span>
+                            <span id="mode-status-text" style="font-size:11px; color:#888;">Off</span>
+                        </div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-theme-toggle" onchange="toggleDarkThemeEngine()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <p style="font-size:12px; font-weight:700; color:#888; margin: 20px 0 5px 5px;">GENERAL</p>
+            <div class="settings-box">
+                <div class="menu-item" onclick="showHistoryTab()">
+                    <div class="menu-left">
+                        <div class="icon-wrapper" style="background:#e0e7ff; color:#4f46e5;">⏳</div>
+                        <span style="font-weight:600;">Refer History Check</span>
+                    </div>
+                    <span class="arrow-right">❯</span>
+                </div>
+                <div class="menu-item" onclick="openLegalDocument('About Us')">
+                    <div class="menu-left">
+                        <div class="icon-wrapper" style="background:#e0f2fe; color:#0369a1;">ℹ️</div>
+                        <span style="font-weight:600;">About Us</span>
+                    </div>
+                    <span class="arrow-right">❯</span>
+                </div>
+                <div class="menu-item" onclick="openLegalDocument('Contact Us')">
+                    <div class="menu-left">
+                        <div class="icon-wrapper" style="background:#fef2f2; color:#b91c1c;">💬</div>
+                        <span style="font-weight:600;">Contact Us</span>
+                    </div>
+                    <span class="arrow-right">❯</span>
+                </div>
+                <div class="menu-item" onclick="openLegalDocument('FAQs')">
+                    <div class="menu-left">
+                        <div class="icon-wrapper" style="background:#fef3c7; color:#d97706;">❓</div>
+                        <span style="font-weight:600;">FAQs</span>
+                    </div>
+                    <span class="arrow-right">❯</span>
+                </div>
+                <div class="menu-item" onclick="openLegalDocument('Terms')">
+                    <div class="menu-left">
+                        <div class="icon-wrapper" style="background:#f0fdf4; color:#16a34a;">📄</div>
+                        <span style="font-weight:600;">Terms</span>
+                    </div>
+                    <span class="arrow-right">❯</span>
+                </div>
+                <div class="menu-item" onclick="openLegalDocument('Privacy')">
+                    <div class="menu-left">
+                        <div class="icon-wrapper" style="background:#fae8ff; color:#c026d3;">🛡️</div>
+                        <span style="font-weight:600;">Privacy</span>
+                    </div>
+                    <span class="arrow-right">❯</span>
+                </div>
+                <div class="menu-item" onclick="location.reload()">
+                    <div class="menu-left">
+                        <div class="icon-wrapper" style="background:#fff1f2; color:#e11d48;">👉</div>
+                        <span style="font-weight:600; color:#e11d48;">Sign Out</span>
+                    </div>
+                    <span class="arrow-right">❯</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-history-overlay" class="hidden">
+            <div class="legal-title">
+                <span class="back-btn" onclick="hideHistoryTab()">⬅</span>
+                <span>History Log</span>
+            </div>
+
+            <div class="history-headline">
+                You Earned Total <span style="color:#3b82f6; font-size:18px; font-weight:700;">2850</span> Tokens By Inviting Your <span style="color:#3b82f6; font-size:18px; font-weight:700;">11</span> Friends
+            </div>
+
+            <div class="friend-row-card">
+                <div class="friend-header">
+                    <div class="friend-profile">
+                        <div class="friend-avatar">M</div>
+                        <div>
+                            <h4 style="font-size:14px; font-weight:700;">Mohd Shahbaz Mir</h4>
+                            <p style="font-size:11px; color:#888;">Jun 18, 2026 11:01 PM</p>
+                        </div>
+                    </div>
+                    <div class="token-badge">🪙 350</div>
+                </div>
+
+                <div class="milestone-matrix">
+                    <div class="milestone-step">
+                        <span class="m-date">June 18, 2026</span>
+                        <span class="m-coins">🪙 50</span>
+                        <span class="m-status">Day: 5</span>
+                    </div>
+                    <div class="milestone-step">
+                        <span class="m-date">June 17, 2026</span>
+                        <span class="m-coins">🪙 50</span>
+                        <span class="m-status">Day: 4</span>
+                    </div>
+                    <div class="milestone-step">
+                        <span class="m-date">June 15, 2026</span>
+                        <span class="m-coins">🪙 50</span>
+                        <span class="m-status">Day: 3</span>
+                    </div>
+                    <div class="milestone-step">
+                        <span class="m-date">June 14, 2026</span>
+                        <span class="m-coins">🪙 50</span>
+                        <span class="m-status">Day: 2</span>
+                    </div>
+                    <div class="milestone-step">
+                        <span class="m-date">June 13, 2026</span>
+                        <span class="m-coins">🪙 50</span>
+                        <span class="m-status">Day: 1</span>
+                    </div>
+                    <div class="milestone-step" style="background: #fff8e1; border: 1px dashed #ffd700;">
+                        <span class="m-date">June 13, 2026</span>
+                        <span class="m-coins" style="color:#b8860b;">🪙 100</span>
+                        <span class="m-status" style="color:#b8860b;">Signed Up</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="friend-row-card"><div class="friend-header"><div class="friend-profile"><div class="friend-avatar" style="background:#22c55e;">A</div><div><h4 style="font-size:14px;">Abdul Hadii</h4><p style="font-size:10px; color:#888;">Jun 13, 2026</p></div></div><div class="token-badge">🪙 150</div></div></div>
+            <div class="friend-row-card"><div class="friend-header"><div class="friend-profile"><div class="friend-avatar" style="background:#eab308;">F</div><div><h4 style="font-size:14px;">Fayaz Dar</h4><p style="font-size:10px; color:#888;">Jun 13, 2026</p></div></div><div class="token-badge">🪙 200</div></div></div>
+            <div class="friend-row-card"><div class="friend-header"><div class="friend-profile"><div class="friend-avatar" style="background:#3b82f6;">S</div><div><h4 style="font-size:14px;">sajad dar</h4><p style="font-size:10px; color:#888;">Jun 11, 2026</p></div></div><div class="token-badge">🪙 150</div></div></div>
+            <div class="friend-row-card"><div class="friend-header"><div class="friend-profile"><div class="friend-avatar" style="background:#ef4444;">F</div><div><h4 style="font-size:14px;">FREE FIRE MAX</h4><p style="font-size:10px; color:#888;">Jun 15, 2026</p></div></div><div class="token-badge">🪙 350</div></div></div>
+        </div>
+
+        <div id="view-legal-overlay" class="legal-overlay hidden">
+            <div class="legal-title">
+                <span class="back-btn" onclick="closeLegalDocument()">⬅</span>
+                <span id="legal-title-text">Document View</span>
+            </div>
+            <div id="legal-body-text" style="font-size:13px; line-height:1.6; white-space:pre-wrap; color:#555;">
+                Loading Document...
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="bottom-navigation-bar hidden" id="app-floating-nav">
+        <div class="nav-tab"><div class="nav-icon">🏠</div><div>Earn</div></div>
+        <div class="nav-tab"><div class="nav-icon">🎁</div><div>Boxes</div></div>
+        <div class="nav-tab"><div class="nav-icon">🏆</div><div>Ranks</div></div>
+        <div class="nav-tab"><div class="nav-icon">💼</div><div>Wallet</div></div>
+        <div class="nav-tab active-tab"><div class="nav-icon">⚙️</div><div>Settings</div></div>
+    </nav>
+
+    <script>
+        function bypassLoginGate() {
+            document.getElementById('gateway-screen').classList.add('hidden');
+            document.getElementById('view-settings-page').classList.remove('hidden');
+            document.getElementById('app-floating-nav').classList.remove('hidden');
+        }
+
+        function toggleDarkThemeEngine() {
+            let chk = document.getElementById('dark-theme-toggle').checked;
+            let statusText = document.getElementById('mode-status-text');
+            if(chk) {
+                document.body.classList.add('dark-theme');
+                statusText.innerText = "On";
+  
