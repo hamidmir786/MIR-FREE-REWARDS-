@@ -6,10 +6,9 @@
     <title>MIR FREE REWARDS</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- FIREBASE INTEGRATION CORE MODULES -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
         * {
@@ -34,12 +33,9 @@
         }
         body.dark-theme .app-header { background: #1c1e24; }
         body.dark-theme .settings-box, 
-        body.dark-theme .friend-row-card,
-        body.dark-theme .feature-card,
-        body.dark-theme .history-headline { background: #1c1e24; color: white; }
+        body.dark-theme .feature-card { background: #1c1e24; color: white; }
         body.dark-theme .menu-item { border-bottom: 1px solid #2a2d37; color: #e0e0e0; }
         body.dark-theme .bottom-navigation-bar { background: #1c1e24; border-top: 1px solid #2a2d37; }
-        body.dark-theme .milestone-step { background: #252932; }
 
         /* HEADER UI */
         .app-header {
@@ -82,7 +78,7 @@
             margin: 0 auto;
         }
 
-        /* LOGIN GATEWAY */
+        /* INITIALIZING GATEWAY & BOXES */
         #gateway-screen {
             text-align: center;
             padding: 40px 20px;
@@ -93,13 +89,13 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         body.dark-theme #gateway-screen { background: #1c1e24; }
+        
         .btn-google {
             width: 100%; padding: 14px; background: #e11d48; color: white;
             border: none; border-radius: 12px; font-weight: 600; cursor: pointer; margin-top: 25px;
             box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
         }
 
-        /* FEATURE CARD GENERAL */
         .feature-card {
             background: white;
             border-radius: 16px;
@@ -109,7 +105,6 @@
             text-align: center;
         }
 
-        /* EARN TAB UI */
         .reward-btn {
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white; border: none; padding: 12px 30px;
@@ -117,13 +112,11 @@
             margin-top: 15px; box-shadow: 0 4px 15px rgba(59,130,246,0.4);
         }
 
-        /* SPIN WHEEL SYSTEM */
-        .wheel-container {
-            position: relative; width: 260px; height: 260px; margin: 20px auto;
-        }
+        /* SPIN WHEEL */
+        .wheel-container { position: relative; width: 230px; height: 230px; margin: 20px auto; }
         .main-spin-wheel {
             width: 100%; height: 100%; border-radius: 50%;
-            border: 8px solid #1a1c22; background: conic-gradient(
+            border: 6px solid #1a1c22; background: conic-gradient(
                 #ef4444 0deg 60deg, #3b82f6 60deg 120deg, 
                 #10b981 120deg 180deg, #f59e0b 180deg 240deg, 
                 #8b5cf6 240deg 300deg, #ec4899 300deg 360deg
@@ -131,31 +124,20 @@
             transition: transform 4s cubic-bezier(0.1, 0.8, 0.3, 1);
         }
         .wheel-pointer {
-            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0; 
-            border-left: 15px solid transparent; border-right: 15px solid transparent;
-            border-top: 25px solid #ff0055; z-index: 10;
-        }
-        .spin-center-hub {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 50px; height: 50px; background: white; border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 5;
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent;
+            border-top: 22px solid #ff0055; z-index: 10;
         }
 
-        /* SETTINGS & PROFILE */
+        /* SETTINGS */
         .profile-container { text-align: center; padding: 15px 0; }
         .avatar-large {
-            width: 80px; height: 80px; border-radius: 50%; background: #5856d6;
-            color: white; font-size: 32px; font-weight: 700;
+            width: 70px; height: 70px; border-radius: 50%; background: #5856d6;
+            color: white; font-size: 28px; font-weight: 700;
             display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
-            border: 3px solid white; box-shadow: 0 4px 15px rgba(88,86,214,0.3);
         }
         .settings-box { background: white; border-radius: 16px; padding: 8px 16px; margin-top: 15px; }
-        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #f0f1f7; cursor: pointer; font-size: 14px; }
-        .menu-item:last-child { border-bottom: none; }
-        .menu-left { display: flex; align-items: center; gap: 12px; }
-        .icon-wrapper { width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; }
-        .arrow-right { color: #b0b5bc; }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #f0f1f7; cursor: pointer; }
 
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { display: none; }
@@ -164,7 +146,7 @@
         input:checked + .slider { background-color: #3b82f6; }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* FLOATING NAV BAR */
+        /* NAV BAR */
         .bottom-navigation-bar {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 480px; background: #ffffff; height: 65px;
@@ -173,128 +155,112 @@
         }
         .nav-tab { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #a0a5ae; cursor: pointer; flex: 1; }
         .nav-tab.active-tab { color: #3b82f6; font-weight: 600; }
-        .nav-icon { font-size: 20px; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
-    <!-- APP HEADER -->
     <header class="app-header">
         <span class="app-title" id="main-navbar-title">MIR FREE REWARDS</span>
         <div class="header-right">
             <div class="coin-badge">
                 <span class="coin-gold-icon"></span>
-                <span id="global-coins-counter">...</span>
+                <span id="global-coins-counter">0</span>
             </div>
         </div>
     </header>
 
     <main class="page-content">
 
-        <!-- SCREEN 1: LOGIN GATEWAY -->
-        <div id="gateway-screen" style="display: block; text-align: center;">
-            <div id="login-loading-text" style="color:#777; margin-bottom: 15px;">Initializing Secure Database Engine...</div>
+        <div id="gateway-screen">
+            <div id="login-loading-text" style="color:#777; font-size: 14px; padding: 20px 0;">
+                ⏳ Connecting to Live Database Engine...
+            </div>
             <div id="login-action-box" style="display: none;">
-                <h2 style="font-size: 22px; color: #e11d48;">MIR FREE REWARDS</h2>
-                <p style="color: #666; font-size: 12px; margin-top: 4px;">Sign in securely with your Google Account</p>
+                <h2 style="font-size: 22px; color: #e11d48; margin-bottom: 10px;">MIR FREE REWARDS</h2>
+                <p style="color: #666; font-size: 13px;">Sign in securely with your Google Account to enter dashboard</p>
                 <button class="btn-google" onclick="loginWithGoogleEngine()">🔴 Sign In With Google</button>
             </div>
         </div>
 
-        <!-- SCREEN 2: EARN MODULE -->
         <div id="view-earn-tab" style="display: none;">
             <div class="feature-card">
-                <h3 style="font-size: 18px;">Daily Login Check-In</h3>
-                <p style="font-size: 12px; color:#777; margin-top:5px;">Claim your free daily premium diamond coins instantly</p>
-                <button class="reward-btn" id="daily-claim-node" onclick="claimDailyBonusPoints()">Claim +50 Tokens</button>
+                <h3>Daily Login Check-In</h3>
+                <p style="font-size: 12px; color:#777; margin-top:5px;">Claim your daily reward coins instantly</p>
+                <button class="reward-btn" id="daily-claim-node" onclick="claimDailyBonusPoints()">Claim +50 Coins</button>
             </div>
             <div class="feature-card" style="text-align: left;">
-                <h4 style="font-size: 14px; margin-bottom:8px;">🚀 Available Tasks</h4>
-                <div style="padding:12px; background:#f8f9fe; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <div><b style="font-size:13px; display:block;">Watch Integration Video Ad</b><span style="font-size:11px; color:#888;">Ad Systems</span></div>
+                <h4 style="margin-bottom:8px;">🚀 Tasks List</h4>
+                <div style="padding:12px; background:#f8f9fe; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><b style="font-size:13px; color:#1a1c22;">Watch Video Ad</b><span style="font-size:11px; color:#888; display:block;">Ad System Integration</span></div>
                     <span style="color:#16a34a; font-weight:700; cursor:pointer;" onclick="simulateAdWatch()">+20 🪙</span>
                 </div>
             </div>
         </div>
 
-        <!-- SCREEN 3: LUCKY SPIN SYSTEM -->
         <div id="view-boxes-tab" style="display: none;">
             <div class="feature-card">
-                <h3 style="font-size: 18px;">Lucky Dynamic Spin Wheel</h3>
-                <p style="font-size: 12px; color:#777;">Test your fortune algorithms to win massive diamonds</p>
-                
+                <h3>Lucky Dynamic Spin Wheel</h3>
+                <p style="font-size: 12px; color:#777;">Spin the wheel to win diamond rewards</p>
                 <div class="wheel-container">
                     <div class="wheel-pointer"></div>
-                    <div class="spin-center-hub"></div>
                     <div class="main-spin-wheel" id="target-wheel-node"></div>
                 </div>
-
                 <button class="reward-btn" style="background:linear-gradient(135deg, #10b981, #059669);" onclick="executeSpinSequence()">Spin Now (-10 Coins)</button>
             </div>
         </div>
 
-        <!-- SCREEN 4: RANKS PLATFORM -->
         <div id="view-ranks-tab" style="display: none;">
             <div class="feature-card">
-                <h3 style="font-size: 18px; margin-bottom:15px;">Global Leaderboard</h3>
-                <div id="leaderboard-container">
-                    <div style="color:#888; text-align:center; padding:10px;">Loading live ranks...</div>
-                </div>
+                <h3 style="margin-bottom:15px;">Global Leaderboard</h3>
+                <div id="leaderboard-container" style="color:#888; font-size:13px;">Loading live ranks...</div>
             </div>
         </div>
 
-        <!-- SCREEN 5: WALLET LEDGER -->
         <div id="view-wallet-tab" style="display: none;">
             <div class="feature-card">
-                <h3 style="font-size: 16px; color:#666;">Total Redeemable Balance</h3>
-                <h1 style="font-size: 36px; color:#3b82f6; margin: 10px 0;" id="wallet-balance-display">...</h1>
-                <p style="font-size: 11px; color:#aaa;">Minimum withdrawal threshold node: 10,000 Tokens</p>
-                <button class="reward-btn" style="width:100%;" onclick="requestRedeemPayout()">Redeem Rewards Code</button>
+                <h3 style="font-size: 15px; color:#666;">Total Redeemable Balance</h3>
+                <h1 style="font-size: 38px; color:#3b82f6; margin: 10px 0;" id="wallet-balance-display">0</h1>
+                <p style="font-size: 11px; color:#aaa; margin-bottom:15px;">Minimum threshold: 10,000 Coins</p>
+                <button class="reward-btn" style="width:100%;" onclick="requestRedeemPayout()">Redeem Payout Code</button>
             </div>
         </div>
 
-        <!-- SCREEN 6: SETTINGS SYSTEM MODULE -->
         <div id="view-settings-tab" style="display: none;">
             <div class="profile-container">
                 <div class="avatar-large" id="profile-avatar-letter">U</div>
-                <h3 class="profile-name" id="profile-display-name">Loading...</h3>
-                <p class="profile-email" id="profile-display-email" style="color:#888; font-size:11px;">Syncing...</p>
+                <h3 id="profile-display-name">User Name</h3>
+                <p id="profile-display-email" style="color:#888; font-size:12px;"></p>
             </div>
-
             <div class="settings-box">
                 <div class="menu-item">
-                    <div class="menu-left">
-                        <div class="icon-wrapper" style="background:#e0f2fe; color:#0284c7;">☀️</div>
-                        <div>
-                            <span style="display:block; font-weight:600;">Dark Mode</span>
-                            <span id="mode-status-text" style="font-size:11px; color:#888;">Off</span>
-                        </div>
+                    <div>
+                        <span style="display:block; font-weight:600;">Dark Mode</span>
+                        <span id="mode-status-text" style="font-size:11px; color:#888;">Off</span>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="dark-theme-toggle" onchange="toggleDarkThemeEngine()">
                         <span class="slider"></span>
                     </label>
                 </div>
-                <div class="menu-item" onclick="logoutUserEngine()">
-                    <div class="menu-left"><div class="icon-wrapper" style="background:#fef2f2; color:#ef4444;">🚪</div><span style="font-weight:600; color:#ef4444;">Logout Account</span></div>
-                    <span class="arrow-right">❯</span>
+                <div class="menu-item" onclick="logoutUserEngine()" style="color:#ef4444; font-weight:600; border:none; margin-top:10px;">
+                    <span>🚪 Logout Account</span>
+                    <span>❯</span>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <!-- FLOATING NAV BAR -->
     <nav class="bottom-navigation-bar" id="app-floating-nav" style="display: none;">
-        <div class="nav-tab active-tab" id="tab-earn" onclick="switchActiveTabEngine('earn')"><div class="nav-icon">🏠</div><div>Earn</div></div>
-        <div class="nav-tab" id="tab-boxes" onclick="switchActiveTabEngine('boxes')"><div class="nav-icon">🎁</div><div>Boxes</div></div>
-        <div class="nav-tab" id="tab-ranks" onclick="switchActiveTabEngine('ranks')"><div class="nav-icon">🏆</div><div>Ranks</div></div>
-        <div class="nav-tab" id="tab-wallet" onclick="switchActiveTabEngine('wallet')"><div class="nav-icon">💼</div><div>Wallet</div></div>
-        <div class="nav-tab" id="tab-settings" onclick="switchActiveTabEngine('settings')"><div class="nav-icon">⚙️</div><div>Settings</div></div>
+        <div class="nav-tab active-tab" id="tab-earn" onclick="switchActiveTabEngine('earn')">🏠<br>Earn</div>
+        <div class="nav-tab" id="tab-boxes" onclick="switchActiveTabEngine('boxes')">🎁<br>Play</div>
+        <div class="nav-tab" id="tab-ranks" onclick="switchActiveTabEngine('ranks')">🏆<br>Ranks</div>
+        <div class="nav-tab" id="tab-wallet" onclick="switchActiveTabEngine('wallet')">💼<br>Wallet</div>
+        <div class="nav-tab" id="tab-settings" onclick="switchActiveTabEngine('settings')">⚙️<br>Settings</div>
     </nav>
 
     <script>
-        // FIREBASE CREDENTIAL DATA
+        // FIREBASE SECURE INITIALIZATION CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
             authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
@@ -302,138 +268,160 @@
             projectId: "mir-free-rewards-log-and-earn",
             storageBucket: "mir-free-rewards-log-and-earn.firebasestorage.app",
             messagingSenderId: "1055267295995",
-            appId: "1:1055267295995:web:35ebcfaa35a650a832165e",
-            measurementId: "G-V5CGH67MPE"
+            appId: "1:1055267295995:web:35ebcfaa35a650a832165e"
         };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
-
-        let currentUserRef = null;
-        let currentCoins = 0;
-        let isSpinning = false;
-
-        // Check user session
-        auth.onAuthStateChanged(user => {
-            document.getElementById('login-loading-text').style.display = 'none';
-            if (user) {
-                currentUserRef = database.ref('users/' + user.uid);
-                
-                // Set Profile Details
-                document.getElementById('profile-display-name').innerText = user.displayName || "Mir User";
-                document.getElementById('profile-display-email').innerText = user.email;
-                document.getElementById('profile-avatar-letter').innerText = (user.displayName || "U").substring(0,1).toUpperCase();
-                
-                // Listen to live database changes
-                currentUserRef.on('value', snapshot => {
-                    let data = snapshot.val();
-                    if(data) {
-                        currentCoins = data.coins || 0;
-                    } else {
-                        currentCoins = 100; // Welcome Bonus
-                        currentUserRef.set({ 
-                            name: user.displayName || "Mir User", 
-                            email: user.email,
-                            coins: currentCoins 
-                        });
-                    }
-                    updateGlobalBalancesUI();
-                });
-
-                initAppDashboard();
-                syncLeaderboardData();
-            } else {
-                document.getElementById('gateway-screen').style.display = 'block';
-                document.getElementById('login-action-box').style.display = 'block';
-                document.getElementById('app-floating-nav').style.display = 'none';
+        // Safety Trigger Check
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
             }
-        });
+            
+            const auth = firebase.auth();
+            const database = firebase.database();
 
-        function loginWithGoogleEngine() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(error => {
-                alert("Google Authentication Failed: " + error.message);
+            let currentUserRef = null;
+            let currentCoins = 0;
+            let isSpinning = false;
+
+            // Session Watchdog
+            auth.onAuthStateChanged(user => {
+                document.getElementById('login-loading-text').style.display = 'none';
+                if (user) {
+                    document.getElementById('gateway-screen').style.display = 'none';
+                    document.getElementById('app-floating-nav').style.display = 'flex';
+                    
+                    currentUserRef = database.ref('users/' + user.uid);
+                    
+                    // Setup Profile Info UI
+                    document.getElementById('profile-display-name').innerText = user.displayName || "Mir User";
+                    document.getElementById('profile-display-email').innerText = user.email || "";
+                    document.getElementById('profile-avatar-letter').innerText = (user.displayName || "U").charAt(0).toUpperCase();
+                    
+                    // Core Live Sync Stream Listener
+                    currentUserRef.on('value', snapshot => {
+                        let data = snapshot.val();
+                        if(data) {
+                            currentCoins = data.coins || 0;
+                        } else {
+                            currentCoins = 100; // Registration Welcome Gift Node
+                            currentUserRef.set({ 
+                                name: user.displayName || "Mir User", 
+                                email: user.email,
+                                coins: currentCoins 
+                            });
+                        }
+                        document.getElementById('global-coins-counter').innerText = currentCoins;
+                        document.getElementById('wallet-balance-display').innerText = currentCoins;
+                    });
+
+                    switchActiveTabEngine('earn');
+                    syncLeaderboardData();
+                } else {
+                    document.getElementById('gateway-screen').style.display = 'block';
+                    document.getElementById('login-action-box').style.display = 'block';
+                    document.getElementById('app-floating-nav').style.display = 'none';
+                    hideAllDashboardTabs();
+                }
             });
-        }
 
-        function logoutUserEngine() {
-            auth.signOut().then(() => {
-                location.reload();
-            });
-        }
-
-        function updateGlobalBalancesUI() {
-            document.getElementById('global-coins-counter').innerText = currentCoins;
-            document.getElementById('wallet-balance-display').innerText = currentCoins;
-        }
-
-        function initAppDashboard() {
-            document.getElementById('gateway-screen').style.display = 'none';
-            document.getElementById('app-floating-nav').style.display = 'flex';
-            switchActiveTabEngine('earn');
-        }
-
-        function updateCoinsInDatabase(amountChange) {
-            if(currentUserRef) {
-                let targetBalance = currentCoins + amountChange;
-                if(targetBalance < 0) targetBalance = 0;
-                currentUserRef.update({ coins: targetBalance });
-            }
-        }
-
-        function claimDailyBonusPoints() {
-            let btn = document.getElementById('daily-claim-node');
-            updateCoinsInDatabase(50);
-            btn.innerText = "Claimed Securely";
-            btn.style.background = "#888";
-            btn.disabled = true;
-        }
-
-        function simulateAdWatch() {
-            alert("Loading Integration Ad...");
-            setTimeout(() => {
-                updateCoinsInDatabase(20);
-                alert("Ad rewarded! +20 Coins added securely.");
-            }, 1000);
-        }
-
-        function executeSpinSequence() {
-            if(isSpinning) return;
-            if(currentCoins < 10) { alert('Insufficient Balance!'); return; }
-
-            updateCoinsInDatabase(-10);
-            isSpinning = true;
-
-            let randomDegrees = Math.floor(3600 + Math.random() * 360);
-            let targetWheel = document.getElementById('target-wheel-node');
-            targetWheel.style.transform = `rotate(${randomDegrees}deg)`;
-
-            setTimeout(() => {
-                isSpinning = false;
-                let rewards = [10, 50, 100, 25, 5, 200];
-                let selectedPrize = rewards[Math.floor(Math.random() * rewards.length)];
-                
-                updateCoinsInDatabase(selectedPrize);
-                alert(`Firebase Win: +${selectedPrize} Diamonds!`);
-            }, 4000);
-        }
-
-        function syncLeaderboardData() {
-            database.ref('users').orderByChild('coins').limitToLast(5).on('value', snapshot => {
-                let leaderboardBox = document.getElementById('leaderboard-container');
-                leaderboardBox.innerHTML = "";
-                let usersArr = [];
-                
-                snapshot.forEach(child => {
-                    usersArr.push({ name: child.val().name || "User", coins: child.val().coins || 0 });
+            function loginWithGoogleEngine() {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider).catch(error => {
+                    alert("Authentication Error: " + error.message);
                 });
-                usersArr.reverse();
+            }
 
-                usersArr.forEach((user, index) => {
-                    let row = document.createElement('div');
-                    row.style.display = "flex";
-                    row.style.justifyContent = "space-between";
-                    row.style.padding = "10px 0";
+            function logoutUserEngine() {
+                auth.signOut().then(() => { location.reload(); });
+            }
+
+            function updateCoinsInDatabase(amountChange) {
+                if(currentUserRef) {
+                    let targetBalance = currentCoins + amountChange;
+                    if(targetBalance < 0) targetBalance = 0;
+                    currentUserRef.update({ coins: targetBalance });
+                }
+            }
+
+            function claimDailyBonusPoints() {
+                let btn = document.getElementById('daily-claim-node');
+                updateCoinsInDatabase(50);
+                btn.innerText = "Claimed"; btn.disabled = true; btn.style.background = "#888";
+            }
+
+            function simulateAdWatch() {
+                alert("Loading Integration Ad Engine...");
+                setTimeout(() => {
+                    updateCoinsInDatabase(20);
+                    alert("Ad watch success! +20 Coins added.");
+                }, 1200);
+            }
+
+            function executeSpinSequence() {
+                if(isSpinning) return;
+                if(currentCoins < 10) { alert('Insufficient Coins Balance!'); return; }
+
+                updateCoinsInDatabase(-10);
+                isSpinning = true;
+
+                let randomDegrees = Math.floor(3600 + Math.random() * 360);
+                document.getElementById('target-wheel-node').style.transform = `rotate(${randomDegrees}deg)`;
+
+                setTimeout(() => {
+                    isSpinning = false;
+                    let prizes = [5, 20, 50, 10, 100, 15];
+                    let chosen = prizes[Math.floor(Math.random() * prizes.length)];
+                    updateCoinsInDatabase(chosen);
+                    alert(`Wheel Win: Added +${chosen} Coins!`);
+                }, 4000);
+            }
+
+            function syncLeaderboardData() {
+                database.ref('users').orderByChild('coins').limitToLast(5).on('value', snapshot => {
+                    let box = document.getElementById('leaderboard-container');
+                    box.innerHTML = "";
+                    let usersList = [];
+                    snapshot.forEach(c => { usersList.push({name: c.val().name || "User", coins: c.val().coins || 0}); });
+                    usersList.reverse();
+                    usersList.forEach((u, i) => {
+                        box.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;"><span>🏅 ${i+1}. ${u.name}</span><b>${u.coins} 🪙</b></div>`;
+                    });
+                });
+            }
+
+            function requestRedeemPayout() {
+                if(currentCoins < 10000) { alert("Minimum threshold requires 10,000 coins!"); return; }
+                database.ref('withdraw_requests').push({
+                    userId: auth.currentUser.uid,
+                    userName: auth.currentUser.displayName || "User",
+                    userEmail: auth.currentUser.email,
+                    requestedCoins: currentCoins,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    updateCoinsInDatabase(-currentCoins);
+                    alert("Payout request submitted successfully to Admin queue!");
+                });
+            }
+
+            function hideAllDashboardTabs() {
+                document.getElementById('view-earn-tab').style.display = 'none';
+                document.getElementById('view-boxes-tab').style.display = 'none';
+                document.getElementById('view-ranks-tab').style.display = 'none';
+                document.getElementById('view-wallet-tab').style.display = 'none';
+                document.getElementById('view-settings-tab').style.display = 'none';
+            }
+
+            function switchActiveTabEngine(tab) {
+                hideAllDashboardTabs();
+                document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active-tab'));
+                document.getElementById('tab-' + tab).classList.add('active-tab');
+                document.getElementById('view-' + tab + '-tab').style.display = 'block';
                 
+                let titles = {earn: "Earn Tokens", boxes: "Lucky Play", ranks: "Leaderboard Ranks", wallet: "Wallet Ledger", settings: "Settings Configuration"};
+                document.getElementById('main-navbar-title').innerText = titles[tab];
+            }
+
+            function toggleDarkThemeEngine() {
+                let chk = document.getElementById('dark-theme-toggle').checked;
+               
