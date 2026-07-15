@@ -117,7 +117,7 @@
         let cachedUsersList = [];
         let isLeaderboardFrozenState = false;
 
-        // AUTH SESSION & GUARDRails (Bypasses rendering blocks if session storage fails)
+        // AUTH SESSION & GUARD WITH FIREBASE LOAD BYPASS
         window.addEventListener('load', () => {
             const adminSession = sessionStorage.getItem("admin_authenticated_session");
             if (!adminSession || adminSession !== "true") {
@@ -128,9 +128,11 @@
             }
         });
 
-        // CORE SYNC & DATA FETCH
+        // CORE SYNC & DATA FETCH (Safe from orderBy indexes lock)
         function fetchLatestAdminData() {
-            db.collection("users").orderBy("createdAt", "desc").get().then(snap => {
+            // Humne .orderBy() hata diya hai taake Firestore Index issue se page freeze na ho. 
+            // JavaScript manual sorting use karegi jo ki fully client-side safe hai.
+            db.collection("users").get().then(snap => {
                 cachedUsersList = [];
                 let totalCoins = 0;
                 
@@ -141,6 +143,13 @@
                     totalCoins += parseInt(data.coins || 0);
                 });
 
+                // Client-side Javascript Sorting as a safe fallback
+                cachedUsersList.sort((a, b) => {
+                    const dateA = a.createdAt ? (a.createdAt.seconds || 0) : 0;
+                    const dateB = b.createdAt ? (b.createdAt.seconds || 0) : 0;
+                    return dateB - dateA;
+                });
+
                 document.getElementById("statTotalUsers").innerText = cachedUsersList.length;
                 document.getElementById("statCirculatingCoins").innerText = totalCoins;
 
@@ -148,6 +157,7 @@
                 fetchRedeemRequestsQueue();
             }).catch(err => {
                 console.error("Fetch Error:", err);
+                alert("Database load error: Check Console Log!");
             });
         }
 
@@ -170,7 +180,8 @@
         }
 
         function fetchRedeemRequestsQueue() {
-            db.collection("redeem_requests").orderBy("timestamp", "desc").get().then(snap => {
+            // Index crash aur lock se bachne ke liye standard .get() query
+            db.collection("redeem_requests").get().then(snap => {
                 const container = document.getElementById("redeemRequestsContainer");
                 container.innerHTML = "";
                 
@@ -179,25 +190,43 @@
                     return;
                 }
 
+                let requestsArray = [];
                 snap.forEach(doc => {
-                    const req = doc.data();
-                    const reqId = doc.id;
+                    const rData = doc.data();
+                    rData.id = doc.id;
+                    requestsArray.push(rData);
+                });
+
+                // Client-side safe dynamic sorting
+                requestsArray.sort((a, b) => {
+                    const timeA = a.timestamp ? (a.timestamp.seconds || 0) : 0;
+                    const timeB = b.timestamp ? (b.timestamp.seconds || 0) : 0;
+                    return timeB - timeA;
+                });
+
+                requestsArray.forEach(req => {
+                    const reqId = req.id;
                     const item = document.createElement("div");
                     item.className = `p-3.5 bg-black/30 border ${req.status === 'PENDING' ? 'border-yellow-900/40' : 'border-gray-900'} rounded-2xl text-xs space-y-2`;
                     
+                    // Safely parsed elements jisse screen rendering block na ho
+                    const label = req.amountLabel || "N/A Coins Package";
+                    const address = req.targetAddress || "No target address specified";
+                    const statusVal = req.status || "PENDING";
+
                     item.innerHTML = `
                         <div class="flex justify-between items-center">
                             <span class="text-[9px] font-mono text-gray-500">ID: ${reqId.substring(0, 8)}...</span>
-                            <span class="px-2 py-0.5 rounded text-[8px] font-black tracking-wider ${req.status === 'PENDING' ? 'bg-yellow-950/40 text-yellow-400 border border-yellow-800/30' : 'bg-green-950/40 text-green-400 border border-green-800/30'}">${req.status}</span>
+                            <span class="px-2 py-0.5 rounded text-[8px] font-black tracking-wider ${statusVal === 'PENDING' ? 'bg-yellow-950/40 text-yellow-400 border border-yellow-800/30' : 'bg-green-950/40 text-green-400 border border-green-800/30'}">${statusVal}</span>
                         </div>
                         <div>
-                            <p class="font-bold text-white text-[11px]">${req.amountLabel || 'Tokens'}</p>
-                            <p class="text-purple-400 font-mono text-[10px] mt-0.5">Target: ${req.targetAddress || 'N/A'}</p>
+                            <p class="font-bold text-white text-[11px]">${label}</p>
+                            <p class="text-purple-400 font-mono text-[10px] mt-0.5">Target: ${address}</p>
                         </div>
-                        ${req.status === 'PENDING' ? `
+                        ${statusVal === 'PENDING' ? `
                         <div class="flex gap-2 pt-1.5">
-                            <button onclick="approveRedeemTicket('${reqId}', '${req.userUid}', '${req.amountLabel}')" class="flex-1 py-1 bg-green-700 hover:bg-green-600 text-white text-[9px] font-bold rounded-lg uppercase">Approve</button>
-                            <button onclick="rejectRedeemTicket('${reqId}', '${req.userUid}')" class="flex-1 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-400 text-[9px] font-bold rounded-lg uppercase">Reject</button>
+                            <button onclick="approveRedeemTicket('${reqId}', '${req.userUid || ''}', '${label}')" class="flex-1 py-1 bg-green-700 hover:bg-green-600 text-white text-[9px] font-bold rounded-lg uppercase">Approve</button>
+                            <button onclick="rejectRedeemTicket('${reqId}', '${req.userUid || ''}')" class="flex-1 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-400 text-[9px] font-bold rounded-lg uppercase">Reject</button>
                         </div>
                         ` : ''}
                     `;
@@ -208,7 +237,7 @@
             });
         }
 
-        // RENDER DOM ELEMENTS
+        // RENDER DOM ELEMENTS SAFELY WITH FALLBACK
         function renderUsersListMarkup(list) {
             const container = document.getElementById("usersDataContainer");
             container.innerHTML = "";
@@ -221,22 +250,30 @@
             list.forEach(user => {
                 const card = document.createElement("div");
                 card.className = "bg-[#0b0b14] border border-gray-900 p-3.5 rounded-2xl text-xs space-y-2";
+                
+                // Unchecked Null properties validation
+                const username = user.name || "Anonymous User";
+                const useremail = user.email || "no-email@registered.com";
+                const usercoins = user.coins || 0;
+                const securePin = user.securePin || "Not Setup";
+                const recoveryDob = user.recoveryDob || "Not Setup";
+
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
-                            <h4 class="font-bold text-white">${user.name || 'Anonymous User'}</h4>
-                            <p class="text-gray-500 font-mono text-[10px]">${user.email || 'No Email'}</p>
+                            <h4 class="font-bold text-white">${username}</h4>
+                            <p class="text-gray-500 font-mono text-[10px]">${useremail}</p>
                         </div>
                         <div class="bg-purple-950/30 border border-purple-900/40 px-2 py-0.5 rounded-lg text-purple-400 font-mono font-bold text-[10px]">
-                            ${user.coins || 0} 🪙
+                            ${usercoins} 🪙
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-[10px] bg-black/30 p-2 rounded-xl text-gray-400 font-mono">
-                        <div>PIN: ${user.securePin || 'Not Set'}</div>
-                        <div>DOB: ${user.recoveryDob || 'Not Set'}</div>
+                        <div>PIN: ${securePin}</div>
+                        <div>DOB: ${recoveryDob}</div>
                     </div>
                     <div class="flex gap-2 pt-1">
-                        <button onclick="promptEditCoins('${user.uid}', ${user.coins || 0})" class="flex-1 py-1.5 bg-purple-950/30 hover:bg-purple-900/50 border border-purple-800/30 text-purple-300 text-[9px] font-bold rounded-lg uppercase"><i class="fa-solid fa-pen-to-square"></i> Edit Coins</button>
+                        <button onclick="promptEditCoins('${user.uid}', ${usercoins})" class="flex-1 py-1.5 bg-purple-950/30 hover:bg-purple-900/50 border border-purple-800/30 text-purple-300 text-[9px] font-bold rounded-lg uppercase"><i class="fa-solid fa-pen-to-square"></i> Edit Coins</button>
                         <button onclick="deleteUserRecord('${user.uid}')" class="py-1.5 px-3 bg-red-950/20 border border-red-900/30 hover:bg-red-900/30 text-red-400 text-[9px] font-bold rounded-lg uppercase"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
                 `;
@@ -308,40 +345,4 @@
             db.collection("users").doc(userUid).delete().then(() => {
                 alert("User record cleared!");
                 fetchLatestAdminData();
-            });
-        }
-
-        // APPROVE / REJECT TICKETS
-        function approveRedeemTicket(requestId, userUid, amountLabel) {
-            const code = prompt("Enter the Reward Redeem Code to send to the user:");
-            if (code === null || code.trim() === "") return;
-
-            db.collection("redeem_requests").doc(requestId).update({
-                status: "APPROVED",
-                resolvedCode: code
-            }).then(() => {
-                db.collection("users").doc(userUid).collection("mailbox").add({
-                    title: "🎁 Payout Approved!",
-                    message: `Your withdrawal for ${amountLabel} has been processed successfully. Copy your redeem key below!`,
-                    systemCode: code,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    alert("Ticket approved and mail delivered to user!");
-                    fetchLatestAdminData();
-                });
-            });
-        }
-
-        function rejectRedeemTicket(requestId, userUid) {
-            if (!confirm("Reject this withdrawal request?")) return;
-
-            db.collection("redeem_requests").doc(requestId).update({
-                status: "REJECTED"
-            }).then(() => {
-                db.collection("users").doc(userUid).collection("mailbox").add({
-                    title: "⚠️ Payout Rejected",
-                    message: `Your withdrawal request was rejected due to verification issues. Contact Support for details.`,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    alert("Ticket rejected!");
-                    fetchLatestAdminD
+      
