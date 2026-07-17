@@ -353,4 +353,146 @@
             const code = prompt("Enter the Reward Redeem Code to send to the user:");
             if (code === null || code.trim() === "") return;
 
-            db.collection("redeem_requests").doc(requestId).update
+            db.collection("redeem_requests").doc(requestId).update({
+                status: "APPROVED",
+                resolvedCode: code
+            }).then(() => {
+                if(userUid && userUid !== "") {
+                    db.collection("users").doc(userUid).collection("mailbox").add({
+                        title: "🎁 Payout Approved!",
+                        message: `Your withdrawal for ${amountLabel} has been processed successfully. Copy your redeem key below!`,
+                        systemCode: code,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        alert("Ticket approved and mail delivered to user!");
+                        fetchLatestAdminData();
+                    });
+                } else {
+                    alert("Ticket approved but user ID was null.");
+                    fetchLatestAdminData();
+                }
+            });
+        }
+
+        function rejectRedeemTicket(requestId, userUid) {
+            if (!confirm("Reject this withdrawal request?")) return;
+
+            db.collection("redeem_requests").doc(requestId).update({
+                status: "REJECTED"
+            }).then(() => {
+                if(userUid && userUid !== "") {
+                    db.collection("users").doc(userUid).collection("mailbox").add({
+                        title: "⚠️ Payout Rejected",
+                        message: `Your withdrawal request was rejected due to verification issues. Contact Support for details.`,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        alert("Ticket rejected!");
+                        fetchLatestAdminData();
+                    });
+                } else {
+                    alert("Ticket rejected.");
+                    fetchLatestAdminData();
+                }
+            });
+        }
+
+        // GLOBAL ALERTS & SYSTEM CONFIG MODALS
+        function triggerAnnouncementModal() {
+            const modal = document.getElementById("adminPortalModal");
+            const body = document.getElementById("adminModalBody");
+            modal.style.display = "flex";
+
+            body.innerHTML = `
+                <div class="flex justify-between items-center pb-2 border-b border-gray-800">
+                    <h3 class="text-xs font-bold text-white uppercase"><i class="fa-solid fa-bullhorn text-purple-400"></i> Dispatch Global Alert</h3>
+                    <button onclick="closeAdminPortalModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-3 pt-2 text-xs">
+                    <textarea id="globalAlertText" rows="3" placeholder="Write standard announcement message..." class="w-full p-2.5 bg-black/40 border border-gray-900 rounded-lg text-white outline-none resize-none"></textarea>
+                    <button onclick="dispatchGlobalAnnouncements()" class="w-full py-2 bg-purple-700 hover:bg-purple-600 text-white font-bold rounded-lg uppercase">Send to All Users</button>
+                </div>
+            `;
+        }
+
+        function dispatchGlobalAnnouncements() {
+            const message = document.getElementById("globalAlertText").value.trim();
+            if (message === "") return;
+
+            db.collection("users").get().then(snap => {
+                let batch = db.batch();
+                snap.forEach(doc => {
+                    const mailRef = db.collection("users").doc(doc.id).collection("mailbox").doc();
+                    batch.set(mailRef, {
+                        title: "📢 System Notification",
+                        message: message,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+
+                batch.commit().then(() => {
+                    alert("📢 Global Announcement delivered to all users successfully!");
+                    closeAdminPortalModal();
+                });
+            });
+        }
+
+        function triggerKeyConfigModal() {
+            const modal = document.getElementById("adminPortalModal");
+            const body = document.getElementById("adminModalBody");
+            modal.style.display = "flex";
+
+            body.innerHTML = `
+                <div class="flex justify-between items-center pb-2 border-b border-gray-800">
+                    <h3 class="text-xs font-bold text-white uppercase"><i class="fa-solid fa-key text-purple-400"></i> Edit Credentials</h3>
+                    <button onclick="closeAdminPortalModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-3 pt-2 text-xs">
+                    <div>
+                        <label class="block text-[9px] text-gray-500 font-bold uppercase mb-1">Username</label>
+                        <input type="text" id="editAdminUsername" class="w-full px-3 py-2 bg-black/40 border border-gray-900 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] text-gray-500 font-bold uppercase mb-1">New Password</label>
+                        <input type="password" id="editAdminPassword" class="w-full px-3 py-2 bg-black/40 border border-gray-900 rounded-lg text-white">
+                    </div>
+                    <button onclick="saveNewAdminKeys()" class="w-full py-2 bg-purple-700 hover:bg-purple-600 text-white font-bold rounded-lg uppercase">Update Key</button>
+                </div>
+            `;
+
+            db.collection("app_admin").doc("credentials").get().then(doc => {
+                if (doc.exists) {
+                    document.getElementById("editAdminUsername").value = doc.data().username || "admin";
+                    document.getElementById("editAdminPassword").value = doc.data().password || "root123";
+                }
+            });
+        }
+
+        function saveNewAdminKeys() {
+            const u = document.getElementById("editAdminUsername").value.trim();
+            const p = document.getElementById("editAdminPassword").value.trim();
+
+            if (u === "" || p === "") {
+                alert("Credentials can't be empty!");
+                return;
+            }
+
+            db.collection("app_admin").doc("credentials").set({
+                username: u,
+                password: p
+            }).then(() => {
+                alert("🔑 Administration credentials changed successfully!");
+                closeAdminPortalModal();
+            });
+        }
+
+        function closeAdminPortalModal() {
+            document.getElementById("adminPortalModal").style.display = "none";
+        }
+
+        function handleAdminLogout() {
+            sessionStorage.removeItem("admin_authenticated_session");
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
