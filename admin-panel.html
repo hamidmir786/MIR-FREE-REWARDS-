@@ -7,12 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body class="bg-[#05050a] text-gray-300 min-h-screen font-sans pb-12">
 
+    <!-- Top Admin Header -->
     <header class="bg-[#0b0b14] border-b border-purple-950/60 px-5 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-purple-900/30 rounded-xl border border-purple-500/30 flex items-center justify-center text-purple-400 text-lg shadow-[0_0_15px_rgba(147,51,234,0.15)]">
@@ -33,8 +35,10 @@
         </div>
     </header>
 
+    <!-- Admin Analytics Hub -->
     <main class="max-w-md mx-auto p-4 space-y-4">
         
+        <!-- Live Dashboard Counters -->
         <div class="grid grid-cols-2 gap-3">
             <div class="bg-[#0b0b14] border border-gray-900 p-3.5 rounded-2xl relative overflow-hidden">
                 <p class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total Users</p>
@@ -51,6 +55,7 @@
             </div>
         </div>
 
+        <!-- Navigation Tabs Matrix -->
         <div class="grid grid-cols-2 gap-2">
             <button onclick="switchAdminTab('usersListSection')" id="tabBtn-users" class="py-2.5 bg-purple-900/20 border border-purple-700/50 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-users-gear"></i> Users Hub
@@ -66,34 +71,41 @@
             </button>
         </div>
 
+        <!-- SEARCH INPUT BOX -->
         <div class="relative">
             <input type="text" id="adminUserSearchBar" oninput="executeClientSearchFilter()" placeholder="Search by UID, Email, or Name..." class="w-full px-4 py-2.5 bg-[#0b0b14] border border-gray-900 rounded-xl text-xs text-white placeholder-gray-600 outline-none focus:border-purple-800 transition-all font-mono">
             <i class="fa-solid fa-magnifying-glass absolute right-4 top-3 text-gray-600 text-xs"></i>
         </div>
 
+        <!-- SECTION 1: USERS LIVE HUB -->
         <section id="usersListSection" class="space-y-3">
             <div class="flex justify-between items-center px-1">
                 <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest"><i class="fa-solid fa-database text-purple-500"></i> Registered Database Records</h4>
                 <button onclick="fetchLatestAdminData()" class="text-[9px] text-purple-400 hover:text-purple-300 font-bold"><i class="fa-solid fa-arrows-rotate"></i> Reload Table</button>
             </div>
             <div id="usersDataContainer" class="space-y-2.5">
-                </div>
+                <!-- User rows render dynamically here -->
+            </div>
         </section>
 
+        <!-- SECTION 2: REDEEM REQUESTS PORTAL -->
         <section id="redeemRequestsSection" class="space-y-3 hidden">
             <div class="flex justify-between items-center px-1">
                 <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest"><i class="fa-solid fa-receipt text-yellow-500"></i> Pending Redeem Queue</h4>
                 <p class="text-[9px] text-gray-500 font-mono">Real-time Claims Desk</p>
             </div>
             <div id="redeemRequestsContainer" class="space-y-2.5">
-                </div>
+                <!-- Redeem rows render dynamically here -->
+            </div>
         </section>
 
     </main>
 
+    <!-- DYNAMIC OVERLAY MODALS -->
     <div id="adminPortalModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div id="adminModalBody" class="w-full max-w-sm bg-[#0b0b14] border border-gray-900 p-5 rounded-2xl space-y-4">
-            </div>
+            <!-- Dynamic modal content renders here -->
+        </div>
     </div>
 
     <script>
@@ -108,7 +120,7 @@
           appId: "1:1055267295995:web:35ebcfaa35a650a832165e"
         };
 
-        // Safe Initialization
+        // Standard Initialization
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -117,21 +129,14 @@
         let cachedUsersList = [];
         let isLeaderboardFrozenState = false;
 
-        // AUTH SESSION & GUARD WITH FIREBASE LOAD BYPASS
-        window.addEventListener('load', () => {
-            const adminSession = sessionStorage.getItem("admin_authenticated_session");
-            if (!adminSession || adminSession !== "true") {
-                window.location.href = "login.html";
-            } else {
-                fetchLatestAdminData();
-                listenToLeaderboardConfig();
-            }
-        });
+        // DIRECT REFRESH AUTO RUN
+        window.onload = function() {
+            fetchLatestAdminData();
+            listenToLeaderboardConfig();
+        };
 
-        // CORE SYNC & DATA FETCH (Safe from orderBy indexes lock)
+        // CORE SYNC & DATA FETCH
         function fetchLatestAdminData() {
-            // Humne .orderBy() hata diya hai taake Firestore Index issue se page freeze na ho. 
-            // JavaScript manual sorting use karegi jo ki fully client-side safe hai.
             db.collection("users").get().then(snap => {
                 cachedUsersList = [];
                 let totalCoins = 0;
@@ -143,7 +148,7 @@
                     totalCoins += parseInt(data.coins || 0);
                 });
 
-                // Client-side Javascript Sorting as a safe fallback
+                // Client sorting logic
                 cachedUsersList.sort((a, b) => {
                     const dateA = a.createdAt ? (a.createdAt.seconds || 0) : 0;
                     const dateB = b.createdAt ? (b.createdAt.seconds || 0) : 0;
@@ -156,8 +161,7 @@
                 renderUsersListMarkup(cachedUsersList);
                 fetchRedeemRequestsQueue();
             }).catch(err => {
-                console.error("Fetch Error:", err);
-                alert("Database load error: Check Console Log!");
+                console.error("Database connection missing:", err);
             });
         }
 
@@ -175,12 +179,11 @@
                     }
                 }
             }, err => {
-                console.error("Leaderboard Config Listen Error: ", err);
+                console.error("Leaderboard Config Error: ", err);
             });
         }
 
         function fetchRedeemRequestsQueue() {
-            // Index crash aur lock se bachne ke liye standard .get() query
             db.collection("redeem_requests").get().then(snap => {
                 const container = document.getElementById("redeemRequestsContainer");
                 container.innerHTML = "";
@@ -197,7 +200,6 @@
                     requestsArray.push(rData);
                 });
 
-                // Client-side safe dynamic sorting
                 requestsArray.sort((a, b) => {
                     const timeA = a.timestamp ? (a.timestamp.seconds || 0) : 0;
                     const timeB = b.timestamp ? (b.timestamp.seconds || 0) : 0;
@@ -209,7 +211,6 @@
                     const item = document.createElement("div");
                     item.className = `p-3.5 bg-black/30 border ${req.status === 'PENDING' ? 'border-yellow-900/40' : 'border-gray-900'} rounded-2xl text-xs space-y-2`;
                     
-                    // Safely parsed elements jisse screen rendering block na ho
                     const label = req.amountLabel || "N/A Coins Package";
                     const address = req.targetAddress || "No target address specified";
                     const statusVal = req.status || "PENDING";
@@ -251,7 +252,6 @@
                 const card = document.createElement("div");
                 card.className = "bg-[#0b0b14] border border-gray-900 p-3.5 rounded-2xl text-xs space-y-2";
                 
-                // Unchecked Null properties validation
                 const username = user.name || "Anonymous User";
                 const useremail = user.email || "no-email@registered.com";
                 const usercoins = user.coins || 0;
@@ -345,4 +345,12 @@
             db.collection("users").doc(userUid).delete().then(() => {
                 alert("User record cleared!");
                 fetchLatestAdminData();
-      
+            });
+        }
+
+        // APPROVE / REJECT TICKETS
+        function approveRedeemTicket(requestId, userUid, amountLabel) {
+            const code = prompt("Enter the Reward Redeem Code to send to the user:");
+            if (code === null || code.trim() === "") return;
+
+            db.collection("redeem_requests").doc(requestId).update
