@@ -163,7 +163,7 @@
     </div>
 
     <!-- STAGE 2 OVERLAY: SECURITY PROFILE CREATION NODE -->
-    <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50 animate-fade-in">
+    <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0a0a12] border border-purple-900/30 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             
             <div class="w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-xl text-white text-xl mb-3">
@@ -225,7 +225,6 @@
 
         let liveSessionUserCache = null;
 
-        // AUTH SECURITY LAYER BYPASS MITIGATION BLOCK
         window.onload = function() {
             if (sessionStorage.getItem("admin_authenticated_session") === "true") {
                 window.location.href = "admin-panel.html";
@@ -253,7 +252,6 @@
             triggerGoogleOAuthIdentityVerification();
         }
 
-        // ADMINISTRATIVE ACCESS VERIFICATION ROUTING TO admin-panel.html
         function executeAdminAuthentication() {
             const inputUser = document.getElementById('adminUser').value;
             const inputPass = document.getElementById('adminPass').value;
@@ -290,55 +288,58 @@
             });
         }
 
-        // STRICT SYSTEM: 1 DEVICE = 1 ACCOUNT ONLY ENFORCEMENT ENGINE
+        // ABSOLUTE ANTI-FRAUD ENGINE: STRICT DEVICE LOCK ON POST-LOGIN
         function triggerGoogleOAuthIdentityVerification() {
             const activeOAuthProvider = new firebase.auth.GoogleAuthProvider();
             activeOAuthProvider.setCustomParameters({ prompt: 'select_account' });
 
+            // Unique Device Token generate/fetch logic
+            let uniqueSystemHardwareSignature = localStorage.getItem("mir_system_fingerprint_token");
+            if(!uniqueSystemHardwareSignature) {
+                uniqueSystemHardwareSignature = "mir_dev_node_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+                localStorage.setItem("mir_system_fingerprint_token", uniqueSystemHardwareSignature);
+            }
+
             auth.signInWithPopup(activeOAuthProvider).then((authResponse) => {
-                liveSessionUserCache = authResponse.user;
-                const firestoreClientDocRef = db.collection("users").doc(liveSessionUserCache.uid);
+                const user = authResponse.user;
+                liveSessionUserCache = user;
 
-                // Hardware Signature Fetch/Generate
-                let uniqueSystemHardwareSignature = localStorage.getItem("mir_system_fingerprint_token");
-                if(!uniqueSystemHardwareSignature) {
-                    uniqueSystemHardwareSignature = "crypto_sig_node_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-                    localStorage.setItem("mir_system_fingerprint_token", uniqueSystemHardwareSignature);
-                }
-
-                // SECURE FIRESTORE FIREWALL: SCAN ALL ENTRIES FOR THIS HARDWARE SIGNATURE
+                // Check global database if this device is already linked to ANY OTHER USER ID
                 db.collection("users").where("deviceToken", "==", uniqueSystemHardwareSignature).get().then((queryMatchSnapshot) => {
                     let accountLinkedWithThisDevice = null;
                     
                     queryMatchSnapshot.forEach((doc) => {
-                        accountLinkedWithThisDevice = doc.id;
+                        accountLinkedWithThisDevice = doc.data();
                     });
 
-                    // Anti-Fraud Trigger: If another UID already owns this hardware profile token
-                    if(accountLinkedWithThisDevice && accountLinkedWithThisDevice !== liveSessionUserCache.uid) {
-                        alert("⛔ Security Restriction: Multiple accounts are not allowed! Only 1 account per device is permitted on this system.");
+                    // BLOCK IMMEDIATELY: If a different UID already registered this device token
+                    if(accountLinkedWithThisDevice && accountLinkedWithThisDevice.uid !== user.uid) {
+                        alert(`⛔ Security Restriction:\nMultiple accounts are NOT allowed!\n\nThis device is already locked to another account (${accountLinkedWithThisDevice.email}). Only 1 account per device is permitted.`);
                         auth.signOut();
                         liveSessionUserCache = null;
                         return;
                     }
 
-                    // Proceed if security clearance passes
-                    firestoreClientDocRef.get().then((profileDocumentSnapshot) => {
+                    // Clear to check current account status
+                    db.collection("users").doc(user.uid).get().then((profileDocumentSnapshot) => {
                         if(profileDocumentSnapshot.exists) {
                             const registeredUserData = profileDocumentSnapshot.data();
                             
-                            // Cross-check dynamic token mapping consistency
-                            if(registeredUserData.deviceToken && registeredUserData.deviceToken !== uniqueSystemHardwareSignature) {
-                                db.collection("users").doc(liveSessionUserCache.uid).update({
+                            // Double security layer mapping
+                            if(!registeredUserData.deviceToken || registeredUserData.deviceToken !== uniqueSystemHardwareSignature) {
+                                db.collection("users").doc(user.uid).update({
                                     deviceToken: uniqueSystemHardwareSignature
                                 });
                             }
-                            alert(`Welcome back authorized member: ${liveSessionUserCache.displayName}`);
+                            alert(`Welcome back authorized member: ${user.displayName}`);
                             window.location.href = "homepage.html";
                         } else {
+                            // If account doesn't exist, open registration modal
                             document.getElementById('registrationOverlay').style.display = 'flex';
                         }
                     });
+                }).catch((err) => {
+                    alert("Database Cross-Check Error: " + err.message);
                 });
 
             }).catch((frameworkFaultError) => {
