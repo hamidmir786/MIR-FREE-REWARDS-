@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Production Core Framework Modules -->
+    <!-- Firebase Core Modules -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -41,45 +41,35 @@
             0%, 100% { box-shadow: 0 0 15px rgba(147, 51, 234, 0.2); }
             50% { box-shadow: 0 0 30px rgba(147, 51, 234, 0.5); }
         }
-        /* Absolute Responsive Scaling Core Rules */
+        /* Responsive Scaling Engine */
         .responsive-container {
             width: 100%;
             max-width: 440px;
             margin: auto;
             transition: all 0.3s ease-in-out;
         }
-        /* Tablet & Large Screens Autoscale Override */
         @media (min-width: 768px) {
-            .responsive-container {
-                max-width: 480px;
-                transform: scale(1.02);
-            }
+            .responsive-container { max-width: 480px; transform: scale(1.02); }
         }
         @media (min-width: 1024px) {
-            .responsive-container {
-                max-width: 520px;
-                transform: scale(1.05);
-            }
+            .responsive-container { max-width: 520px; transform: scale(1.05); }
         }
     </style>
 </head>
 <body class="p-4 relative selection:bg-purple-600 selection:text-white">
 
-    <!-- Background Atmospheric Vectors -->
     <div class="absolute top-[-20%] left-[-15%] w-[60%] h-[60%] rounded-full bg-purple-900/15 blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-[-20%] right-[-15%] w-[60%] h-[60%] rounded-full bg-indigo-900/15 blur-[140px] pointer-events-none"></div>
 
-    <!-- MAIN INTERACTIVE HUB WRAPPER (Universal Responsive Architecture) -->
+    <!-- MAIN UI WRAPPER -->
     <div class="responsive-container p-5 sm:p-7 rounded-3xl glass-panel shadow-2xl relative overflow-hidden border border-white/5">
         
-        <!-- AUTHORIZATION BRANDING BADGE -->
         <div class="flex justify-center mb-6 select-none">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-purple-950/60 border border-purple-500/30 text-purple-300 shadow-sm animate-pulse">
                 <i class="fa-solid fa-circle-check text-[8px] sm:text-[9px]"></i> Authorised by MIR•MASTER'S
             </span>
         </div>
 
-        <!-- Application Branding Engine Header -->
         <div class="text-center mb-6 select-none">
             <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-[0_0_25px_rgba(139,92,246,0.45)] animate-core-pulse">
                 <i class="fa-solid fa-gift text-xl sm:text-2xl text-white"></i>
@@ -88,7 +78,7 @@
             <p class="text-[10px] sm:text-[11px] text-gray-400 mt-1 font-medium tracking-wide">Play Quizzes & Win Daily Rewards</p>
         </div>
 
-        <!-- ADMINISTRATIVE DASHBOARD CONTROL BLOCK -->
+        <!-- ADMIN PANEL LOGIN -->
         <div class="mb-6 p-4 rounded-2xl bg-black/40 border border-purple-950/40 shadow-inner">
             <h2 class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2 select-none">
                 <i class="fa-solid fa-user-shield text-[10px] sm:text-[11px]"></i> Admin Dashboard Login
@@ -108,14 +98,13 @@
             </div>
         </div>
 
-        <!-- STRUCTURAL DIVISION LINE -->
         <div class="relative flex py-2 items-center select-none">
             <div class="flex-grow border-t border-gray-900"></div>
             <span class="flex-shrink mx-4 text-[9px] uppercase tracking-[0.25em] text-gray-600 font-black">User Account Zone</span>
             <div class="flex-grow border-t border-gray-900"></div>
         </div>
 
-        <!-- OAUTH INTERACTION LAYOUT -->
+        <!-- GOOGLE OAUTH BUTTON -->
         <div class="my-6">
             <button onclick="displayComplianceModalOverlay()" class="w-full py-3.5 bg-white text-gray-900 font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-3 active:scale-[0.97] transition-all shadow-xl hover:bg-gray-50 border border-white">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4" alt="Google Logo">
@@ -123,7 +112,6 @@
             </button>
         </div>
 
-        <!-- COMPLIANCE DOCUMENT ROUTING ANCHORS -->
         <div class="flex justify-center gap-5 text-[9px] sm:text-[10px] text-gray-600 mt-6 pt-4 border-t border-gray-900/50 font-semibold select-none">
             <a href="privacy.html" target="_blank" class="hover:text-purple-400 transition-colors duration-200 flex items-center gap-1"><i class="fa-solid fa-user-lock text-[9px]"></i> Privacy Policy</a>
             <span class="text-gray-800">•</span>
@@ -131,79 +119,59 @@
         </div>
     </div>
 
-    <!-- STAGE 1 OVERLAY: LEGAL COMPLIANCE TERMS & PRIVACY INTERCEPTOR MODAL -->
+    <!-- COMPLIANCE MODAL OVERLAY -->
     <div id="complianceOverlay" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-xs p-6 bg-[#11111b] border border-white/5 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-200">
-            
             <div class="w-12 h-12 bg-purple-950/40 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 text-lg mx-auto mb-3">
                 <i class="fa-solid fa-scale-balanced"></i>
             </div>
-            
             <h3 class="text-sm font-black text-white tracking-wide uppercase mb-2">Terms & Privacy</h3>
-            
             <p class="text-[11px] text-gray-400 leading-relaxed mb-4 px-1 font-medium">
                 By continuing, you agree to our terms and conditions. Please read our policies before proceeding.
             </p>
-            
             <div class="flex justify-center gap-3 text-[10px] font-bold text-purple-400 mb-5 bg-black/30 py-2 rounded-xl border border-gray-900">
                 <a href="privacy.html" target="_blank" class="hover:underline hover:text-purple-300">Privacy Policy</a>
                 <span class="text-gray-800 select-none">|</span>
                 <a href="terms.html" target="_blank" class="hover:underline hover:text-purple-300">Terms & Conditions</a>
             </div>
-
             <div class="grid grid-cols-2 gap-3 font-bold text-xs select-none">
-                <button onclick="closeComplianceModalOverlay()" class="py-2 bg-gray-800 hover:bg-gray-700 text-gray-400 rounded-xl active:scale-95 transition-all uppercase tracking-wider">
-                    Cancel
-                </button>
-                <button onclick="grantComplianceConsentAndAuth()" class="py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl active:scale-95 transition-all shadow-md uppercase tracking-wider">
-                    Agree
-                </button>
+                <button onclick="closeComplianceModalOverlay()" class="py-2 bg-gray-800 hover:bg-gray-700 text-gray-400 rounded-xl active:scale-95 transition-all uppercase tracking-wider">Cancel</button>
+                <button onclick="grantComplianceConsentAndAuth()" class="py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl active:scale-95 transition-all shadow-md uppercase tracking-wider">Agree</button>
             </div>
         </div>
     </div>
 
-    <!-- STAGE 2 OVERLAY: SECURITY PROFILE CREATION NODE -->
+    <!-- REGISTRATION MODAL OVERLAY -->
     <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0a0a12] border border-purple-900/30 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            
             <div class="w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-xl text-white text-xl mb-3">
                 <i class="fa-solid fa-user-shield"></i>
             </div>
-
             <div class="text-center mb-5 select-none">
                 <h3 class="text-sm font-black text-white uppercase tracking-wider">Complete Registration</h3>
                 <p class="text-[10px] text-gray-500 font-medium mt-1">Set up your account security before entering the dashboard.</p>
             </div>
-            
             <div class="space-y-4 text-left">
                 <div>
                     <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Referral Code (Optional)</label>
                     <input type="text" id="refCode" placeholder="Enter code if you have one" autocomplete="off" class="w-full px-3 py-2 text-xs bg-black/50 border border-gray-800 rounded-lg outline-none text-white neon-focus transition-all uppercase font-mono">
-                    <p class="text-[9px] text-red-400 font-bold mt-1.5 flex items-start gap-1 leading-normal">
-                        <i class="fa-solid fa-triangle-exclamation text-[10px] mt-0.5 shrink-0"></i> 
-                        <span>The referral code only 1 time use no invalid or our code register it.</span>
-                    </p>
                 </div>
-
                 <div>
                     <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Set 4-Digit Secure PIN</label>
                     <input type="password" id="securePin" maxlength="4" placeholder="••••" class="w-full px-3 py-2 text-center text-lg font-black tracking-widest bg-black/50 border border-gray-800 rounded-lg outline-none text-white neon-focus transition-all font-mono" inputmode="numeric">
-                    <p class="text-[9px] text-gray-500 mt-1 font-medium">The code will access or used in withdrawal time.</p>
                 </div>
-
                 <div>
                     <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Security Question: What is your Date of birth?</label>
                     <input type="date" id="recoveryDob" class="w-full px-3 py-2 text-xs bg-black/50 border border-gray-800 rounded-lg outline-none text-gray-400 neon-focus transition-all font-mono">
                 </div>
-
-                <button onclick="commitSecureUserRegistration()" class="w-full py-3 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs uppercase tracking-wider rounded-xl active:scale-95 transition-all shadow-lg shadow-purple-950/30">
+                <button onclick="commitSecureUserRegistration()" class="w-full py-3 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs uppercase tracking-wider rounded-xl active:scale-95 transition-all shadow-lg">
                     Submit & Start Earning
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN ENGINE CORE CONTROL CONTROLLER JAVASCRIPT -->
+    <!-- CORE JAVASCRIPT CONTROLLER -->
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
@@ -225,26 +193,27 @@
 
         let liveSessionUserCache = null;
 
-        window.onload = function() {
-            if (sessionStorage.getItem("admin_authenticated_session") === "true") {
-                window.location.href = "admin-panel.html";
+        // Permanent Device ID Generation Rule (Browser Based Engine)
+        function getDevicePersistentUID() {
+            let deviceId = localStorage.getItem("mir_permanent_hardware_hash");
+            if (!deviceId) {
+                // Generates a hard token unique to the current setup session
+                deviceId = "MIR-DEV-" + Math.random().toString(36).substring(2, 15) + window.navigator.userAgent.replace(/[^a-zA-Z0-9]/g, "").substring(0, 10);
+                localStorage.setItem("mir_permanent_hardware_hash", deviceId);
             }
-        };
+            return deviceId;
+        }
 
         function displayComplianceModalOverlay() {
             const modal = document.getElementById("complianceOverlay");
             modal.style.display = "flex";
-            setTimeout(() => {
-                modal.firstElementChild.style.transform = "scale(1)";
-            }, 20);
+            setTimeout(() => { modal.firstElementChild.style.transform = "scale(1)"; }, 20);
         }
 
         function closeComplianceModalOverlay() {
             const modal = document.getElementById("complianceOverlay");
             modal.firstElementChild.style.transform = "scale(0.95)";
-            setTimeout(() => {
-                modal.style.display = "none";
-            }, 100);
+            setTimeout(() => { modal.style.display = "none"; }, 100);
         }
 
         function grantComplianceConsentAndAuth() {
@@ -253,155 +222,109 @@
         }
 
         function executeAdminAuthentication() {
-            const inputUser = document.getElementById('adminUser').value;
-            const inputPass = document.getElementById('adminPass').value;
-
-            const sanitizedUser = inputUser.replace(/[/<>'\"]/g, "").trim();
-            const sanitizedPass = inputPass.replace(/[/<>'\"]/g, "").trim();
-
-            if(sanitizedUser === "" || sanitizedPass === "") {
-                alert("Security Core Failure: Fields cannot execute empty.");
-                return;
+            const inputUser = document.getElementById('adminUser').value.trim();
+            const inputPass = document.getElementById('adminPass').value.trim();
+            if(inputUser === "admin" && inputPass === "root123") {
+                sessionStorage.setItem("admin_authenticated_session", "true");
+                window.location.href = "admin-panel.html";
+            } else {
+                alert("⛔ Admin Security Clearance Denied.");
             }
-
-            db.collection("app_admin").doc("credentials").get().then((doc) => {
-                if(doc.exists && doc.data().username === sanitizedUser && doc.data().password === sanitizedPass) {
-                    alert("👑 Administration Verification Matrix Passed. Connecting...");
-                    sessionStorage.setItem("admin_authenticated_session", "true");
-                    window.location.href = "admin-panel.html";
-                } else {
-                    if(sanitizedUser === "admin" && sanitizedPass === "root123") {
-                        alert("⚠️ Security Alert: Default settings active. Routing to admin-panel.html...");
-                        sessionStorage.setItem("admin_authenticated_session", "true");
-                        window.location.href = "admin-panel.html";
-                    } else {
-                        alert("⛔ Cryptographic Discrepancy: Administration Access Aborted.");
-                    }
-                }
-            }).catch(() => {
-                if(sanitizedUser === "admin" && sanitizedPass === "root123") {
-                    sessionStorage.setItem("admin_authenticated_session", "true");
-                    window.location.href = "admin-panel.html";
-                } else {
-                    alert("System Matrix Exception: Security Firewall link broken.");
-                }
-            });
         }
 
-        // ABSOLUTE ANTI-FRAUD ENGINE: STRICT DEVICE LOCK ON POST-LOGIN
+        // ABSOLUTE DEVICE INTERCEPTOR FLOW
         function triggerGoogleOAuthIdentityVerification() {
             const activeOAuthProvider = new firebase.auth.GoogleAuthProvider();
             activeOAuthProvider.setCustomParameters({ prompt: 'select_account' });
 
-            // Unique Device Token generate/fetch logic
-            let uniqueSystemHardwareSignature = localStorage.getItem("mir_system_fingerprint_token");
-            if(!uniqueSystemHardwareSignature) {
-                uniqueSystemHardwareSignature = "mir_dev_node_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-                localStorage.setItem("mir_system_fingerprint_token", uniqueSystemHardwareSignature);
-            }
+            const currentDeviceID = getDevicePersistentUID();
 
             auth.signInWithPopup(activeOAuthProvider).then((authResponse) => {
                 const user = authResponse.user;
                 liveSessionUserCache = user;
 
-                // Check global database if this device is already linked to ANY OTHER USER ID
-                db.collection("users").where("deviceToken", "==", uniqueSystemHardwareSignature).get().then((queryMatchSnapshot) => {
-                    let accountLinkedWithThisDevice = null;
-                    
-                    queryMatchSnapshot.forEach((doc) => {
-                        accountLinkedWithThisDevice = doc.data();
+                // 1. Check if ANY user profile has registered this Device ID
+                db.collection("users").where("deviceToken", "==", currentDeviceID).get().then((querySnapshot) => {
+                    let activeDeviceOwnerUID = null;
+                    let activeDeviceOwnerEmail = "";
+
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        activeDeviceOwnerUID = data.uid;
+                        activeDeviceOwnerEmail = data.email;
                     });
 
-                    // BLOCK IMMEDIATELY: If a different UID already registered this device token
-                    if(accountLinkedWithThisDevice && accountLinkedWithThisDevice.uid !== user.uid) {
-                        alert(`⛔ Security Restriction:\nMultiple accounts are NOT allowed!\n\nThis device is already locked to another account (${accountLinkedWithThisDevice.email}). Only 1 account per device is permitted.`);
+                    // SECURITY TRIGGER: If this device ID belongs to another user account
+                    if (activeDeviceOwnerUID && activeDeviceOwnerUID !== user.uid) {
+                        alert(`⛔ SECURITY VIOLATION!\n\nMultiple accounts are NOT allowed on this device.\nThis device is already locked to: ${activeDeviceOwnerEmail}\n\nLogging out current session.`);
                         auth.signOut();
                         liveSessionUserCache = null;
                         return;
                     }
 
-                    // Clear to check current account status
-                    db.collection("users").doc(user.uid).get().then((profileDocumentSnapshot) => {
-                        if(profileDocumentSnapshot.exists) {
-                            const registeredUserData = profileDocumentSnapshot.data();
+                    // 2. Check if this specific User has already registered on a DIFFERENT device
+                    db.collection("users").doc(user.uid).get().then((userDoc) => {
+                        if (userDoc.exists) {
+                            const userData = userDoc.data();
                             
-                            // Double security layer mapping
-                            if(!registeredUserData.deviceToken || registeredUserData.deviceToken !== uniqueSystemHardwareSignature) {
-                                db.collection("users").doc(user.uid).update({
-                                    deviceToken: uniqueSystemHardwareSignature
-                                });
+                            if (userData.deviceToken && userData.deviceToken !== currentDeviceID) {
+                                alert(`⛔ ACCOUNT LOCKOUT!\n\nYour account is registered on another device.\nYou cannot access this account from multiple devices.`);
+                                auth.signOut();
+                                liveSessionUserCache = null;
+                                return;
                             }
-                            alert(`Welcome back authorized member: ${user.displayName}`);
+
+                            // If validation passes, route inside
+                            alert(`Authorized Entry: ${user.displayName}`);
                             window.location.href = "homepage.html";
                         } else {
-                            // If account doesn't exist, open registration modal
+                            // Fresh account signup allowed
                             document.getElementById('registrationOverlay').style.display = 'flex';
                         }
                     });
-                }).catch((err) => {
-                    alert("Database Cross-Check Error: " + err.message);
+
+                }).catch((error) => {
+                    alert("Security Check Failed: " + error.message);
                 });
 
-            }).catch((frameworkFaultError) => {
-                alert("Identity Framework Intercept Fault: " + frameworkFaultError.message);
+            }).catch((err) => {
+                alert("Auth Intercept Fault: " + err.message);
             });
         }
 
         function commitSecureUserRegistration() {
-            if(!liveSessionUserCache) {
-                alert("Runtime Session Error: Null context state. Re-initialize login sequence.");
-                return;
-            }
+            if(!liveSessionUserCache) return;
 
-            const rawRefField = document.getElementById('refCode').value.replace(/[/<>'\"]/g, "").trim().toUpperCase();
             const rawPinField = document.getElementById('securePin').value.trim();
             const rawDobField = document.getElementById('recoveryDob').value;
+            const currentDeviceID = getDevicePersistentUID();
 
             if(rawPinField.length !== 4 || isNaN(rawPinField)) {
-                alert("🔒 Security Requirement Failure: Transaction security PIN must be exactly 4 digits!");
+                alert("Transaction security PIN must be exactly 4 digits!");
                 return;
             }
             if(!rawDobField) {
-                alert("📅 Configuration Input Fault: Recovery Security Date parameter value required!");
+                alert("Recovery Birth Date parameter value required!");
                 return;
             }
 
-            const uploadVerifiedPayloadToProductionDatabase = (assignedCoinBonusMetrics) => {
-                const storedSystemHardwareSignature = localStorage.getItem("mir_system_fingerprint_token");
-                
-                db.collection("users").doc(liveSessionUserCache.uid).set({
-                    uid: liveSessionUserCache.uid,
-                    name: liveSessionUserCache.displayName,
-                    email: liveSessionUserCache.email,
-                    photo: liveSessionUserCache.photoURL,
-                    coins: parseInt(assignedCoinBonusMetrics),
-                    securePin: rawPinField,
-                    recoveryDob: rawDobField,
-                    deviceToken: storedSystemHardwareSignature,
-                    myReferralCode: "MIR" + liveSessionUserCache.uid.substring(0, 5).toUpperCase(),
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    alert("🚀 Core Data Structure Initialized. Account Registry Operational!");
-                    window.location.href = "homepage.html";
-                }).catch(databaseInjectionError => {
-                    alert("Write Execution Refused: Structural fault " + databaseInjectionError.message);
-                });
-            };
-
-            if(rawRefField !== "") {
-                db.collection("users").where("myReferralCode", "==", rawRefField).get().then((refCheckResultSnapshot) => {
-                    if(refCheckResultSnapshot.empty) {
-                        alert("❌ Referral Matching Fault: Code is invalid or inactive.");
-                    } else {
-                        alert("🎉 Dynamic Voucher Processed: 100 Referral Bonus Coins allocated!");
-                        uploadVerifiedPayloadToProductionDatabase(100);
-                    }
-                }).catch(() => {
-                    uploadVerifiedPayloadToProductionDatabase(0);
-                });
-            } else {
-                uploadVerifiedPayloadToProductionDatabase(0);
-            }
+            db.collection("users").doc(liveSessionUserCache.uid).set({
+                uid: liveSessionUserCache.uid,
+                name: liveSessionUserCache.displayName,
+                email: liveSessionUserCache.email,
+                photo: liveSessionUserCache.photoURL,
+                coins: 0,
+                securePin: rawPinField,
+                recoveryDob: rawDobField,
+                deviceToken: currentDeviceID,
+                myReferralCode: "MIR" + liveSessionUserCache.uid.substring(0, 5).toUpperCase(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert("🚀 Core Profile Initialized & Device Registry Bound!");
+                window.location.href = "homepage.html";
+            }).catch(err => {
+                alert("Registry Error: " + err.message);
+            });
         }
     </script>
 </body>
