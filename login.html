@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MIR FREE REWARDS - Secure Authorization Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,6 +19,10 @@
             color: #f3f4f6;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .neon-focus:focus {
             box-shadow: 0 0 20px rgba(147, 51, 234, 0.55);
@@ -37,37 +41,57 @@
             0%, 100% { box-shadow: 0 0 15px rgba(147, 51, 234, 0.2); }
             50% { box-shadow: 0 0 30px rgba(147, 51, 234, 0.5); }
         }
+        /* Absolute Responsive Scaling Core Rules */
+        .responsive-container {
+            width: 100%;
+            max-width: 440px;
+            margin: auto;
+            transition: all 0.3s ease-in-out;
+        }
+        /* Tablet & Large Screens Autoscale Override */
+        @media (min-width: 768px) {
+            .responsive-container {
+                max-width: 480px;
+                transform: scale(1.02);
+            }
+        }
+        @media (min-width: 1024px) {
+            .responsive-container {
+                max-width: 520px;
+                transform: scale(1.05);
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 relative selection:bg-purple-600 selection:text-white">
+<body class="p-4 relative selection:bg-purple-600 selection:text-white">
 
     <!-- Background Atmospheric Vectors -->
     <div class="absolute top-[-20%] left-[-15%] w-[60%] h-[60%] rounded-full bg-purple-900/15 blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-[-20%] right-[-15%] w-[60%] h-[60%] rounded-full bg-indigo-900/15 blur-[140px] pointer-events-none"></div>
 
-    <!-- MAIN INTERACTIVE HUB WRAPPER -->
-    <div class="w-full max-w-md p-6 rounded-3xl glass-panel shadow-2xl relative overflow-hidden border border-white/5">
+    <!-- MAIN INTERACTIVE HUB WRAPPER (Universal Responsive Architecture) -->
+    <div class="responsive-container p-5 sm:p-7 rounded-3xl glass-panel shadow-2xl relative overflow-hidden border border-white/5">
         
         <!-- AUTHORIZATION BRANDING BADGE -->
         <div class="flex justify-center mb-6 select-none">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-purple-950/60 border border-purple-500/30 text-purple-300 shadow-sm animate-pulse">
-                <i class="fa-solid fa-circle-check text-[8px]"></i> Authorised by MIR•MASTER'S
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-purple-950/60 border border-purple-500/30 text-purple-300 shadow-sm animate-pulse">
+                <i class="fa-solid fa-circle-check text-[8px] sm:text-[9px]"></i> Authorised by MIR•MASTER'S
             </span>
         </div>
 
         <!-- Application Branding Engine Header -->
         <div class="text-center mb-6 select-none">
-            <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-[0_0_25px_rgba(139,92,246,0.45)] animate-core-pulse">
-                <i class="fa-solid fa-gift text-2xl text-white"></i>
+            <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-[0_0_25px_rgba(139,92,246,0.45)] animate-core-pulse">
+                <i class="fa-solid fa-gift text-xl sm:text-2xl text-white"></i>
             </div>
-            <h1 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-400 uppercase">MIR FREE REWARDS</h1>
-            <p class="text-[11px] text-gray-400 mt-1 font-medium tracking-wide">Play Quizzes & Win Daily Rewards</p>
+            <h1 class="text-xl sm:text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-400 uppercase">MIR FREE REWARDS</h1>
+            <p class="text-[10px] sm:text-[11px] text-gray-400 mt-1 font-medium tracking-wide">Play Quizzes & Win Daily Rewards</p>
         </div>
 
         <!-- ADMINISTRATIVE DASHBOARD CONTROL BLOCK -->
         <div class="mb-6 p-4 rounded-2xl bg-black/40 border border-purple-950/40 shadow-inner">
-            <h2 class="text-[10px] font-black uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2 select-none">
-                <i class="fa-solid fa-user-shield text-[11px]"></i> Admin Dashboard Login
+            <h2 class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2 select-none">
+                <i class="fa-solid fa-user-shield text-[10px] sm:text-[11px]"></i> Admin Dashboard Login
             </h2>
             <div class="space-y-3">
                 <div class="relative">
@@ -78,7 +102,7 @@
                     <i class="fa-solid fa-lock text-gray-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs"></i>
                     <input type="password" id="adminPass" placeholder="Password" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 text-xs bg-gray-950/70 border border-gray-800 rounded-xl outline-none text-white placeholder-gray-600 neon-focus transition-all font-mono">
                 </div>
-                <button onclick="executeAdminAuthentication()" class="w-full py-2.5 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-xs font-black text-white rounded-xl active:scale-[0.97] transition-all shadow-lg tracking-wider uppercase select-none">
+                <button onclick="executeAdminAuthentication()" class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-xs font-black text-white rounded-xl active:scale-[0.97] transition-all shadow-lg tracking-wider uppercase select-none">
                     Admin Login
                 </button>
             </div>
@@ -100,7 +124,7 @@
         </div>
 
         <!-- COMPLIANCE DOCUMENT ROUTING ANCHORS -->
-        <div class="flex justify-center gap-5 text-[10px] text-gray-600 mt-6 pt-4 border-t border-gray-900/50 font-semibold select-none">
+        <div class="flex justify-center gap-5 text-[9px] sm:text-[10px] text-gray-600 mt-6 pt-4 border-t border-gray-900/50 font-semibold select-none">
             <a href="privacy.html" target="_blank" class="hover:text-purple-400 transition-colors duration-200 flex items-center gap-1"><i class="fa-solid fa-user-lock text-[9px]"></i> Privacy Policy</a>
             <span class="text-gray-800">•</span>
             <a href="terms.html" target="_blank" class="hover:text-purple-400 transition-colors duration-200 flex items-center gap-1"><i class="fa-solid fa-file-contract text-[9px]"></i> Terms & Conditions</a>
@@ -139,19 +163,19 @@
     </div>
 
     <!-- STAGE 2 OVERLAY: SECURITY PROFILE CREATION NODE -->
-    <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0a0a12] border border-purple-900/30 shadow-2xl relative">
+    <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50 animate-fade-in">
+        <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0a0a12] border border-purple-900/30 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             
-            <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center border-4 border-[#0a0a12] shadow-xl text-white text-xl">
+            <div class="w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-xl text-white text-xl mb-3">
                 <i class="fa-solid fa-user-shield"></i>
             </div>
 
-            <div class="text-center mt-8 mb-5 select-none">
+            <div class="text-center mb-5 select-none">
                 <h3 class="text-sm font-black text-white uppercase tracking-wider">Complete Registration</h3>
                 <p class="text-[10px] text-gray-500 font-medium mt-1">Set up your account security before entering the dashboard.</p>
             </div>
             
-            <div class="space-y-4">
+            <div class="space-y-4 text-left">
                 <div>
                     <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Referral Code (Optional)</label>
                     <input type="text" id="refCode" placeholder="Enter code if you have one" autocomplete="off" class="w-full px-3 py-2 text-xs bg-black/50 border border-gray-800 rounded-lg outline-none text-white neon-focus transition-all uppercase font-mono">
@@ -181,7 +205,6 @@
 
     <!-- MAIN ENGINE CORE CONTROL CONTROLLER JAVASCRIPT -->
     <script>
-        // Production Verified Live Web Configuration Matrix
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
           authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
@@ -193,7 +216,6 @@
           measurementId: "G-V5CGH67MPE"
         };
 
-        // Initialize Core Framework Engine
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -210,7 +232,6 @@
             }
         };
 
-        // INTERCEPTOR OVERLAY DIALOG MANAGEMENT
         function displayComplianceModalOverlay() {
             const modal = document.getElementById("complianceOverlay");
             modal.style.display = "flex";
@@ -232,7 +253,7 @@
             triggerGoogleOAuthIdentityVerification();
         }
 
-        // ADMINISTRATIVE ACCESS VERIFICATION WITH CORRECTED admin-panel.html DESTINATION
+        // ADMINISTRATIVE ACCESS VERIFICATION ROUTING TO admin-panel.html
         function executeAdminAuthentication() {
             const inputUser = document.getElementById('adminUser').value;
             const inputPass = document.getElementById('adminPass').value;
@@ -269,7 +290,7 @@
             });
         }
 
-        // GOOGLE INDEPENDENT POPUP HANDLER WITH STRICT 1 DEVICE = 1 ACCOUNT LOCK
+        // STRICT SYSTEM: 1 DEVICE = 1 ACCOUNT ONLY ENFORCEMENT ENGINE
         function triggerGoogleOAuthIdentityVerification() {
             const activeOAuthProvider = new firebase.auth.GoogleAuthProvider();
             activeOAuthProvider.setCustomParameters({ prompt: 'select_account' });
@@ -278,36 +299,36 @@
                 liveSessionUserCache = authResponse.user;
                 const firestoreClientDocRef = db.collection("users").doc(liveSessionUserCache.uid);
 
-                // Unique Hardware Signature Node Generation
+                // Hardware Signature Fetch/Generate
                 let uniqueSystemHardwareSignature = localStorage.getItem("mir_system_fingerprint_token");
                 if(!uniqueSystemHardwareSignature) {
                     uniqueSystemHardwareSignature = "crypto_sig_node_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
                     localStorage.setItem("mir_system_fingerprint_token", uniqueSystemHardwareSignature);
                 }
 
-                // STRICT ANTI-MULTI ACCOUNT SECURITY FIREWALL
+                // SECURE FIRESTORE FIREWALL: SCAN ALL ENTRIES FOR THIS HARDWARE SIGNATURE
                 db.collection("users").where("deviceToken", "==", uniqueSystemHardwareSignature).get().then((queryMatchSnapshot) => {
-                    let hardwareBoundAccountID = null;
+                    let accountLinkedWithThisDevice = null;
                     
                     queryMatchSnapshot.forEach((doc) => {
-                        hardwareBoundAccountID = doc.id;
+                        accountLinkedWithThisDevice = doc.id;
                     });
 
-                    // Agar is device par koi doosra account pehle se bana hai
-                    if(hardwareBoundAccountID && hardwareBoundAccountID !== liveSessionUserCache.uid) {
-                        alert("⛔ Security Violation: 1 Device only 1 account allowed. Multiple accounts are strictly prohibited on this device instance!");
+                    // Anti-Fraud Trigger: If another UID already owns this hardware profile token
+                    if(accountLinkedWithThisDevice && accountLinkedWithThisDevice !== liveSessionUserCache.uid) {
+                        alert("⛔ Security Restriction: Multiple accounts are not allowed! Only 1 account per device is permitted on this system.");
                         auth.signOut();
                         liveSessionUserCache = null;
                         return;
                     }
 
-                    // Existing User Profile Check
+                    // Proceed if security clearance passes
                     firestoreClientDocRef.get().then((profileDocumentSnapshot) => {
                         if(profileDocumentSnapshot.exists) {
-                            // Purane valid user ko double check karenge device token ke liye
-                            const existingData = profileDocumentSnapshot.data();
-                            if(existingData.deviceToken && existingData.deviceToken !== uniqueSystemHardwareSignature) {
-                                // Device change lock or update handling if needed
+                            const registeredUserData = profileDocumentSnapshot.data();
+                            
+                            // Cross-check dynamic token mapping consistency
+                            if(registeredUserData.deviceToken && registeredUserData.deviceToken !== uniqueSystemHardwareSignature) {
                                 db.collection("users").doc(liveSessionUserCache.uid).update({
                                     deviceToken: uniqueSystemHardwareSignature
                                 });
@@ -315,7 +336,6 @@
                             alert(`Welcome back authorized member: ${liveSessionUserCache.displayName}`);
                             window.location.href = "homepage.html";
                         } else {
-                            // New User: Onboarding registration flow opens
                             document.getElementById('registrationOverlay').style.display = 'flex';
                         }
                     });
@@ -326,7 +346,6 @@
             });
         }
 
-        // CORE USER SECURE SIGNUP SUBMISSION CONTROL PIPELINE
         function commitSecureUserRegistration() {
             if(!liveSessionUserCache) {
                 alert("Runtime Session Error: Null context state. Re-initialize login sequence.");
@@ -368,7 +387,6 @@
                 });
             };
 
-            // Dynamic Referral Context Execution Logic
             if(rawRefField !== "") {
                 db.collection("users").where("myReferralCode", "==", rawRefField).get().then((refCheckResultSnapshot) => {
                     if(refCheckResultSnapshot.empty) {
