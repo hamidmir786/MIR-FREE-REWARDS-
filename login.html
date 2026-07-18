@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Standard Web SDK Modules -->
+    <!-- Firebase Production Core Framework Modules -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -39,34 +39,23 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 relative selection:bg-purple-600 selection:text-white">
+<body class="min-h-screen flex items-center justify-center p-4 relative selection:bg-purple-600 selection:text-white">
 
-    <!-- Atmospheric Background Vectors -->
+    <!-- Background Atmospheric Vectors -->
     <div class="absolute top-[-20%] left-[-15%] w-[60%] h-[60%] rounded-full bg-purple-900/15 blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-[-20%] right-[-15%] w-[60%] h-[60%] rounded-full bg-indigo-900/15 blur-[140px] pointer-events-none"></div>
 
-    <!-- NEW: DYNAMIC UPCOMING EVENT ALERT BANNER -->
-    <div class="w-full max-w-md mb-4 bg-gradient-to-r from-purple-900/40 via-indigo-950/50 to-purple-900/40 border border-purple-500/20 rounded-xl p-3 text-center shadow-lg relative overflow-hidden select-none">
-        <div class="absolute inset-0 bg-purple-500/5 min-w-full animate-pulse"></div>
-        <p class="text-[10px] font-black tracking-widest text-purple-400 uppercase flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-bullhorn text-amber-400 animate-bounce"></i> Special Coming Alert
-        </p>
-        <p class="text-[11px] text-gray-300 font-bold mt-1">
-            New Mega Quiz Tournament & Redeem Codes Drop Soon! Stay Tuned.
-        </p>
-    </div>
-
-    <!-- MAIN INTERACTIVE WRAPPER -->
+    <!-- MAIN INTERACTIVE HUB WRAPPER -->
     <div class="w-full max-w-md p-6 rounded-3xl glass-panel shadow-2xl relative overflow-hidden border border-white/5">
         
         <!-- AUTHORIZATION BRANDING BADGE -->
-        <div class="flex justify-center mb-5 select-none">
+        <div class="flex justify-center mb-6 select-none">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-purple-950/60 border border-purple-500/30 text-purple-300 shadow-sm animate-pulse">
                 <i class="fa-solid fa-circle-check text-[8px]"></i> Authorised by MIR•MASTER'S
             </span>
         </div>
 
-        <!-- Application Header Engine -->
+        <!-- Application Branding Engine Header -->
         <div class="text-center mb-6 select-none">
             <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-[0_0_25px_rgba(139,92,246,0.45)] animate-core-pulse">
                 <i class="fa-solid fa-gift text-2xl text-white"></i>
@@ -75,7 +64,7 @@
             <p class="text-[11px] text-gray-400 mt-1 font-medium tracking-wide">Play Quizzes & Win Daily Rewards</p>
         </div>
 
-        <!-- ADMINISTRATIVE DASHBOARD CONTROL BLOCK (NOW PINNED TO admin.html) -->
+        <!-- ADMINISTRATIVE DASHBOARD CONTROL BLOCK -->
         <div class="mb-6 p-4 rounded-2xl bg-black/40 border border-purple-950/40 shadow-inner">
             <h2 class="text-[10px] font-black uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2 select-none">
                 <i class="fa-solid fa-user-shield text-[11px]"></i> Admin Dashboard Login
@@ -118,7 +107,7 @@
         </div>
     </div>
 
-    <!-- STAGE 1 OVERLAY: LEGAL COMPLIANCE MATRIX MODAL -->
+    <!-- STAGE 1 OVERLAY: LEGAL COMPLIANCE TERMS & PRIVACY INTERCEPTOR MODAL -->
     <div id="complianceOverlay" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-xs p-6 bg-[#11111b] border border-white/5 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-200">
             
@@ -149,7 +138,7 @@
         </div>
     </div>
 
-    <!-- STAGE 2 OVERLAY: MFA REGISTRATION NODE ONBOARDING MODAL -->
+    <!-- STAGE 2 OVERLAY: SECURITY PROFILE CREATION NODE -->
     <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0a0a12] border border-purple-900/30 shadow-2xl relative">
             
@@ -190,9 +179,9 @@
         </div>
     </div>
 
-    <!-- PROGRAM CORE LOGIC ENGINE SYSTEM -->
+    <!-- MAIN ENGINE CORE CONTROL CONTROLLER JAVASCRIPT -->
     <script>
-        // Production Verified Web Configuration Object
+        // Production Verified Live Web Configuration Matrix
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
           authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
@@ -204,7 +193,7 @@
           measurementId: "G-V5CGH67MPE"
         };
 
-        // Initialize Core Framework
+        // Initialize Core Framework Engine
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -214,14 +203,14 @@
 
         let liveSessionUserCache = null;
 
-        // BROWSER INJECTION FIREWALL RUNNER
+        // AUTH SECURITY LAYER BYPASS MITIGATION BLOCK
         window.onload = function() {
             if (sessionStorage.getItem("admin_authenticated_session") === "true") {
-                window.location.href = "admin.html"; // Fixed targeted routing redirection
+                window.location.href = "admin-panel.html";
             }
         };
 
-        // MODAL DISPLAY MANAGEMENT ROUTINES
+        // INTERCEPTOR OVERLAY DIALOG MANAGEMENT
         function displayComplianceModalOverlay() {
             const modal = document.getElementById("complianceOverlay");
             modal.style.display = "flex";
@@ -240,16 +229,14 @@
 
         function grantComplianceConsentAndAuth() {
             closeComplianceModalOverlay();
-            // Directly passes execution down the pipeline after overlay approval confirmation
             triggerGoogleOAuthIdentityVerification();
         }
 
-        // ADMINISTRATIVE PORTAL ROUTINE WITH CORRECT FILE DESTINATION (admin.html)
+        // ADMINISTRATIVE ACCESS VERIFICATION WITH CORRECTED admin-panel.html DESTINATION
         function executeAdminAuthentication() {
             const inputUser = document.getElementById('adminUser').value;
             const inputPass = document.getElementById('adminPass').value;
 
-            // XSS Data Sanitization Module
             const sanitizedUser = inputUser.replace(/[/<>'\"]/g, "").trim();
             const sanitizedPass = inputPass.replace(/[/<>'\"]/g, "").trim();
 
@@ -262,12 +249,12 @@
                 if(doc.exists && doc.data().username === sanitizedUser && doc.data().password === sanitizedPass) {
                     alert("👑 Administration Verification Matrix Passed. Connecting...");
                     sessionStorage.setItem("admin_authenticated_session", "true");
-                    window.location.href = "admin.html"; // Correct Target Architecture Link
+                    window.location.href = "admin-panel.html";
                 } else {
                     if(sanitizedUser === "admin" && sanitizedPass === "root123") {
-                        alert("⚠️ Security Alert: Default settings active. Route access open.");
+                        alert("⚠️ Security Alert: Default settings active. Routing to admin-panel.html...");
                         sessionStorage.setItem("admin_authenticated_session", "true");
-                        window.location.href = "admin.html"; // Correct Target Architecture Link
+                        window.location.href = "admin-panel.html";
                     } else {
                         alert("⛔ Cryptographic Discrepancy: Administration Access Aborted.");
                     }
@@ -275,14 +262,14 @@
             }).catch(() => {
                 if(sanitizedUser === "admin" && sanitizedPass === "root123") {
                     sessionStorage.setItem("admin_authenticated_session", "true");
-                    window.location.href = "admin.html";
+                    window.location.href = "admin-panel.html";
                 } else {
                     alert("System Matrix Exception: Security Firewall link broken.");
                 }
             });
         }
 
-        // GOOGLE INDEPENDENT POPUP HANDLER WITH SYBIL MITIGATION LAYER
+        // GOOGLE INDEPENDENT POPUP HANDLER WITH STRICT 1 DEVICE = 1 ACCOUNT LOCK
         function triggerGoogleOAuthIdentityVerification() {
             const activeOAuthProvider = new firebase.auth.GoogleAuthProvider();
             activeOAuthProvider.setCustomParameters({ prompt: 'select_account' });
@@ -291,36 +278,44 @@
                 liveSessionUserCache = authResponse.user;
                 const firestoreClientDocRef = db.collection("users").doc(liveSessionUserCache.uid);
 
-                // Create Unique Client Instance Fingerprint Signature
+                // Unique Hardware Signature Node Generation
                 let uniqueSystemHardwareSignature = localStorage.getItem("mir_system_fingerprint_token");
                 if(!uniqueSystemHardwareSignature) {
                     uniqueSystemHardwareSignature = "crypto_sig_node_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
                     localStorage.setItem("mir_system_fingerprint_token", uniqueSystemHardwareSignature);
                 }
 
-                // Global Sybil Cloning Counter Verification Block
+                // STRICT ANTI-MULTI ACCOUNT SECURITY FIREWALL
                 db.collection("users").where("deviceToken", "==", uniqueSystemHardwareSignature).get().then((queryMatchSnapshot) => {
-                    let suspiciousHardwareCloneFlag = false;
+                    let hardwareBoundAccountID = null;
+                    
                     queryMatchSnapshot.forEach((doc) => {
-                        if(doc.id !== liveSessionUserCache.uid) {
-                            suspiciousHardwareCloneFlag = true;
-                        }
+                        hardwareBoundAccountID = doc.id;
                     });
 
-                    if(suspiciousHardwareCloneFlag) {
-                        alert("⛔ Security Policy Infraction: Multiple records detected on single device layer instance. Channel closed.");
+                    // Agar is device par koi doosra account pehle se bana hai
+                    if(hardwareBoundAccountID && hardwareBoundAccountID !== liveSessionUserCache.uid) {
+                        alert("⛔ Security Violation: 1 Device only 1 account allowed. Multiple accounts are strictly prohibited on this device instance!");
                         auth.signOut();
                         liveSessionUserCache = null;
                         return;
                     }
 
-                    // System Entry Registry Profile Validation Pipeline
+                    // Existing User Profile Check
                     firestoreClientDocRef.get().then((profileDocumentSnapshot) => {
                         if(profileDocumentSnapshot.exists) {
+                            // Purane valid user ko double check karenge device token ke liye
+                            const existingData = profileDocumentSnapshot.data();
+                            if(existingData.deviceToken && existingData.deviceToken !== uniqueSystemHardwareSignature) {
+                                // Device change lock or update handling if needed
+                                db.collection("users").doc(liveSessionUserCache.uid).update({
+                                    deviceToken: uniqueSystemHardwareSignature
+                                });
+                            }
                             alert(`Welcome back authorized member: ${liveSessionUserCache.displayName}`);
                             window.location.href = "homepage.html";
                         } else {
-                            // Trigger dynamic onboarding view frame
+                            // New User: Onboarding registration flow opens
                             document.getElementById('registrationOverlay').style.display = 'flex';
                         }
                     });
@@ -331,7 +326,7 @@
             });
         }
 
-        // MULTI-FACTOR PROFILE REGISTRATION ENTRY ROUTINE
+        // CORE USER SECURE SIGNUP SUBMISSION CONTROL PIPELINE
         function commitSecureUserRegistration() {
             if(!liveSessionUserCache) {
                 alert("Runtime Session Error: Null context state. Re-initialize login sequence.");
@@ -342,9 +337,8 @@
             const rawPinField = document.getElementById('securePin').value.trim();
             const rawDobField = document.getElementById('recoveryDob').value;
 
-            // Strict Schema Invalidation Checks
             if(rawPinField.length !== 4 || isNaN(rawPinField)) {
-                alert("🔒 Security Requirement Failure: Transaction configuration parameter PIN requires exactly 4 numbers array format!");
+                alert("🔒 Security Requirement Failure: Transaction security PIN must be exactly 4 digits!");
                 return;
             }
             if(!rawDobField) {
@@ -374,17 +368,16 @@
                 });
             };
 
-            // Referral Validation Execution Nodes
+            // Dynamic Referral Context Execution Logic
             if(rawRefField !== "") {
                 db.collection("users").where("myReferralCode", "==", rawRefField).get().then((refCheckResultSnapshot) => {
                     if(refCheckResultSnapshot.empty) {
-                        alert("❌ Referral Matching Fault: Targeted verification query returned empty or dead array link.");
+                        alert("❌ Referral Matching Fault: Code is invalid or inactive.");
                     } else {
-                        alert("🎉 Dynamic Voucher Processed: 100 Referral Initial Coin metrics allocated to current session balance.");
+                        alert("🎉 Dynamic Voucher Processed: 100 Referral Bonus Coins allocated!");
                         uploadVerifiedPayloadToProductionDatabase(100);
                     }
                 }).catch(() => {
-                    alert("Intermittent Connection Delay: Initializing core balance with base zero profile configuration.");
                     uploadVerifiedPayloadToProductionDatabase(0);
                 });
             } else {
