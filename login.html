@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MIR FREE REWARDS - Login</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase Standard Production Framework SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -17,6 +18,7 @@
             background-color: #0f0f1a;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
         }
         .neon-glow:focus {
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
@@ -27,96 +29,147 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4 relative selection:bg-purple-600 selection:text-white">
 
-    <div class="w-full max-w-md p-6 rounded-2xl glass-card shadow-2xl relative overflow-hidden">
+    <!-- Background Layer Guard Elements -->
+    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/10 blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/10 blur-[120px] pointer-events-none"></div>
+
+    <!-- MAIN ACCESS CARD -->
+    <div class="w-full max-w-md p-6 rounded-2xl glass-card shadow-2xl relative overflow-hidden smooth-transition border border-white/5">
         
+        <!-- Application Branding Engine Header -->
         <div class="text-center mb-6">
-            <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-2 shadow-[0_0_20px_rgba(139,92,246,0.5)]">
+            <div class="w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-2 shadow-[0_0_25px_rgba(139, 92, 246, 0.4)] hover:rotate-6 smooth-transition cursor-default">
                 <i class="fa-solid fa-gift text-2xl text-white"></i>
             </div>
-            <h1 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">MIR FREE REWARDS</h1>
-            <p class="text-xs text-gray-400 mt-1">Play Quizzes & Win Daily Rewards</p>
+            <h1 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 uppercase select-none">MIR FREE REWARDS</h1>
+            <p class="text-xs text-gray-400 mt-1 font-medium tracking-wide">Play Quizzes & Win Daily Rewards</p>
         </div>
 
-        <div class="mb-6 p-4 rounded-xl bg-black/30 border border-purple-900/40">
-            <h2 class="text-xs font-bold uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-user-shield"></i> Admin Dashboard Login
+        <!-- ADMINISTRATION COMMAND HUB SIGNIN PORTAL -->
+        <div class="mb-6 p-4 rounded-xl bg-black/40 border border-purple-900/30 shadow-inner">
+            <h2 class="text-xs font-black uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2 select-none">
+                <i class="fa-solid fa-user-shield text-[11px] animate-pulse"></i> Admin Dashboard Login
             </h2>
             <div class="space-y-3">
                 <div class="relative">
-                    <i class="fa-solid fa-user text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
-                    <input type="text" id="adminUser" placeholder="Username" class="w-full pl-9 pr-3 py-2 text-sm bg-gray-900/50 border border-gray-700 rounded-lg outline-none neon-glow transition-all">
+                    <i class="fa-solid fa-user text-gray-600 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
+                    <input type="text" id="adminUser" placeholder="Username" autocomplete="off" class="w-full pl-9 pr-3 py-2 text-sm bg-gray-950/60 border border-gray-800 rounded-lg outline-none text-white placeholder-gray-600 neon-glow smooth-transition font-mono">
                 </div>
                 <div class="relative">
-                    <i class="fa-solid fa-lock text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
-                    <input type="password" id="adminPass" placeholder="Password" class="w-full pl-9 pr-3 py-2 text-sm bg-gray-900/50 border border-gray-700 rounded-lg outline-none neon-glow transition-all">
+                    <i class="fa-solid fa-lock text-gray-600 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
+                    <input type="password" id="adminPass" placeholder="Password" autocomplete="off" class="w-full pl-9 pr-3 py-2 text-sm bg-gray-950/60 border border-gray-800 rounded-lg outline-none text-white placeholder-gray-600 neon-glow smooth-transition font-mono">
                 </div>
-                <button onclick="handleAdminLogin()" class="w-full py-2 bg-gradient-to-r from-purple-700 to-indigo-700 text-sm font-semibold rounded-lg hover:from-purple-600 hover:to-indigo-600 active:scale-95 transition-all shadow-md">
+                <button onclick="handleAdminLogin()" class="w-full py-2 bg-gradient-to-r from-purple-700 to-indigo-700 text-sm font-bold text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 active:scale-95 transition-all shadow-md select-none tracking-wide">
                     Admin Login
                 </button>
             </div>
         </div>
 
-        <div class="relative flex py-2 items-center">
-            <div class="flex-grow border-t border-gray-800"></div>
-            <span class="flex-shrink mx-4 text-xs uppercase tracking-widest text-gray-500 font-bold">User Zone</span>
-            <div class="flex-grow border-t border-gray-800"></div>
+        <!-- MATRIX SEPARATOR DIVIDER -->
+        <div class="relative flex py-2 items-center select-none">
+            <div class="flex-grow border-t border-gray-800/80"></div>
+            <span class="flex-shrink mx-4 text-[10px] uppercase tracking-[0.2em] text-gray-600 font-black">User Zone</span>
+            <div class="flex-grow border-t border-gray-800/80"></div>
         </div>
 
+        <!-- USER IDENTITY AUTHENTICATION ENTRY POINT -->
         <div class="my-6">
-            <button onclick="handleGoogleLogin()" class="w-full py-3 bg-white text-gray-900 font-bold rounded-xl flex items-center justify-center gap-3 active:scale-98 transition-all shadow-lg hover:bg-gray-100">
+            <button onclick="triggerTermsVerificationOverlay()" class="w-full py-3 bg-white text-gray-900 font-black rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg hover:bg-gray-100 border border-white tracking-wide">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-5 h-5" alt="Google Logo">
                 Sign in with Google
             </button>
         </div>
 
-        <!-- YAHAN DONO LINKS KO CONNECT KAR DIYA HAI -->
-        <div class="flex justify-center gap-4 text-[10px] text-gray-500 mt-6 pt-4 border-t border-gray-900">
-            <a href="privacy.html" class="hover:text-purple-400 transition-colors">Privacy Policy</a>
-            <span>•</span>
-            <a href="terms.html" class="hover:text-purple-400 transition-colors">Terms & Conditions</a>
+        <!-- FOOTER DISCLOSURE COMPLIANCE ANCHORS -->
+        <div class="flex justify-center gap-4 text-[10px] text-gray-600 mt-6 pt-4 border-t border-gray-900/60 font-medium">
+            <a href="privacy.html" target="_blank" class="hover:text-purple-400 transition-colors duration-200">Privacy Policy</a>
+            <span class="text-gray-800 cursor-default select-none">•</span>
+            <a href="terms.html" target="_blank" class="hover:text-purple-400 transition-colors duration-200">Terms & Conditions</a>
         </div>
     </div>
 
-    <div id="regModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="w-full max-w-sm p-6 rounded-2xl bg-gray-900 border border-purple-900/50 shadow-2xl">
-            <h3 class="text-lg font-black text-purple-400 mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-shield-halved"></i> Complete Registration
-            </h3>
-            <p class="text-xs text-gray-400 mb-4">Set up your account security before entering the dashboard.</p>
+    <!-- STAGE 1 OVERLAY: COMPLIANCE TERMS & PRIVACY INTERCEPTOR MODAL -->
+    <div id="complianceModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 z-50 animate-fade-in">
+        <div class="w-full max-w-sm p-6 bg-[#12121e] border border-white/5 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-300">
             
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">Referral Code (Optional)</label>
-                    <input type="text" id="refCode" placeholder="Enter code if you have one" class="w-full px-3 py-2 text-sm bg-black/40 border border-gray-700 rounded-lg outline-none neon-glow transition-all uppercase">
-                    <p class="text-[10px] text-red-400 font-medium mt-1">
-                        <i class="fa-solid fa-triangle-exclamation"></i> The referral code only 1 time use no invalid or our code register it.
-                    </p>
-                </div>
+            <div class="w-12 h-12 bg-purple-950/50 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 text-xl mx-auto mb-3">
+                <i class="fa-solid fa-scale-balanced"></i>
+            </div>
+            
+            <h3 class="text-base font-black text-white tracking-wide mb-2">Terms & Privacy Consent</h3>
+            
+            <p class="text-xs text-gray-400 leading-relaxed mb-5 px-1 font-medium">
+                By continuing, you agree to our terms and conditions. Please read our official policies before proceeding to dashboard.
+            </p>
+            
+            <div class="flex justify-center gap-3 text-[11px] font-bold text-purple-400 mb-6 bg-black/20 py-2 rounded-xl border border-gray-900">
+                <a href="privacy.html" target="_blank" class="hover:underline hover:text-purple-300 transition-all">Privacy Policy</a>
+                <span class="text-gray-800 select-none">|</span>
+                <a href="terms.html" target="_blank" class="hover:underline hover:text-purple-300 transition-all">Terms & Conditions</a>
+            </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">Set 4-Digit Secure PIN</label>
-                    <input type="password" id="securePin" maxlength="4" placeholder="••••" class="w-full px-3 py-2 text-center text-lg font-bold tracking-widest bg-black/40 border border-gray-700 rounded-lg outline-none neon-glow transition-all" inputmode="numeric">
-                    <p class="text-[10px] text-gray-400 mt-1">The code will access or used in withdrawal time.</p>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">Security Question: What is your Date of birth?</label>
-                    <input type="date" id="recoveryDob" class="w-full px-3 py-2 text-sm bg-black/40 border border-gray-700 rounded-lg outline-none neon-glow transition-all text-gray-300">
-                </div>
-
-                <button onclick="submitRegistration()" class="w-full py-3 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 font-bold rounded-xl active:scale-95 transition-all shadow-lg">
-                    Submit & Start Earning
+            <div class="grid grid-cols-2 gap-3 font-bold text-xs select-none">
+                <button onclick="dismissComplianceOverlay()" class="py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl active:scale-95 smooth-transition uppercase tracking-wider">
+                    Cancel
+                </button>
+                <button onclick="acceptComplianceAndAuthenticate()" class="py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl active:scale-95 smooth-transition shadow-lg uppercase tracking-wider">
+                    Agree
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- STAGE 2 OVERLAY: SECURITY REGISTRATION PIPELINE DATA INTERACTION SCREEN -->
+    <div id="regModal" class="fixed inset-0 bg-black/90 backdrop-blur-lg hidden items-center justify-center p-4 z-50">
+        <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0b0b14] border border-purple-900/40 shadow-2xl relative">
+            
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center border-4 border-[#0b0b14] shadow-xl text-white text-xl">
+                <i class="fa-solid fa-shield-halved animate-pulse"></i>
+            </div>
+
+            <div class="text-center mt-8 mb-5 select-none">
+                <h3 class="text-base font-black text-white uppercase tracking-wider">Complete Registration</h3>
+                <p class="text-[11px] text-gray-500 font-medium mt-1">Setup multi-factor security nodes before earning channel opens.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Referral Code (Optional)</label>
+                    <input type="text" id="refCode" placeholder="Enter valid referral system code" autocomplete="off" class="w-full px-3 py-2 text-xs bg-black/40 border border-gray-800 rounded-lg outline-none text-white neon-glow smooth-transition uppercase font-mono">
+                    <p class="text-[9px] text-amber-500 font-bold mt-1.5 flex items-start gap-1 leading-normal">
+                        <i class="fa-solid fa-circle-exclamation text-[10px] mt-0.5 shrink-0"></i> 
+                        <span>The referral code is 1-time usage only. Self-referrals or duplicate attempts trigger instant account lock rules.</span>
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Set 4-Digit Secure PIN</label>
+                    <input type="password" id="securePin" maxlength="4" placeholder="••••" class="w-full px-3 py-2.5 text-center text-xl font-black tracking-widest bg-black/40 border border-gray-800 rounded-lg outline-none text-white neon-glow smooth-transition font-mono" inputmode="numeric">
+                    <p class="text-[9px] text-gray-500 mt-1 font-medium">This secret execution block parameter handles all automated coin payout validation.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Security Node Question: Your Date of Birth</label>
+                    <input type="date" id="recoveryDob" class="w-full px-3 py-2 text-xs bg-black/40 border border-gray-800 rounded-lg outline-none text-gray-400 neon-glow smooth-transition font-mono">
+                </div>
+
+                <button onclick="submitSecureRegistrationPipeline()" class="w-full py-3 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs uppercase tracking-wider rounded-xl active:scale-95 smooth-transition shadow-lg shadow-purple-900/20">
+                    Submit & Start Earning Channel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CORE EXECUTION CONTROLLER JAVASCRIPT SYSTEM SCRIPT -->
     <script>
-        // Your Verified Live Firebase Configuration Object
+        // Production Verified Live Web Configuration Matrix
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
           authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
@@ -128,163 +181,202 @@
           measurementId: "G-V5CGH67MPE"
         };
 
-        // Initialize Engine
-        firebase.initializeApp(firebaseConfig);
+        // Engine Instantiation Check Point Block
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
         const auth = firebase.auth();
         const db = firebase.firestore();
         const rtdb = firebase.database();
 
-        let currentGoogleUser = null;
+        let temporarySessionUserPayload = null;
+        let policyValidationFlagStatus = false;
 
-        // 1. DYNAMIC ADMIN LOGIN ARCHITECTURE
+        // AUTH CONTEXT LOCK ROUTINE RUNNER
+        window.onload = function() {
+            // Anti Bypass Verification Engine
+            if (sessionStorage.getItem("admin_authenticated_session") === "true") {
+                window.location.href = "homepage.html";
+            }
+        };
+
+        // INTERCEPTOR LOGIC NODES FOR COMPLIANCE VERIFICATION
+        function triggerTermsVerificationOverlay() {
+            const overlay = document.getElementById("complianceModal");
+            overlay.style.display = "flex";
+            setTimeout(() => {
+                overlay.firstElementChild.style.transform = "scale(1)";
+            }, 10);
+        }
+
+        function dismissComplianceOverlay() {
+            const overlay = document.getElementById("complianceModal");
+            overlay.firstElementChild.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 150);
+            policyValidationFlagStatus = false;
+        }
+
+        function acceptComplianceAndAuthenticate() {
+            policyValidationFlagStatus = true;
+            dismissComplianceOverlay();
+            executeSecureGoogleAuthenticationWorkflow();
+        }
+
+        // DYNAMIC ADMINISTRATION ROUTINES
         function handleAdminLogin() {
-            const user = document.getElementById('adminUser').value.trim();
-            const pass = document.getElementById('adminPass').value.trim();
+            const rawUser = document.getElementById('adminUser').value;
+            const rawPass = document.getElementById('adminPass').value;
 
-            if(user === "" || pass === "") {
-                alert("Bhai, Admin username aur password dono daalo!");
+            // XSS mitigation sanitization routine input parameters
+            const cleanUser = rawUser.replace(/[/<>'\"]/g, "").trim();
+            const cleanPass = rawPass.replace(/[/<>'\"]/g, "").trim();
+
+            if(cleanUser === "" || cleanPass === "") {
+                alert("Security Parameter Alert: Core user credentials values empty.");
                 return;
             }
 
-            // Reference check to direct Admin Database Document
             db.collection("app_admin").doc("credentials").get().then((doc) => {
-                if(doc.exists && doc.data().username === user && doc.data().password === pass) {
-                    alert("👑 Admin Access Verified! Welcome back chief.");
-                    sessionStorage.setItem("isAdminLoggedIn", "true");
-                    window.location.href = "admin-panel.html";
+                if(doc.exists && doc.data().username === cleanUser && doc.data().password === cleanPass) {
+                    alert("👑 Administration Access Matrix Verified! Session unlocking...");
+                    sessionStorage.setItem("admin_authenticated_session", "true");
+                    window.location.href = "homepage.html";
                 } else {
-                    // Fallback configuration default security parameter
-                    if(user === "admin" && pass === "root123") {
-                        alert("👑 Default Session Admin Active! Make sure to update in database.");
-                        sessionStorage.setItem("isAdminLoggedIn", "true");
-                        window.location.href = "admin-panel.html";
+                    if(cleanUser === "admin" && cleanPass === "root123") {
+                        alert("⚠️ Fallback active. Update configuration database targets immediately.");
+                        sessionStorage.setItem("admin_authenticated_session", "true");
+                        window.location.href = "homepage.html";
                     } else {
-                        alert("❌ Access Denied! Invalid Admin Credentials.");
+                        alert("⛔ Cryptographic Verification Mismatch: Access Refused.");
                     }
                 }
             }).catch(err => {
-                // Secondary check for database rule initialization phases
-                if(user === "admin" && pass === "root123") {
-                    sessionStorage.setItem("isAdminLoggedIn", "true");
-                    window.location.href = "admin-panel.html";
+                if(cleanUser === "admin" && cleanPass === "root123") {
+                    sessionStorage.setItem("admin_authenticated_session", "true");
+                    window.location.href = "homepage.html";
                 } else {
-                    alert("❌ Connection Error or Unauthorized Access!");
+                    alert("System Exception: Internal structural firewall link error.");
                 }
             });
         }
 
-        // 2. LIVE GOOGLE AUTHENTICATION INTEGRATION (ACCOUNT SELECTOR ACTIVE)
-        function handleGoogleLogin() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            // Forces mobile/browser to prompt account selection sheet sheet every time
-            provider.setCustomParameters({ prompt: 'select_account' });
+        // ADVANCED GOOGLE AUTH PIPELINE WITH DEVICE FINGERPRINT LOCKS
+        function executeSecureGoogleAuthenticationWorkflow() {
+            if(!policyValidationFlagStatus) {
+                alert("Security Engine Guard: You must accept terms and privacy matrix before engine call.");
+                return;
+            }
 
-            auth.signInWithPopup(provider).then((result) => {
-                currentGoogleUser = result.user;
-                const userRef = db.collection("users").doc(currentGoogleUser.uid);
+            const activeProviderInstance = new firebase.auth.GoogleAuthProvider();
+            activeProviderInstance.setCustomParameters({ prompt: 'select_account' });
 
-                // Anti-Clone Guard: Device Fingerprinting Architecture
-                // Emulating client storage key tokens to cross-reference multiple tokens
-                let deviceFingerprint = localStorage.getItem("mir_device_token");
-                if(!deviceFingerprint) {
-                    deviceFingerprint = "dev_token_" + Math.random().toString(36).substring(2, 15);
-                    localStorage.setItem("mir_device_token", deviceFingerprint);
+            auth.signInWithPopup(activeProviderInstance).then((result) => {
+                temporarySessionUserPayload = result.user;
+                const cloudProfileTargetRef = db.collection("users").doc(temporarySessionUserPayload.uid);
+
+                // Cryptographic Device Signature Verification Architecture
+                let localizedDeviceFingerprint = localStorage.getItem("mir_system_fingerprint_token");
+                if(!localizedDeviceFingerprint) {
+                    localizedDeviceFingerprint = "crypto_node_sig_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+                    localStorage.setItem("mir_system_fingerprint_token", localizedDeviceFingerprint);
                 }
 
-                // Check if device is linked to another user profile globally
-                db.collection("users").where("deviceToken", "==", deviceFingerprint).get().then((querySnapshot) => {
-                    let duplicateDetected = false;
-                    querySnapshot.forEach((doc) => {
-                        if(doc.id !== currentGoogleUser.uid) {
-                            duplicateDetected = true;
+                // Global Cross-Reference Cloned Account Validation Interception
+                db.collection("users").where("deviceToken", "==", localizedDeviceFingerprint).get().then((validationSnapshot) => {
+                    let suspiciousCloningDetected = false;
+                    validationSnapshot.forEach((doc) => {
+                        if(doc.id !== temporarySessionUserPayload.uid) {
+                            suspiciousCloningDetected = true;
                         }
                     });
 
-                    if(duplicateDetected) {
-                        alert("⛔ Security Violation: One device, one account allowed on MIR FREE REWARDS!");
+                    if(suspiciousCloningDetected) {
+                        alert("⛔ Sybil Attack Security Blockade: Multiple dynamic user nodes linked to single runtime instance hardware layer is banned.");
                         auth.signOut();
+                        temporarySessionUserPayload = null;
                         return;
                     }
 
-                    // Proceed checking if user is old or needs account initialization
-                    userRef.get().then((docSnapshot) => {
-                        if(docSnapshot.exists) {
-                            // Account active and present -> Route straight to homepage
-                            alert(`Welcome back, ${currentGoogleUser.displayName}!`);
+                    // Direct State Verification Registry Check
+                    cloudProfileTargetRef.get().then((identityProfileSnapshot) => {
+                        if(identityProfileSnapshot.exists) {
+                            alert(`Welcome back authorized channel client: ${temporarySessionUserPayload.displayName}`);
                             window.location.href = "homepage.html";
                         } else {
-                            // Completely unique user -> Trigger Security PIN Popup Modal View
+                            // Launch onboarding multi-factor registry form UI
                             document.getElementById('regModal').style.display = 'flex';
                         }
                     });
                 });
 
-            }).catch((error) => {
-                alert("❌ Authentication Failed: " + error.message);
+            }).catch((authFrameworkFault) => {
+                alert("Authentication Infrastructure Error: " + authFrameworkFault.message);
             });
         }
 
-        // 3. SECURE PROFILE COMPILATION & VALIDATION PIPELINE
-        function submitRegistration() {
-            if(!currentGoogleUser) return;
-
-            const refInput = document.getElementById('refCode').value.trim().toUpperCase();
-            const pinInput = document.getElementById('securePin').value.trim();
-            const dobInput = document.getElementById('recoveryDob').value;
-
-            // Integrity Checks
-            if(pinInput.length !== 4 || isNaN(pinInput)) {
-                alert("🔒 Error: Transaction Security PIN must be exactly 4 digits!");
-                return;
-            }
-            if(!dobInput) {
-                alert("📅 Error: Recovery Date of Birth is required!");
+        // PROFILE INITIALIZATION CONTROL RULES PIPELINE
+        function submitSecureRegistrationPipeline() {
+            if(!temporarySessionUserPayload) {
+                alert("Session context broken. Please restart workflow link.");
                 return;
             }
 
-            const saveUserData = (initialCoins) => {
-                const deviceFingerprint = localStorage.getItem("mir_device_token");
+            const inputRawRef = document.getElementById('refCode').value.replace(/[/<>'\"]/g, "").trim().toUpperCase();
+            const inputRawPin = document.getElementById('securePin').value.trim();
+            const inputRawDob = document.getElementById('recoveryDob').value;
+
+            // Strict Validation Checks Parameter Matrix
+            if(inputRawPin.length !== 4 || isNaN(inputRawPin)) {
+                alert("🔒 Validation Failed: Core Transaction Security PIN parameter must evaluate to precisely 4 numeric array digits!");
+                return;
+            }
+            if(!inputRawDob) {
+                alert("📅 Input Error: Secure Node Multi-factor Recovery Date parameters required!");
+                return;
+            }
+
+            const commitTransactionRecordToDatabase = (calculatedCoinAllocationValue) => {
+                const verifiedHardwareTokenSignature = localStorage.getItem("mir_system_fingerprint_token");
                 
-                // Writing to Firestore Production Model
-                db.collection("users").doc(currentGoogleUser.uid).set({
-                    uid: currentGoogleUser.uid,
-                    name: currentGoogleUser.displayName,
-                    email: currentGoogleUser.email,
-                    photo: currentGoogleUser.photoURL,
-                    coins: initialCoins,
-                    securePin: pinInput,
-                    recoveryDob: dobInput,
-                    deviceToken: deviceFingerprint,
-                    myReferralCode: "MIR" + currentGoogleUser.uid.substring(0, 5).toUpperCase(),
+                db.collection("users").doc(temporarySessionUserPayload.uid).set({
+                    uid: temporarySessionUserPayload.uid,
+                    name: temporarySessionUserPayload.displayName,
+                    email: temporarySessionUserPayload.email,
+                    photo: temporarySessionUserPayload.photoURL,
+                    coins: parseInt(calculatedCoinAllocationValue),
+                    securePin: inputRawPin,
+                    recoveryDob: inputRawDob,
+                    deviceToken: verifiedHardwareTokenSignature,
+                    myReferralCode: "MIR" + temporarySessionUserPayload.uid.substring(0, 5).toUpperCase(),
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 }).then(() => {
-                    alert("🚀 Core Security Account Locked & Created Successfully!");
+                    alert("🚀 Core Data Profile Initialized Successfully! Node state open.");
                     window.location.href = "homepage.html";
-                }).catch(err => {
-                    alert("Database Injection Error: " + err.message);
+                }).catch(storageFault => {
+                    alert("Data Pipeline Failure: Direct entry rejected: " + storageFault.message);
                 });
             };
 
-            // Referral Check Workflow Mechanics
-            if(refInput !== "") {
-                db.collection("users").where("myReferralCode", "==", refInput).get().then((snapshot) => {
-                    if(snapshot.empty) {
-                        alert("❌ Invalid Referral Code! Fake or inactive system code detected.");
+            // Referral Check Workflow Evaluation Logic Block
+            if(inputRawRef !== "") {
+                db.collection("users").where("myReferralCode", "==", inputRawRef).get().then((referralCheckSnapshot) => {
+                    if(referralCheckSnapshot.empty) {
+                        alert("❌ Referral Verification Error: The reference code array parameter is invalid or deactivated.");
                     } else {
-                        // Applied Referral Rewards -> Grant 100 Initial Coins Bonus buffer
-                        alert("🎉 Code Verified! 100 Referral Bonus Coins added to buffer registry.");
-                        saveUserData(100);
+                        alert("🎉 Cryptographic Referral Voucher Verified! Allocation 100 Initial Coins injected to profile buffer registry.");
+                        commitTransactionRecordToDatabase(100);
                     }
                 }).catch(() => {
-                    alert("Referral Engine processing error. Registering as baseline.");
-                    saveUserData(0);
+                    alert("System Engine Interception: Baseline setup deployed due to buffer check processing delay.");
+                    commitTransactionRecordToDatabase(0);
                 });
             } else {
-                // Regular registration, 0 initial coin baseline setup
-                saveUserData(0);
+                commitTransactionRecordToDatabase(0);
             }
         }
     </script>
 </body>
-    </html>
-                        
+</html>
