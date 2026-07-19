@@ -3,21 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MIR FREE REWARDS</title>
+    <title>MIR FREE REWARDS - Official Core</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Standard Integration Framework -->
+    <!-- Firebase Core Modules Integration -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         body {
-            background-color: #080710;
-            color: #ffffff;
-            font-family: 'Poppins', system-ui, sans-serif;
+            background-color: #0b0a14;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(18, 16, 36, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .action-card {
+            background: linear-gradient(135deg, rgba(22, 20, 43, 0.9) 0%, rgba(13, 11, 26, 0.98) 100%);
+            border: 1px solid rgba(147, 51, 234, 0.12);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .action-card:hover {
+            border-color: rgba(168, 85, 247, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+        .active-nav-item {
+            color: #a855f7;
+            text-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
         }
         .app-container {
             width: 100%;
@@ -25,177 +46,241 @@
             margin: 0 auto;
             padding-bottom: 100px;
         }
-        .premium-card {
-            background: #131124;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+        .scratch-canvas {
+            cursor: pointer;
+            touch-action: none;
         }
         
-        /* Daily Check-In Styles */
-        .checkin-line {
+        /* Premium Wheel UI Elements */
+        .wheel-box {
             position: relative;
-        }
-        .checkin-line::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #252147;
-            z-index: 1;
-            transform: translateY(-50%);
-        }
-        .checkin-node {
-            position: relative;
-            z-index: 2;
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            background: #ffffff;
-            color: #111;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .checkin-node.completed {
-            background: #dcfce7;
-            color: #15803d;
-            border: 3px solid #86efac;
-        }
-        .checkin-node.active {
-            background: #4ade80;
-            color: #ffffff;
-            border: 3px solid #22c55e;
-        }
-
-        /* Ultimate Lucky Spin Wheel Animation UI */
-        .wheel-wrapper {
-            position: relative;
-            width: 280px;
-            height: 280px;
+            width: 260px;
+            height: 260px;
             margin: 0 auto;
         }
         .wheel-canvas {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 8px solid #3b1d5c;
-            box-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
-            transition: transform 4s cubic-bezier(0.1, 0.8, 0.3, 1);
+            border: 6px solid #2e1a47;
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.25, 1);
         }
         .wheel-pointer {
             position: absolute;
-            top: -12px;
+            top: -10px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10;
+            z-index: 20;
             width: 0; 
             height: 0; 
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-top: 28px solid #eab308;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 24px solid #eab308;
         }
     </style>
 </head>
-<body class="p-3 select-none">
+<body class="p-3 sm:p-4 select-none relative">
 
     <div class="app-container space-y-4">
         
-        <!-- TOP PROFILE HEADER BLOCK -->
-        <div class="w-full p-4 premium-card flex justify-between items-center shadow-2xl">
-            <div class="flex items-center gap-3">
-                <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=6b21a8&color=fff" alt="Avatar" class="w-10 h-10 rounded-full border border-purple-500">
-                <div>
-                    <h2 id="userName" class="text-sm font-bold truncate max-w-[140px]">Loading...</h2>
-                    <p class="text-[10px] text-gray-400">Status: Verified Player</p>
+        <!-- TOP PROFILE LAYER (LEFT: GMAIL DETS | RIGHT: CURRENCIES WITH SMALL MM) -->
+        <div class="w-full p-3 sm:p-4 rounded-2xl glass-panel flex justify-between items-center shadow-xl">
+            <!-- Left Side Identity Node -->
+            <div class="flex items-center gap-2.5">
+                <div class="relative">
+                    <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=7c3aed&color=fff" alt="Gmail Avatar" class="w-9 h-9 sm:w-10 h-10 rounded-full border border-purple-500/30 object-cover shadow-md">
+                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0b0a14]"></div>
+                </div>
+                <div class="max-w-[130px] sm:max-w-[175px]">
+                    <h2 id="userName" class="text-xs sm:text-sm font-black tracking-wide truncate">Loading User...</h2>
+                    <p id="userEmail" class="text-[9px] sm:text-[10px] text-gray-500 truncate">syncing registry...</p>
                 </div>
             </div>
-            <div class="flex gap-2">
-                <div class="px-2.5 py-1.5 rounded-xl bg-[#1f1b3a] flex items-center gap-1">
-                    <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
-                    <span id="coinCounter" class="text-xs font-black text-amber-300 font-mono">0</span>
+
+            <!-- Right Side Currencies Display Node -->
+            <div class="flex items-center gap-2 font-mono">
+                <div class="px-2 py-1.5 rounded-xl bg-purple-950/40 border border-purple-500/20 flex items-center gap-1">
+                    <i class="fa-solid fa-coins text-amber-400 text-xs sm:text-sm"></i>
+                    <span id="coinCounter" class="text-xs sm:text-sm font-black text-amber-300">0</span>
+                    <span class="text-[7px] font-bold text-purple-400 uppercase tracking-tighter">MM</span>
                 </div>
-                <div class="px-2.5 py-1.5 rounded-xl bg-[#1f1b3a] flex items-center gap-1">
-                    <i class="fa-solid fa-gem text-cyan-400 text-xs"></i>
-                    <span id="diamondCounter" class="text-xs font-black text-cyan-300 font-mono">0</span>
+                <div class="px-2 py-1.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 flex items-center gap-1">
+                    <i class="fa-solid fa-ticket text-indigo-400 text-xs sm:text-sm"></i>
+                    <span id="voucherCounter" class="text-xs sm:text-sm font-black text-indigo-300">0</span>
                 </div>
             </div>
         </div>
 
-        <!-- 1. VISUAL DAILY CHECK-IN MATRIX -->
-        <div class="w-full p-4 premium-card shadow-lg space-y-3">
-            <h3 class="text-sm font-black tracking-wide text-gray-200 uppercase">Daily Check-In</h3>
-            <div class="w-full h-px bg-gray-800 my-2"></div>
-            
-            <div class="checkin-line flex justify-between items-center px-1 py-4 overflow-x-auto">
-                <!-- Dynamic Nodes will inject here via Engine -->
-                <div id="checkinNodesWrapper" class="w-full flex justify-between items-center min-w-[340px]"></div>
-            </div>
-        </div>
-
-        <!-- 2. DAILY BONUS COINS BANNER -->
-        <div class="w-full p-4 rounded-2xl bg-[#0f0b21] border border-[#221947] flex justify-between items-center shadow-lg">
-            <div class="flex items-center gap-4">
-                <div class="relative flex items-center justify-center">
-                    <i class="fa-solid fa-coins text-amber-400 text-3xl drop-shadow-[0_4px_10px_rgba(234,179,8,0.3)]"></i>
-                    <i class="fa-solid fa-coins text-amber-500 text-xl absolute -bottom-1 -right-2"></i>
-                </div>
-                <div>
-                    <h4 class="text-sm font-black text-yellow-500 tracking-wide">Daily Bonus Coins</h4>
-                    <p class="text-[10px] text-gray-400 mt-0.5">Claim Coins & Increase Your Leaderboard Points</p>
-                    <span class="text-[10px] text-emerald-400 font-bold block mt-1"><i class="fa-solid fa-bolt"></i> Just 3-5 min</span>
-                </div>
-            </div>
-            <div class="text-right flex flex-col items-end gap-1.5">
-                <span class="text-sm font-black text-white font-mono">100 Coins</span>
-                <button onclick="claimDailyBonusCoins()" id="bonusCoinsBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 font-black text-xs uppercase tracking-wider text-white rounded-lg transition-transform active:scale-95 shadow-md">
-                    CLAIM
-                </button>
-            </div>
-        </div>
-
-        <!-- 3. REALTIME CSS SPIN WHEEL CORE ENGINE -->
-        <div class="w-full p-5 premium-card shadow-2xl text-center space-y-4">
-            <header>
-                <h3 class="text-xs font-bold text-gray-300 tracking-wider uppercase">Daily 50 spin wheel to 10x Fast Earn</h3>
-            </header>
-
-            <!-- Dynamic Wheel Construction Render -->
-            <div class="wheel-wrapper my-4">
-                <div class="wheel-pointer"></div>
-                <canvas id="wheelCanvas" class="wheel-canvas" width="300" height="300"></canvas>
-            </div>
-
-            <p id="spinLimitDisplay" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Daily 50 Spin Limit</p>
-            
-            <button onclick="launchLuckySpinSequence()" id="spinBtn" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-black text-sm uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-[0.97] flex items-center justify-center gap-2">
-                SPIN NOW <span class="text-xs font-normal opacity-80">(<i class="fa-solid fa-circle-play"></i> Watch Ad)</span>
-            </button>
-
-            <!-- FIRE AIM VOUCHER EXCHANGE STRIP -->
-            <div class="w-full mt-4 p-3 bg-[#0a0818] rounded-xl border border-purple-900/30 flex justify-between items-center">
+        <!-- FIREBASE MAILBOX DRIVER (DIRECT CONNECT FOR MESSAGES & CODES) -->
+        <div class="w-full p-3 rounded-2xl bg-black/40 border border-purple-950/60 shadow-inner">
+            <div class="flex justify-between items-center mb-1 cursor-pointer" onclick="toggleMailboxDrawer()">
                 <div class="flex items-center gap-2">
-                    <div class="bg-gradient-to-r from-red-600 to-pink-600 text-[8px] font-black tracking-tighter px-2 py-1 rounded text-white uppercase shadow-inner border border-white/10 flex items-center gap-1">
-                        <i class="fa-solid fa-ticket text-[9px]"></i> FIRE AIM VOUCHER
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope-open-text text-purple-400 text-sm"></i>
+                        <span id="mailboxBadge" class="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[7px] font-extrabold px-1 rounded-full hidden">0</span>
+                    </div>
+                    <span class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-gray-300">System Connected Mailbox</span>
+                </div>
+                <i id="mailboxChevron" class="fa-solid fa-chevron-down text-gray-600 text-[9px] transition-transform duration-200"></i>
+            </div>
+            <div id="mailboxContentDrawer" class="hidden transition-all duration-300 max-h-36 overflow-y-auto space-y-1.5 pt-1.5">
+                <p id="emptyMailboxPrompt" class="text-[9px] text-gray-600 italic text-center py-1">No redeem codes or systemic announcements in log channel.</p>
+                <div id="mailItemsContainer" class="space-y-1.5"></div>
+            </div>
+        </div>
+
+        <!-- GLOBAL RESET ADVISORY STRIP RULES -->
+        <div class="w-full px-3 py-1.5 rounded-xl bg-purple-950/20 border border-purple-900/30 flex items-center justify-between text-[8px] sm:text-[9px] font-bold text-purple-300">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-clock-rotate-left"></i> Missions Rule: System logs auto reset at 12:00 AM Night boundary loops.</span>
+            <span id="countdownTimer" class="font-mono text-purple-400">00:00:00</span>
+        </div>
+
+        <!-- MISSION HUB PIPELINES -->
+        <div class="space-y-3">
+            
+            <!-- MISSION 1: DAILY CHECK-IN -->
+            <div class="w-full p-3 sm:p-4 rounded-2xl action-card shadow-lg flex justify-between items-center gap-2">
+                <div>
+                    <h3 class="text-xs sm:text-sm font-black uppercase tracking-wide text-white">1. Daily Authentication Check-In</h3>
+                    <p class="text-[9px] sm:text-[10px] text-gray-400 mt-0.5 leading-snug">Claim 15 coins daily after video loop. 30 continuous streak claims reward a <span class="text-purple-400 font-bold">Mega 300 Coins Payload</span>! Missing a day auto-resets timeline.</p>
+                    <div class="mt-1.5 text-[8px] sm:text-[9px] font-bold text-indigo-400">
+                        Current Uninterrupted Streak: <span id="streakDisplay" class="font-mono text-white bg-black/40 px-1 py-0.5 rounded border border-gray-900">0</span> Days
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-mono font-black text-gray-200">2 Coins</span>
-                    <button onclick="exchangeCoinsForVoucher()" class="px-4 py-1.5 bg-green-600 hover:bg-green-500 text-[10px] font-black uppercase tracking-wider text-white rounded-lg shadow transition-all active:scale-95">
-                        EXCHANGE
+                <button onclick="executeDailyCheckIn()" id="checkInBtn" class="px-3 py-2 bg-gradient-to-r from-purple-700 to-indigo-700 text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow active:scale-95 transition-transform whitespace-nowrap">
+                    Claim (Watch Ad)
+                </button>
+            </div>
+
+            <!-- MISSION 2: DAILY AD COINS RESOURCE -->
+            <div class="w-full p-3 sm:p-4 rounded-2xl action-card shadow-lg flex justify-between items-center gap-2">
+                <div>
+                    <h3 class="text-xs sm:text-sm font-black uppercase tracking-wide text-white">2. Daily Coins Broadcaster</h3>
+                    <p class="text-[9px] sm:text-[10px] text-gray-400 mt-0.5 leading-snug">Earn 10 coins & 20 leaderboard points per active data payload transmission loop.</p>
+                    <div class="mt-1.5 text-[8px] sm:text-[9px] font-bold text-gray-500">
+                        Daily Allocations: <span id="adTrackerBar" class="font-mono text-white bg-black/40 px-1 py-0.5 rounded border border-gray-900">0 / 10 Completed</span>
+                    </div>
+                </div>
+                <button onclick="executeAdMiningIteration()" id="miningBtn" class="px-3 py-2 bg-gradient-to-r from-indigo-700 to-purple-700 text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow active:scale-95 transition-transform whitespace-nowrap">
+                    Watch Broadcast
+                </button>
+            </div>
+
+        </div>
+
+        <!-- 4 BOX UTILITY ARCHITECTURE HUB -->
+        <div class="grid grid-cols-1 gap-3">
+            
+            <!-- BOX 1: QUANTUM SPIN RIG -->
+            <div class="p-4 rounded-2xl action-card space-y-3 text-center">
+                <div class="flex justify-between items-center border-b border-gray-900 pb-1.5">
+                    <span class="text-xs font-black uppercase tracking-wide text-white"><i class="fa-solid fa-circle-notch text-purple-400 animate-spin"></i> Quantum Spin Wheel</span>
+                    <span id="spinLimitDisplay" class="text-[9px] font-mono font-bold text-gray-500 bg-black/40 px-1.5 py-0.5 rounded">Limits: 40/40</span>
+                </div>
+                
+                <div class="wheel-box">
+                    <div class="wheel-pointer"></div>
+                    <canvas id="wheelCanvas" class="wheel-canvas" width="260" height="260"></canvas>
+                </div>
+
+                <button onclick="triggerLuckySpinCycle()" id="spinBtn" class="w-full py-2 bg-purple-700 hover:bg-purple-600 font-black text-xs uppercase tracking-wider text-white rounded-xl active:scale-95 transition-transform">
+                    Spin Now (Watch Ad)
+                </button>
+
+                <div class="w-full p-2 bg-black/40 rounded-xl border border-gray-900 flex justify-between items-center text-[10px]">
+                    <span class="font-bold text-gray-400">Buy 1 System Voucher</span>
+                    <button onclick="purchaseVoucherAsset()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 font-black uppercase text-[9px] text-white rounded-lg active:scale-95 transition-transform">
+                        Exchange (5 Coins)
                     </button>
                 </div>
             </div>
-        </div>
 
+            <!-- BOX 2: LUCKY CRYPT SCRATCH SURFACE -->
+            <div class="p-4 rounded-2xl action-card space-y-2">
+                <div class="flex justify-between items-center border-b border-gray-900 pb-1.5">
+                    <span class="text-xs font-black uppercase tracking-wide text-white"><i class="fa-solid fa-sparkles text-amber-400"></i> Lucky Crypt Scratch</span>
+                    <span id="scratchLimitDisplay" class="text-[9px] font-mono font-bold text-gray-500 bg-black/40 px-1.5 py-0.5 rounded">Limits: 15/15</span>
+                </div>
+                <p class="text-[9px] text-center text-amber-400/90 font-black uppercase tracking-tighter">If your luck is great so you win 500 coins in one scratch</p>
+                
+                <div class="relative w-full h-24 bg-zinc-950 rounded-xl overflow-hidden border border-gray-900 flex items-center justify-center">
+                    <div id="scratchUnderlayText" class="text-center z-0 hidden">
+                        <span class="text-[8px] uppercase tracking-widest text-gray-500 block">Payout Extraction</span>
+                        <span id="scratchResultVal" class="text-base font-mono font-black text-amber-400">0 Coins</span>
+                    </div>
+                    <canvas id="scratchPadCanvas" width="280" height="96" class="absolute inset-0 z-10 scratch-canvas hidden"></canvas>
+                    <button onclick="unlockScratchMatrixSurface()" id="scratchUnlockBtn" class="z-20 px-4 py-2 bg-amber-600 hover:bg-amber-500 font-black text-[10px] uppercase tracking-widest text-white rounded-xl shadow active:scale-95 transition-transform">
+                        Watch Ad to Unlock Surface
+                    </button>
+                </div>
+            </div>
+
+            <!-- BOX 3: MASTER INTELLIGENCE CORE QUIZ -->
+            <div class="p-4 rounded-2xl action-card space-y-2">
+                <div class="flex justify-between items-center border-b border-gray-900 pb-1.5">
+                    <span class="text-xs font-black uppercase tracking-wide text-white"><i class="fa-solid fa-brain text-emerald-400"></i> Intelligence Core Quiz</span>
+                    <span id="quizLimitDisplay" class="text-[9px] font-mono font-bold text-gray-500 bg-black/40 px-1.5 py-0.5 rounded">Limits: 15/15</span>
+                </div>
+                
+                <div id="quizSetupScreen" class="space-y-2.5 text-center">
+                    <p class="text-[10px] text-gray-400 leading-normal">Solve 5 strategic questions. Score minimum <span class="text-emerald-400 font-bold">3 correct answers</span> to claim a variable package of <span class="text-amber-400 font-bold">5 to 7 Coins</span> after verification ad loop.</p>
+                    <button onclick="initializeLiveQuizSession()" id="startQuizBtn" class="w-full py-2 bg-emerald-900/60 border border-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider rounded-xl transition-all">
+                        Initialize Quiz Sequence
+                    </button>
+                </div>
+
+                <div id="quizWorkspaceScreen" class="hidden space-y-3">
+                    <div class="flex justify-between text-[9px] font-mono font-bold text-gray-400">
+                        <span id="quizProgression">Question 1 of 5</span>
+                        <span id="quizScorefield" class="text-emerald-400">Score: 0</span>
+                    </div>
+                    <h4 id="quizQuestionBody" class="text-xs font-bold text-white min-h-8">Loading item problem vector...</h4>
+                    <div id="quizOptionsStack" class="space-y-1.5"></div>
+                </div>
+            </div>
+
+            <!-- BOX 4: CREDENTIAL RECOVERY OVERLAY -->
+            <div class="p-4 rounded-2xl action-card space-y-2">
+                <div class="flex justify-between items-center border-b border-gray-900 pb-1.5">
+                    <span class="text-xs font-black uppercase tracking-wide text-white"><i class="fa-solid fa-key text-red-400"></i> Recovery Pin & DOB Vault</span>
+                    <span class="text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-900/40 animate-pulse">Protected</span>
+                </div>
+                <p class="text-[10px] text-gray-400 leading-relaxed">Extract your systemic variables directly into your Mailbox. Charges a high-priority structural toll processing fee of <span class="text-amber-400 font-bold">500 Coins</span> along with confirmation video broadcast.</p>
+                <button onclick="dispatchSecureRecoveryProtocol()" class="w-full py-2 bg-red-950/40 hover:bg-red-900/40 border border-red-500/20 text-red-400 text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-95">
+                    Authorize Extraction (Costs 500 Coins + Ad)
+                </button>
+            </div>
+
+        </div>
     </div>
 
-    <!-- MAIN SYSTEM ARCHITECTURE CONTROLLER -->
+    <!-- PERSISTENT FOOTER SYSTEM DOCK TERMINAL (AUTHENTIC CROSS-ROUTING LINKS) -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#07060e]/95 backdrop-blur-md border-t border-white/5 shadow-2xl flex justify-around items-center select-none">
+        <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-center active-nav-item">
+            <i class="fa-solid fa-house text-base"></i>
+            <span class="text-[8px] font-black uppercase tracking-wider">Home</span>
+        </a>
+        <a href="refer.html" class="flex flex-col items-center gap-0.5 text-center text-gray-500 hover:text-purple-400 transition-colors">
+            <i class="fa-solid fa-user-plus text-base"></i>
+            <span class="text-[8px] font-black uppercase tracking-wider">Refer</span>
+        </a>
+        <a href="withdrawal.html" class="flex flex-col items-center gap-0.5 text-center text-gray-500 hover:text-purple-400 transition-colors">
+            <i class="fa-solid fa-wallet text-base"></i>
+            <span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span>
+        </a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-0.5 text-center text-gray-500 hover:text-purple-400 transition-colors">
+            <i class="fa-solid fa-trophy text-base"></i>
+            <span class="text-[8px] font-black uppercase tracking-wider">Ranks</span>
+        </a>
+        <a href="profile.html" class="flex flex-col items-center gap-0.5 text-center text-gray-500 hover:text-purple-400 transition-colors">
+            <i class="fa-solid fa-gears text-base"></i>
+            <span class="text-[8px] font-black uppercase tracking-wider">Profile</span>
+        </a>
+    </nav>
+
+    <!-- CORE LOGIC SYSTEM ARCHITECTURE -->
     <script>
-        // Production System Configuration Mapping
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
           authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
@@ -209,225 +294,404 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.firestore();
 
-        let currentUserUID = null, userData = {};
-        let isWheelSpinning = false;
+        let currentUserUID = null, userStateData = {}, isSpinning = false;
 
-        // Strict Anti-Bankruptcy Wheel Segment Setup (Matches exactly with your image labels)
-        const segments = [
-            { text: "5 COINS", type: "coins", val: 5, color: "#fff3e0", prob: 40 },
-            { text: "10 COINS", type: "coins", val: 10, color: "#ffe0b2", prob: 10 },
-            { text: "2000 COINS", type: "coins", val: 2000, color: "#fff3e0", prob: 0.01 }, // 0.01% Ultra Safe Guard
-            { text: "3 VOUCHERS", type: "vouchers", val: 3, color: "#ffe0b2", prob: 10.99 },
-            { text: "50 COINS", type: "coins", val: 50, color: "#fff3e0", prob: 2 },
-            { text: "RE TRY", type: "retry", val: 0, color: "#ffe0b2", prob:37 } // Safe Failure Node
+        // Static Production Pool Array
+        const quizMasterData = [
+            { q: "Which format of cricket incorporates a mandatory 5-day match duration regulations?", a: ["Test Match", "T20 International", "One Day International", "T10 League"], c: 0 },
+            { q: "What is the official standard measure length dimension of a cricket pitch between wickets?", a: ["18 Yards", "20 Yards", "22 Yards", "24 Yards"], c: 2 },
+            { q: "Which programming layout tool framework natively leverages utility class primitives like flex and glass-panel?", a: ["Bootstrap", "Tailwind CSS", "Sass Material", "Angular Engine"], c: 1 },
+            { q: "Which cloud service node infrastructure module handles Firestore datastores natively?", a: ["Firebase", "AWS Lambda", "GitHub Pages", "Netlify Core"], c: 0 },
+            { q: "What is the absolute maximum structural processing capability limit setup for an explicit 4-Digit Secure PIN field?", a: ["2 Digits", "4 Digits", "6 Digits", "8 Digits"], c: 1 }
+        ];
+
+        let liveQuizState = { activeIndex: 0, trackingScore: 0, runtimeSet: [] };
+
+        // Spin Segment Setup Matrix Mapping
+        const wheelSegments = [
+            { text: "5 Coins", val: 5, color: "#1e1b4b", type: "coins", prob: 41 },
+            { text: "Retry", val: 0, color: "#311042", type: "retry", prob: 33 },
+            { text: "10 Coins", val: 10, color: "#1e1b4b", type: "coins", prob: 10 },
+            { text: "3 Vouchers", val: 3, color: "#311042", type: "vouchers", prob: 10 },
+            { text: "50 Coins", val: 50, color: "#1e1b4b", type: "coins", prob: 5 },
+            { text: "1500 Coins", val: 1500, color: "#b45309", type: "coins", prob: 0.01 }
         ];
 
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUserUID = user.uid;
-                syncUserProfileData();
+                initializeRealtimeSyncPipeline();
+                initializeSystemCountdownClock();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        function syncUserProfileData() {
+        function initializeRealtimeSyncPipeline() {
             db.collection("users").doc(currentUserUID).onSnapshot((doc) => {
-                if(doc.exists) {
-                    userData = doc.data();
-                    updateUserDashboardUI();
+                if (doc.exists) {
+                    userStateData = doc.data();
+                    renderSystemMetricsDashboard();
+                    renderMailboxContentFeed();
                 }
             });
         }
 
-        function updateUserDashboardUI() {
-            document.getElementById("userName").innerText = userData.name || "User Node";
-            document.getElementById("coinCounter").innerText = userData.coins || 0;
-            document.getElementById("diamondCounter").innerText = userData.diamonds || 0;
-            if(userData.photo) document.getElementById("userAvatar").src = userData.photo;
+        function renderSystemMetricsDashboard() {
+            document.getElementById("userName").innerText = userStateData.name || "Authorized User";
+            document.getElementById("userEmail").innerText = userStateData.email || "Gmail Channel Bound";
+            document.getElementById("coinCounter").innerText = userStateData.coins || 0;
+            document.getElementById("voucherCounter").innerText = userStateData.vouchers || 0;
+            if(userStateData.photo) document.getElementById("userAvatar").src = userStateData.photo;
 
-            document.getElementById("spinLimitDisplay").innerText = `Daily ${50 - (userData.spinCount || 0)} Spin Limit`;
-            buildDailyCheckInTimeline();
+            document.getElementById("streakDisplay").innerText = userStateData.checkInStreak || 0;
+            document.getElementById("adTrackerBar").innerText = `${userStateData.dailyAdCount || 0} / 10 Completed`;
+            document.getElementById("spinLimitDisplay").innerText = `Limits: ${40 - (userStateData.spinCount || 0)}/40`;
+            document.getElementById("scratchLimitDisplay").innerText = `Limits: ${15 - (userStateData.scratchCount || 0)}/15`;
+            document.getElementById("quizLimitDisplay").innerText = `Limits: ${15 - (userStateData.quizCount || 0)}/15`;
         }
 
-        // DYNAMIC GRAPHICAL TIMELINE GENERATION ENGINE
-        function buildDailyCheckInTimeline() {
-            const wrapper = document.getElementById("checkinNodesWrapper");
-            wrapper.innerHTML = "";
-            const currentDayCount = (userData.checkInStreak % 5) || 1; 
-
-            for(let i = 1; i <= 5; i++) {
-                const node = document.createElement("div");
-                node.className = "flex flex-col items-center gap-1.5";
+        function initializeSystemCountdownClock() {
+            setInterval(() => {
+                const now = new Date(), midnight = new Date();
+                midnight.setHours(24, 0, 0, 0);
+                const diff = midnight - now;
                 
-                let innerContent = i;
-                let nodeStatusStyle = "bg-zinc-800 text-gray-500 border-2 border-zinc-700";
+                const h = String(Math.floor((diff / (1000*60*60)) % 24)).padStart(2, '0');
+                const m = String(Math.floor((diff / (1000*60)) % 60)).padStart(2, '0');
+                const s = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+                document.getElementById("countdownTimer").innerText = `${h}:${m}:${s}`;
 
-                if (i < currentDayCount) {
-                    nodeStatusStyle = "bg-green-100 text-green-700 border-2 border-green-300";
-                    innerContent = '<i class="fa-solid fa-check text-sm"></i>';
-                } else if (i === currentDayCount) {
-                    nodeStatusStyle = "bg-green-500 text-white border-2 border-green-600 animate-pulse";
-                    innerContent = '<i class="fa-solid fa-gift text-sm text-yellow-200"></i>';
-                } else {
-                    if(i === 4) innerContent = "15<br><span class='text-[6px] block'>Tokens</span>";
-                    if(i === 5) innerContent = "20<br><span class='text-[6px] block'>Tokens</span>";
-                }
-
-                node.innerHTML = `
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center font-black text-xs text-center shadow-lg ${nodeStatusStyle}">
-                        ${innerContent}
-                    </div>
-                    <span class="text-[9px] font-bold uppercase tracking-wider text-gray-400">${i === currentDayCount ? 'Today' : 'Day ' + i}</span>
-                `;
-                
-                if(i === currentDayCount) {
-                    node.onclick = () => processDailyTimelineClaim();
-                    node.style.cursor = "pointer";
-                }
-                wrapper.appendChild(node);
-            }
+                if(h === "00" && m === "00" && s === "00") executeMidnightDataPurge();
+            }, 1000);
         }
 
-        function simulateNetworkAdBlock(callback) {
-            setTimeout(callback, 1000); // 1-second clean interstitial mock load
+        function executeMidnightDataPurge() {
+            db.collection("users").doc(currentUserUID).update({
+                dailyAdCount: 0, spinCount: 0, scratchCount: 0, quizCount: 0
+            });
         }
 
-        // DAILY RETRIEVAL VERIFICATION CONTROLLER
-        function processDailyTimelineClaim() {
+        // MOCK INTERSTITIAL NETWORKS LOADER 
+        function loadVideoAdTrackChannel(callback) {
+            setTimeout(callback, 1000);
+        }
+
+        // MISSION 1: DAILY CHECK-IN EXECUTION LOGIC
+        function executeDailyCheckIn() {
             const todayStr = new Date().toDateString();
-            if(userData.lastCheckInTimestamp === todayStr) {
-                alert("🔒 You have already processed today's check-in node payload data stream!");
+            if (userStateData.lastCheckInTimestamp === todayStr) {
+                alert("🔒 Limit Restrained: Daily check-in node value already committed for today!");
                 return;
             }
 
-            simulateNetworkAdBlock(() => {
-                let currentStreak = userData.checkInStreak || 0;
-                currentStreak++;
-                let dynamicBonusReward = 10;
-                
-                if(currentStreak % 4 === 0) dynamicBonusReward = 15;
-                if(currentStreak % 5 === 0) dynamicBonusReward = 20;
+            loadVideoAdTrackChannel(() => {
+                let streak = userStateData.checkInStreak || 0;
+                let payout = 15;
+                const yesterdayStr = new Date(Date.now() - 86400000).toDateString();
+
+                if (userStateData.lastCheckInTimestamp !== yesterdayStr && userStateData.lastCheckInTimestamp !== undefined) {
+                    streak = 0; 
+                }
+
+                streak += 1;
+
+                if (streak === 30) {
+                    payout += 300;
+                    alert("🎉 MEGA STREAK BONANZA ACCELERATED! 300 extra coins injected!");
+                    streak = 0; 
+                }
 
                 db.collection("users").doc(currentUserUID).update({
-                    coins: firebase.firestore.FieldValue.increment(dynamicBonusReward),
+                    coins: firebase.firestore.FieldValue.increment(payout),
                     lastCheckInTimestamp: todayStr,
-                    checkInStreak: currentStreak
-                }).then(() => alert(`🎉 Check-in verified! Allocation of ${dynamicBonusReward} Tokens added successfully.`));
+                    checkInStreak: streak
+                }).then(() => alert(`Successfully added ${payout} Coins!`));
             });
         }
 
-        // DAILY 100 BONUS COINS FUNCTION
-        function claimDailyBonusCoins() {
-            const todayStr = new Date().toDateString();
-            if (userData.lastBonusClaimTimestamp === todayStr) {
-                alert("🔒 Daily Bonus Payload already claimed! Reset triggers at 12:00 AM.");
+        // MISSION 2: DAILY AD PROCESSING MATRIX
+        function executeAdMiningIteration() {
+            let currentAds = userStateData.dailyAdCount || 0;
+
+            if (currentAds >= 10) {
+                loadVideoAdTrackChannel(() => {
+                    alert("Daily ad limits full.");
+                });
                 return;
             }
 
-            simulateNetworkAdBlock(() => {
+            loadVideoAdTrackChannel(() => {
                 db.collection("users").doc(currentUserUID).update({
-                    coins: firebase.firestore.FieldValue.increment(100),
-                    leaderboardPoints: firebase.firestore.FieldValue.increment(50),
-                    lastBonusClaimTimestamp: todayStr
-                }).then(() => alert("✅ Success! 100 Daily Bonus Coins & 50 Ranks points tracked to your profile layer."));
+                    coins: firebase.firestore.FieldValue.increment(10),
+                    leaderboardPoints: firebase.firestore.FieldValue.increment(20),
+                    dailyAdCount: firebase.firestore.FieldValue.increment(1)
+                }).then(() => alert("10 coins and 20 leaderboard points earned you."));
             });
         }
 
-        // HIGH PRECISION PROBABILITY ALGORITHMIC WHEEL RENDER ENGINE
-        const canvas = document.getElementById("wheelCanvas"), ctx = canvas.getContext("2d");
-        const arcSize = (Math.PI * 2) / segments.length;
+        // BOX 1: HIGH PRECISION WHEEL GRAPHICAL DRIVER
+        const spinCanvas = document.getElementById("wheelCanvas"), spinCtx = spinCanvas.getContext("2d");
+        const arcSpace = (Math.PI * 2) / wheelSegments.length;
 
-        function drawVisualMatrixWheel() {
-            segments.forEach((seg, i) => {
-                const currentAngle = i * arcSize;
-                ctx.fillStyle = seg.color;
-                ctx.beginPath();
-                ctx.moveTo(150, 150);
-                ctx.arc(150, 150, 140, currentAngle, currentAngle + arcSize);
-                ctx.lineTo(150, 150);
-                ctx.fill();
+        function drawSystemGraphicWheel() {
+            wheelSegments.forEach((seg, i) => {
+                const angle = i * arcSpace;
+                spinCtx.fillStyle = seg.color;
+                spinCtx.beginPath();
+                spinCtx.moveTo(130, 130);
+                spinCtx.arc(130, 130, 120, angle, angle + arcSpace);
+                spinCtx.lineTo(130, 130);
+                spinCtx.fill();
 
-                // Inject Labels inside graphical frames
-                ctx.save();
-                ctx.fillStyle = "#111111";
-                if(seg.text === "RE TRY") ctx.fillStyle = "#d32f2f";
-                ctx.font = "bold 10px sans-serif";
-                ctx.translate(150, 150);
-                ctx.rotate(currentAngle + arcSize / 2);
-                ctx.textAlign = "right";
-                ctx.fillText(seg.text, 125, 5);
-                ctx.restore();
+                spinCtx.save();
+                spinCtx.fillStyle = "#ffffff";
+                spinCtx.font = "bold 9px system-ui";
+                spinCtx.translate(130, 130);
+                spinCtx.rotate(angle + arcSpace / 2);
+                spinCtx.textAlign = "right";
+                spinCtx.fillText(seg.text, 110, 4);
+                spinCtx.restore();
             });
         }
-        drawVisualMatrixWheel();
+        drawSystemGraphicWheel();
 
-        function launchLuckySpinSequence() {
-            if(isWheelSpinning) return;
-            let dailySpins = userData.spinCount || 0;
-            if(dailySpins >= 50) {
-                alert("⛔ Security Block: Daily 50 allocations exhausted.");
+        function triggerLuckySpinCycle() {
+            if (isSpinning) return;
+            let runSpins = userStateData.spinCount || 0;
+            if (runSpins >= 40) {
+                alert("⛔ Operational Bounds Warning: Daily 40 spin calculation capacity exhausted!");
                 return;
             }
 
-            simulateNetworkAdBlock(() => {
-                isWheelSpinning = true;
-                
-                // Pure Strict Random Mathematical Mapping
-                const seed = Math.random() * 100;
-                let selectedIndex = 5; // Default Safe Element Fallback
-                let cumulativeProb = 0;
+            loadVideoAdTrackChannel(() => {
+                isSpinning = true;
+                const rngSeed = Math.random() * 100;
+                let matchIdx = 1, currentSum = 0;
 
-                for(let i = 0; i < segments.length; i++) {
-                    cumulativeProb += segments[i].prob;
-                    if(seed <= cumulativeProb) {
-                        selectedIndex = i;
+                for (let i = 0; i < wheelSegments.length; i++) {
+                    currentSum += wheelSegments[i].prob;
+                    if (rngSeed <= currentSum) {
+                        matchIdx = i;
                         break;
                     }
                 }
 
-                // Mathematical Calculation targeting targeted arc angle structure
-                const degreeOffset = 360 - (selectedIndex * (360 / segments.length)) - (360 / (segments.length * 2));
-                const terminalRotationAngle = 3600 + degreeOffset; // 10 automated complete revolution loop spins
+                const degOffset = 360 - (matchIdx * (360 / wheelSegments.length)) - (360 / (wheelSegments.length * 2));
+                const totalRotation = 2880 + degOffset; 
 
-                canvas.style.transform = `rotate(${terminalRotationAngle}deg)`;
+                spinCanvas.style.transform = `rotate(${totalRotation}deg)`;
 
                 setTimeout(() => {
-                    const prize = segments[selectedIndex];
-                    let dbUpdateBlock = { spinCount: firebase.firestore.FieldValue.increment(1) };
-                    let outputLog = "";
+                    const prizeNode = wheelSegments[matchIdx];
+                    let updates = { spinCount: firebase.firestore.FieldValue.increment(1) };
+                    let outputTxt = "";
 
-                    if(prize.type === "coins") {
-                        dbUpdateBlock.coins = firebase.firestore.FieldValue.increment(prize.val);
-                        outputLog = `🎁 Claimed: ${prize.val} Coins asset transaction registered!`;
-                    } else if(prize.type === "diamonds") {
-                        dbUpdateBlock.diamonds = firebase.firestore.FieldValue.increment(prize.val);
-                        outputLog = `💎 Claimed: ${prize.val} Rare Diamonds processed!`;
+                    if (prizeNode.type === "coins") {
+                        updates.coins = firebase.firestore.FieldValue.increment(prizeNode.val);
+                        outputTxt = `Extraction Yielded: ${prizeNode.val} Coins!`;
+                    } else if (prizeNode.type === "vouchers") {
+                        updates.vouchers = firebase.firestore.FieldValue.increment(prizeNode.val);
+                        outputTxt = `System Vouchers Allotted: +${prizeNode.val}!`;
                     } else {
-                        outputLog = "💥 Better Luck Next Time! System status alignment shifted.";
+                        outputTxt = "Retry try again.";
                     }
 
-                    db.collection("users").doc(currentUserUID).update(dbUpdateBlock).then(() => {
-                        alert(outputLog);
-                        canvas.style.transition = "none";
-                        canvas.style.transform = `rotate(${degreeOffset}deg)`;
-                        setTimeout(() => { canvas.style.transition = "transform 4s cubic-bezier(0.1, 0.8, 0.3, 1)"; }, 50);
-                        isWheelSpinning = false;
+                    db.collection("users").doc(currentUserUID).update(updates).then(() => {
+                        alert(outputTxt);
+                        spinCanvas.style.transition = "none";
+                        spinCanvas.style.transform = `rotate(${degOffset}deg)`;
+                        setTimeout(() => { spinCanvas.style.transition = "transform 4s cubic-bezier(0.1, 0.8, 0.25, 1)"; }, 40);
+                        isSpinning = false;
                     });
                 }, 4000);
             });
         }
 
-        function exchangeCoinsForVoucher() {
-            let currentCoins = userData.coins || 0;
-            if(currentCoins < 2) {
-                alert("❌ Resource Deficiency: Minimally 2 Coins are required to buy 1 Fire Aim Voucher!");
+        function purchaseVoucherAsset() {
+            let coins = userStateData.coins || 0;
+            if (coins < 5) {
+                alert("❌ Verification Exception: Insufficient currency balance!");
                 return;
             }
             db.collection("users").doc(currentUserUID).update({
-                coins: firebase.firestore.FieldValue.increment(-2),
+                coins: firebase.firestore.FieldValue.increment(-5),
                 vouchers: firebase.firestore.FieldValue.increment(1)
-            }).then(() => alert("🎟️ Successfully Exchanged 5 Coins for 1 Fire Aim Voucher!"));
+            });
+        }
+
+        // BOX 2: LUCKY CRYPT SCRATCH LOGIC
+        function unlockScratchMatrixSurface() {
+            let scratches = userStateData.scratchCount || 0;
+            if (scratches >= 15) {
+                alert("⛔ Execution Limit: Daily scratch interface matrices depleted!");
+                return;
+            }
+
+            loadVideoAdTrackChannel(() => {
+                document.getElementById("scratchUnlockBtn").classList.add("hidden");
+                const canvas = document.getElementById("scratchPadCanvas"), text = document.getElementById("scratchUnderlayText");
+                canvas.classList.remove("hidden"); text.classList.remove("hidden");
+
+                const dynamicLuckFactor = Math.floor(Math.random() * 1000000);
+                let reward = Math.floor(Math.random() * 4) + 3; // 3 to 6 Coins variable range
+
+                if(dynamicLuckFactor === 555555) reward = 500; // Ultra-safe jackpot condition
+
+                document.getElementById("scratchResultVal").innerText = `${reward} Coins`;
+                bindScratchInterfaceCanvas(canvas, reward);
+            });
+        }
+
+        function bindScratchInterfaceCanvas(canvas, val) {
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#272538"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "bold 9px monospace"; ctx.fillStyle = "#8b5cf6";
+            ctx.fillText("SCRATCH LIVE PROTECTION COAT", 65, 50);
+
+            let cleanCount = 0, committed = false;
+            function rubCoat(x, y) {
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fill();
+                cleanCount++;
+
+                if (cleanCount > 40 && !committed) {
+                    committed = true; canvas.classList.add("hidden");
+                    db.collection("users").doc(currentUserUID).update({
+                        coins: firebase.firestore.FieldValue.increment(val),
+                        scratchCount: firebase.firestore.FieldValue.increment(1)
+                    }).then(() => {
+                        alert(`Extracted: ${val} Coins added successfully!`);
+                        document.getElementById("scratchUnlockBtn").classList.remove("hidden");
+                    });
+                }
+            }
+            canvas.onmousemove = (e) => { if(e.buttons === 1) rubCoat(e.offsetX, e.offsetY); };
+            canvas.ontouchmove = (e) => {
+                const r = canvas.getBoundingClientRect(), t = e.touches[0];
+                rubCoat(t.clientX - r.left, t.clientY - r.top);
+            };
+        }
+
+        // BOX 3: MASTER INTELLIGENCE CORE QUIZ HUB
+        function initializeLiveQuizSession() {
+            let quizzes = userStateData.quizCount || 0;
+            if (quizzes >= 15) {
+                alert("⛔ Daily 15 allocation logs filled for Quiz core asset!");
+                return;
+            }
+            liveQuizState.runtimeSet = quizMasterData.sort(() => 0.5 - Math.random());
+            liveQuizState.activeIndex = 0; liveQuizState.trackingScore = 0;
+
+            document.getElementById("quizSetupScreen").classList.add("hidden");
+            document.getElementById("quizWorkspaceScreen").classList.remove("hidden");
+            renderActiveQuizStepItem();
+        }
+
+        function renderActiveQuizStepItem() {
+            const state = liveQuizState;
+            if (state.activeIndex >= 5) {
+                evaluateQuizFinalMetricScore();
+                return;
+            }
+            document.getElementById("quizProgression").innerText = `Question ${state.activeIndex + 1} of 5`;
+            document.getElementById("quizScorefield").innerText = `Score: ${state.trackingScore}`;
+            
+            const item = state.runtimeSet[state.activeIndex];
+            document.getElementById("quizQuestionBody").innerText = item.q;
+            
+            const stack = document.getElementById("quizOptionsStack");
+            stack.innerHTML = "";
+
+            item.a.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "w-full py-2 text-left px-3 text-[10px] bg-black/40 border border-gray-900 text-gray-300 rounded-lg font-medium";
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    if(i === item.c) state.trackingScore += 1;
+                    state.activeIndex += 1;
+                    renderActiveQuizStepItem();
+                };
+                stack.appendChild(btn);
+            });
+        }
+
+        function evaluateQuizFinalMetricScore() {
+            const finalScore = liveQuizState.trackingScore;
+            document.getElementById("quizSetupScreen").classList.remove("hidden");
+            document.getElementById("quizWorkspaceScreen").classList.add("hidden");
+
+            if (finalScore >= 3) {
+                loadVideoAdTrackChannel(() => {
+                    const variableCoins = Math.floor(Math.random() * 3) + 5; // 5 to 7 coins random mapping logic
+                    db.collection("users").doc(currentUserUID).update({
+                        coins: firebase.firestore.FieldValue.increment(variableCoins),
+                        quizCount: firebase.firestore.FieldValue.increment(1)
+                    }).then(() => alert(`Verified Score: ${finalScore}/5. Awarded: ${variableCoins} Coins.`));
+                });
+            } else {
+                alert(`Quiz Over. Score: ${finalScore}/5. No coins awarded because minimum threshold is 3.`);
+                db.collection("users").doc(currentUserUID).update({ quizCount: firebase.firestore.FieldValue.increment(1) });
+            }
+        }
+
+        // BOX 4: SECURE RECOVERY VAULT ROUTINES
+        function dispatchSecureRecoveryProtocol() {
+            let coins = userStateData.coins || 0;
+            if (coins < 500) {
+                alert("❌ Transaction Denied: Requires 500 currency assets!");
+                return;
+            }
+
+            loadVideoAdTrackChannel(() => {
+                const mailRef = db.collection("users").doc(currentUserUID).collection("mailbox").doc();
+                
+                db.runTransaction((tx) => {
+                    const userRef = db.collection("users").doc(currentUserUID);
+                    return tx.get(userRef).then((sfDoc) => {
+                        let bal = sfDoc.data().coins || 0;
+                        if(bal < 500) throw "Underflow.";
+                        tx.update(userRef, { coins: bal - 500 });
+                        tx.set(mailRef, {
+                            title: "🔑 Secure Layer System Recovery Payload",
+                            body: `Match Matrix Found!\n• Secure Extraction PIN: ${sfDoc.data().securePin || '4491'}\n• Recovery Registered DOB: ${sfDoc.data().recoveryDob || '01-01-2000'}`,
+                            timestamp: new Date().toLocaleString(),
+                            read: false
+                        });
+                    });
+                }).then(() => alert("your pin and DOB on your mailbox upto 48 hours")).catch(() => alert("Vault Processing Interrupted."));
+            });
+        }
+
+        // MAILBOX SYSTEM INTERFACING TRANSITIONS
+        function toggleMailboxDrawer() {
+            const dr = document.getElementById("mailboxContentDrawer"), ch = document.getElementById("mailboxChevron");
+            if (dr.classList.contains("hidden")) {
+                dr.classList.remove("hidden"); ch.className = "fa-solid fa-chevron-up text-purple-400 text-[9px]";
+            } else {
+                dr.classList.add("hidden"); ch.className = "fa-solid fa-chevron-down text-gray-600 text-[9px]";
+            }
+        }
+
+        function renderMailboxContentFeed() {
+            db.collection("users").doc(currentUserUID).collection("mailbox").orderBy("timestamp", "desc").onSnapshot((snap) => {
+                const container = document.getElementById("mailItemsContainer"), prompt = document.getElementById("emptyMailboxPrompt");
+                const badge = document.getElementById("mailboxBadge");
+                container.innerHTML = ""; let unread = 0;
+
+                if (snap.empty) { prompt.classList.remove("hidden"); badge.classList.add("hidden"); return; }
+                prompt.classList.add("hidden");
+
+                snap.forEach((doc) => {
+                    const mail = doc.data(); if (!mail.read) unread++;
+                    const item = document.createElement("div");
+                    item.className = `p-2 rounded-xl text-[9px] font-mono border ${mail.read ? 'bg-black/20 border-gray-900 text-gray-500' : 'bg-purple-950/20 border-purple-950 text-gray-200'}`;
+                    item.innerHTML = `<div class="font-bold flex justify-between text-[8px] text-purple-400"><span>${mail.title}</span></div><p class="mt-1 whitespace-pre-line">${mail.body}</p>`;
+                    item.onclick = () => { if (!mail.read) db.collection("users").doc(currentUserUID).collection("mailbox").doc(doc.id).update({ read: true }); };
+                    container.appendChild(item);
+                });
+                if (unread > 0) { badge.innerText = unread; badge.classList.remove("hidden"); } else badge.classList.add("hidden");
+            });
         }
     </script>
 </body>
