@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIR FREE REWARDS - Homepage Core</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase Standard Integration Framework -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        body {
+            background-color: #0c0c14;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(15, 15, 27, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .action-card {
+            background: linear-gradient(135deg, rgba(20, 20, 35, 0.85) 0%, rgba(10, 10, 20, 0.95) 100%);
+            border: 1px solid rgba(147, 51, 234, 0.15);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .action-card:hover {
+            border-color: rgba(147, 51, 234, 0.4);
+            transform: translateY(-2px);
+        }
+        .active-nav-item {
+            color: #a855f7;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+        }
+        
+        /* Universal Device Scaling Engine (6-inch to 10-inch adaptive setup) */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding-bottom: 90px;
+        }
+        @media (min-width: 768px) {
+            .app-container { max-width: 640px; }
+            .grid-boxes { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        }
+        @media (min-width: 1024px) {
+            .app-container { max-width: 768px; }
+        }
+        
+        /* Interactive Scratch Pad Simulation Canvas */
+        .scratch-canvas {
+            cursor: pointer;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-5 relative select-none">
+
+    <!-- Atmospheric Glow Vectors -->
+    <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/10 blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/10 blur-[120px] pointer-events-none"></div>
+
+    <!-- MAIN APP FLOW WRAPPER -->
+    <div class="app-container space-y-4">
+        
+        <!-- TOP AUTHENTICATED PROFILE & STATUS BAR -->
+        <div class="w-full p-3 sm:p-4 rounded-2xl glass-panel flex justify-between items-center shadow-lg border border-white/5">
+            <!-- Left Node: User Identity Context -->
+            <div class="flex items-center gap-2.5">
+                <div class="relative">
+                    <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=6b21a8&color=fff" alt="Avatar" class="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-purple-500/40 object-cover shadow-inner">
+                    <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0c0c14]"></div>
+                </div>
+                <div>
+                    <h2 id="userName" class="text-xs sm:text-sm font-black tracking-wide truncate max-w-[120px] sm:max-w-[160px]">Loading Account...</h2>
+                    <p id="userEmail" class="text-[9px] sm:text-[10px] text-gray-500 truncate max-w-[120px] sm:max-w-[160px]">syncing configuration...</p>
+                </div>
+            </div>
+
+            <!-- Right Node: Dynamic Currencies Display Tracker -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="px-2.5 py-1.5 rounded-xl bg-purple-950/40 border border-purple-500/20 flex items-center gap-1.5 shadow-inner">
+                    <i class="fa-solid fa-coins text-amber-400 text-xs sm:text-sm"></i>
+                    <span id="coinCounter" class="text-xs sm:text-sm font-black text-amber-300 font-mono">0</span>
+                    <span class="text-[8px] font-bold text-purple-400 tracking-tighter">MM</span>
+                </div>
+                <div class="px-2.5 py-1.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 flex items-center gap-1.5 shadow-inner">
+                    <i class="fa-solid fa-ticket text-indigo-400 text-xs sm:text-sm"></i>
+                    <span id="voucherCounter" class="text-xs sm:text-sm font-black text-indigo-300 font-mono">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAILBOX SECURE SYSTEM COMPONENT -->
+        <div class="w-full p-3 rounded-2xl bg-black/30 border border-gray-900/60 shadow-inner">
+            <div class="flex justify-between items-center mb-2" onclick="toggleMailboxDrawer()">
+                <div class="flex items-center gap-2 cursor-pointer">
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope text-purple-400 text-sm sm:text-base animate-pulse"></i>
+                        <span id="mailboxBadge" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[7px] font-black px-1 rounded-full hidden">0</span>
+                    </div>
+                    <span class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-gray-300">System Secure Mailbox</span>
+                </div>
+                <i id="mailboxChevron" class="fa-solid fa-chevron-down text-gray-600 text-[10px] transition-transform duration-200"></i>
+            </div>
+            <div id="mailboxContentDrawer" class="hidden transition-all duration-300 space-y-2 max-h-40 overflow-y-auto pt-1">
+                <p id="emptyMailboxPrompt" class="text-[9px] text-gray-600 italic text-center py-2">No active tactical communications or reward slips in data stream.</p>
+                <div id="mailItemsContainer" class="space-y-1.5"></div>
+            </div>
+        </div>
+
+        <!-- GLOBAL RESET ANNOUNCEMENT STRIP -->
+        <div class="w-full px-3 py-1.5 rounded-xl bg-purple-950/20 border border-purple-900/30 flex items-center justify-between text-[9px] font-bold text-purple-300">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-clock-rotate-left text-[10px]"></i> Rules: All mission pipelines automatically wipe & reset at 12:00 AM Midnight.</span>
+            <span id="countdownTimer" class="font-mono text-purple-400 tracking-wider">00:00:00</span>
+        </div>
+
+        <!-- MISSIONS & TASK ENGINES AREA -->
+        <div class="space-y-3">
+            <!-- TASK CARD 1: DAILY RETRIEVAL CHECK-IN SYSTEM -->
+            <div class="w-full p-4 rounded-2xl action-card shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="p-1.5 rounded-lg bg-purple-950/60 border border-purple-800/40 text-purple-400 text-xs"><i class="fa-solid fa-calendar-day"></i></span>
+                        <h3 class="text-xs sm:text-sm font-black uppercase tracking-wide text-white">Daily Operations Authentication</h3>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1 max-w-sm leading-relaxed">Claim <span class="text-amber-400 font-bold">15 MM Coins</span> daily. Complete a strict uninterrupted streak of 30 days to claim a massive <span class="text-purple-400 font-bold">300 MM Mega Jackpot</span> structural payload! Missing a single sequence resets validation status back to Day 1.</p>
+                    <div class="mt-2 text-[9px] font-bold text-indigo-400 tracking-wide flex items-center gap-1">
+                        <i class="fa-solid fa-fire"></i> Current Valid Continuous Streak: <span id="streakDaysDisplay" class="font-mono text-white bg-indigo-950/80 px-1.5 py-0.5 rounded border border-indigo-900/40">0</span> / 30 Days
+                    </div>
+                </div>
+                <button onclick="triggerDailyCheckInSequence()" id="checkInBtn" class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-purple-700 to-indigo-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all whitespace-nowrap">
+                    Claim Reward (Watch Ad)
+                </button>
+            </div>
+
+            <!-- TASK CARD 2: AD STACK MINING (DAILY COINS MATRIX) -->
+            <div class="w-full p-4 rounded-2xl action-card shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="p-1.5 rounded-lg bg-indigo-950/60 border border-indigo-800/40 text-indigo-400 text-xs"><i class="fa-solid fa-rectangle-ad"></i></span>
+                        <h3 class="text-xs sm:text-sm font-black uppercase tracking-wide text-white">Ad Stack Resource Mining</h3>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1 max-w-sm leading-relaxed">Each broadcast iteration unlocks <span class="text-amber-400 font-bold">10 MM Coins</span> & allocates <span class="text-indigo-400 font-bold">20 Leaderboard Points</span> into live metrics.</p>
+                    <div class="mt-2 flex items-center gap-2 text-[9px] font-bold">
+                        <span class="text-gray-500">Daily Allocation Tracker:</span>
+                        <span id="adTrackerBar" class="font-mono text-white bg-black/40 px-1.5 py-0.5 rounded border border-gray-800">0 / 10 Completed</span>
+                    </div>
+                </div>
+                <button onclick="executeAdMiningIteration()" id="miningBtn" class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-indigo-700 to-purple-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all whitespace-nowrap">
+                    Mine Broadcast Data
+                </button>
+            </div>
+        </div>
+
+        <!-- 4 BOX HARDCORE UTILITY FUNCTIONAL HUB -->
+        <div class="grid grid-cols-1 gap-3 grid-boxes">
+            
+            <!-- CARD UTILITY BOX 1: HIGH PRECISION PROBABILITY SPIN WHEEL -->
+            <div class="p-4 rounded-2xl action-card flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-900 pb-2 mb-2">
+                        <span class="text-xs font-black uppercase tracking-wide text-white flex items-center gap-1.5"><i class="fa-solid fa-circle-notch text-purple-400"></i> Quantum Spin Rig</span>
+                        <span id="spinLimitDisplay" class="text-[9px] font-mono font-bold text-gray-500 bg-black/40 px-1.5 py-0.5 rounded">Limits: 40/40</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 leading-normal">Watch broadcast to spin matrix. Exchange 5 MM Coins to purchase 1 direct Voucher system asset.</p>
+                    
+                    <!-- Dynamic Probability Breakdown Table for Transparency -->
+                    <div class="mt-3 bg-black/40 rounded-xl p-2 border border-gray-900/60 text-[8px] font-mono text-gray-500 space-y-1">
+                        <div class="flex justify-between"><span>5 MM Coins (Common):</span><span class="text-purple-400 font-bold">41.00%</span></div>
+                        <div class="flex justify-between"><span>Retry Null Matrix (Fail):</span><span class="text-red-400 font-bold">33.00%</span></div>
+                        <div class="flex justify-between"><span>10 MM Coins (Uncommon):</span><span class="text-purple-400 font-bold">10.00%</span></div>
+                        <div class="flex justify-between"><span>3 System Vouchers (Rare):</span><span class="text-indigo-400 font-bold">10.00%</span></div>
+                        <div class="flex justify-between"><span>50 MM Coins (Epic):</span><span class="text-amber-400 font-bold">5.00%</span></div>
+                        <div class="flex justify-between"><span>1500 MM Jackpot (0.01% Ultimate):</span><span class="text-emerald-400 font-black animate-pulse">0.01%</span></div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 space-y-2">
+                    <button onclick="engageQuantumSpinCycle()" id="spinBtn" class="w-full py-2 bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 text-white text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-[0.98]">
+                        Run Quantum Spin Rig
+                    </button>
+                    <button onclick="purchaseVoucherAsset()" class="w-full py-1.5 bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-wide rounded-lg transition-all flex items-center justify-center gap-1">
+                        Buy 1 Voucher <span class="text-[9px] text-amber-500 font-mono">(Costs 5 MM)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARD UTILITY BOX 2: ADVANCED CANVAS SCRATCH PAYLOAD NODE -->
+            <div class="p-4 rounded-2xl action-card flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-900 pb-2 mb-2">
+                        <span class="text-xs font-black uppercase tracking-wide text-white flex items-center gap-1.5"><i class="fa-solid fa-sparkles text-amber-400"></i> Scratch Crypt Matrix</span>
+                        <span id="scratchLimitDisplay" class="text-[9px] font-mono font-bold text-gray-500 bg-black/40 px-1.5 py-0.5 rounded">Limits: 15/15</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 leading-normal mb-2">If your luck is great so you win 500 coins in one scratch! Standard payload: 3 to 6 Coins.</p>
+                    
+                    <!-- Interactive Scratch Overlay Interface -->
+                    <div class="relative w-full h-24 bg-zinc-950 rounded-xl overflow-hidden border border-gray-900 flex items-center justify-center select-none shadow-inner">
+                        <div id="scratchUnderlayText" class="text-center z-0 hidden">
+                            <span class="text-[10px] uppercase font-black tracking-widest text-gray-600 block">Scratched Payload</span>
+                            <span id="scratchResultAmount" class="text-lg font-mono font-black text-amber-400">0 MM Coins</span>
+                        </div>
+                        <canvas id="scratchPadCanvas" width="280" height="96" class="absolute inset-0 z-10 scratch-canvas hidden"></canvas>
+                        <button onclick="unlockScratchMatrixSystem()" id="scratchUnlockBtn" class="z-20 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 font-black text-[10px] uppercase tracking-wider text-white rounded-lg shadow active:scale-95 transition-transform">
+                            Watch Ad to Unlock Card
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p class="text-[8px] font-mono text-center text-gray-600 uppercase tracking-widest">Ad authorization required per surface scratch</p>
+                </div>
+            </div>
+
+            <!-- CARD UTILITY BOX 3: DYNAMIC ALGORITHMIC QUIZ CORE ENGINE -->
+            <div class="p-4 rounded-2xl action-card flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-900 pb-2 mb-2">
+                        <span class="text-xs font-black uppercase tracking-wide text-white flex items-center gap-1.5"><i class="fa-solid fa-brain text-emerald-400"></i> Intelligence Core Quiz</span>
+                        <span id="quizLimitDisplay" class="text-[9px] font-mono font-bold text-gray-500 bg-black/40 px-1.5 py-0.5 rounded">Limits: 15/15</span>
+                    </div>
+                    
+                    <!-- Internal Interactive Quiz Workspace Panel -->
+                    <div id="quizSetupContainer" class="space-y-3">
+                        <p class="text-[10px] text-gray-400 leading-normal">Solve 5 sequential questions. Score a minimum of <span class="text-emerald-400 font-bold">3 correct answers</span> to claim <span class="text-amber-400 font-bold">5 to 7 MM Coins</span> after post-eval ad validation.</p>
+                        <button onclick="initializeActiveQuizSession()" id="startQuizBtn" class="w-full py-2 bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider rounded-xl transition-all">
+                            Initialize Data Stream Quiz
+                        </button>
+                    </div>
+
+                    <div id="quizWorkspaceContainer" class="hidden space-y-3">
+                        <div class="flex justify-between text-[9px] font-mono font-bold text-gray-400">
+                            <span id="quizProgressTracker">Question 1 of 5</span>
+                            <span id="quizScoreTracker" class="text-emerald-400">Score: 0</span>
+                        </div>
+                        <h4 id="quizQuestionBody" class="text-xs font-bold text-white leading-snug min-h-8">Loading problem matrix data...</h4>
+                        <div id="quizOptionsStack" class="space-y-1.5"></div>
+                    </div>
+                </div>
+                <div class="mt-3 border-t border-gray-900/60 pt-2 text-center text-[8px] font-mono text-gray-600 uppercase">
+                    Failure to secure threshold score awards 0 payload assets
+                </div>
+            </div>
+
+            <!-- CARD UTILITY BOX 4: ADMINISTRATIVE RECOVERY OVERLAY MATRIX -->
+            <div class="p-4 rounded-2xl action-card flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-900 pb-2 mb-2">
+                        <span class="text-xs font-black uppercase tracking-wide text-white flex items-center gap-1.5"><i class="fa-solid fa-key text-red-400"></i> Credentials Recovery Vault</span>
+                        <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-red-950/60 border border-red-900/40 text-red-400 animate-pulse">Secure Layer</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 leading-normal">Lost your setup structure variables? Charge an automated toll processing fee of <span class="text-amber-500 font-bold">500 MM Coins</span> along with high-priority validation to push encrypted credentials.</p>
+                    <div class="mt-3 bg-red-950/20 border border-red-900/30 rounded-xl p-2.5 text-center text-[9px] text-red-300 font-bold leading-relaxed">
+                        ⚠️ Data Payload routing details, Secure Transaction PIN and Registered Date of Birth values will drop inside your System Mailbox within a maximum latency window of 48 Hours.
+                    </div>
+                </div>
+                <button onclick="dispatchSecureRecoveryProtocol()" class="mt-4 w-full py-2 bg-red-950/40 hover:bg-red-900/60 border border-red-500/20 text-red-400 text-xs font-black uppercase tracking-wider rounded-xl transition-all active:scale-[0.98]">
+                    Authorize Extraction (Costs 500 MM + Ad)
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PERSISTENT FOOTER SYSTEM DOCK TERMINAL (Multi-Page Cross Connection Grid) -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#090910]/95 backdrop-blur-md border-t border-white/5 shadow-[0_-8px_30px_rgba(0,0,0,0.7)] flex justify-around items-center select-none">
+        <a href="homepage.html" class="flex flex-col items-center gap-1 text-center transition-all duration-200 active-nav-item">
+            <i class="fa-solid fa-house-chimney text-base sm:text-lg"></i>
+            <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-wider">Home</span>
+        </a>
+        <a href="refer.html" class="flex flex-col items-center gap-1 text-center text-gray-500 hover:text-purple-400 transition-all duration-200">
+            <i class="fa-solid fa-user-plus text-base sm:text-lg"></i>
+            <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-wider">Refer</span>
+        </a>
+        <a href="withdrawal.html" class="flex flex-col items-center gap-1 text-center text-gray-500 hover:text-purple-400 transition-all duration-200">
+            <i class="fa-solid fa-wallet text-base sm:text-lg"></i>
+            <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-wider">Withdraw</span>
+        </a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-1 text-center text-gray-500 hover:text-purple-400 transition-all duration-200">
+            <i class="fa-solid fa-trophy text-base sm:text-lg"></i>
+            <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-wider">Ranks</span>
+        </a>
+        <a href="profile.html" class="flex flex-col items-center gap-1 text-center text-gray-500 hover:text-purple-400 transition-all duration-200">
+            <i class="fa-solid fa-user-gear text-base sm:text-lg"></i>
+            <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-wider">Profile</span>
+        </a>
+    </nav>
+
+    <!-- CORE LOGIC CONTROLLER COMPONENT -->
+    <script>
+        // Production Configuration Matrix Mapping Block
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
+          authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
+          databaseURL: "https://mir-free-rewards-log-and-earn-default-rtdb.firebaseio.com",
+          projectId: "mir-free-rewards-log-and-earn",
+          storageBucket: "mir-free-rewards-log-and-earn.firebasestorage.app",
+          messagingSenderId: "1055267295995",
+          appId: "1:1055267295995:web:35ebcfaa35a650a832165e",
+          measurementId: "G-V5CGH67MPE"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUserUID = null;
+        let userDataState = {};
+
+        // Hardcoded Quiz Bank Payload
+        const questionPoolData = [
+            { q: "Which format of cricket incorporates a mandatory 5-day match duration regulations?", a: ["Test Match", "T20 International", "One Day International", "T10 League"], c: 0 },
+            { q: "What is the official standard measure length dimension of a cricket pitch between wickets?", a: ["18 Yards", "20 Yards", "22 Yards", "24 Yards"], c: 2 },
+            { q: "Which programming layout tool framework natively leverages utility class primitives like flex, pt-4, and glass-panel styles?", a: ["Bootstrap", "Tailwind CSS", "Sass Material", "Angular Engine"], c: 1 },
+            { q: "Which cloud service node infrastructure module handles Firestore datastores and Auth popups natively?", a: ["Firebase", "AWS Lambda", "GitHub Pages", "Netlify Core"], c: 0 },
+            { q: "What is the absolute maximum structural processing storage capability limit setup for an explicit 4-Digit Secure PIN field?", a: ["2 Digits", "4 Digits", "6 Digits", "8 Digits"], c: 1 },
+            { q: "In web architecture paradigms, what exact protocol endpoint value represents a completely local server environment port address?", a: ["http://127.0.0.1", "https://google.com", "ftp://storage.node", "localhost:80"], c: 0 }
+        ];
+
+        let ongoingQuizState = { activeIndex: 0, correctScore: 0, trackingList: [] };
+
+        // INITIALIZATION PERSISTENCE ENGINE LINK
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUserUID = user.uid;
+                initializeDatabaseSyncPipeline();
+                initializeSystemMidnightClock();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function initializeDatabaseSyncPipeline() {
+            db.collection("users").doc(currentUserUID).onSnapshot((doc) => {
+                if(doc.exists) {
+                    userDataState = doc.data();
+                    renderUserProfileMetrics();
+                    renderMailboxContent();
+                }
+            });
+        }
+
+        function renderUserProfileMetrics() {
+            document.getElementById("userName").innerText = userDataState.name || "Authorized User";
+            document.getElementById("userEmail").innerText = userDataState.email || "Securing data connection...";
+            document.getElementById("coinCounter").innerText = userDataState.coins || 0;
+            document.getElementById("voucherCounter").innerText = userDataState.vouchers || 0;
+            document.getElementById("userAvatar").src = userDataState.photo || "https://ui-avatars.com/api/?name=User";
+            
+            // Sync dynamic task trackers safely with local data models
+            document.getElementById("streakDaysDisplay").innerText = userDataState.checkInStreak || 0;
+            document.getElementById("adTrackerBar").innerText = `${userDataState.dailyAdCount || 0} / 10 Completed`;
+            document.getElementById("spinLimitDisplay").innerText = `Limits: ${40 - (userDataState.spinCount || 0)}/40`;
+            document.getElementById("scratchLimitDisplay").innerText = `Limits: ${15 - (userDataState.scratchCount || 0)}/15`;
+            document.getElementById("quizLimitDisplay").innerText = `Limits: ${15 - (userDataState.quizCount || 0)}/15`;
+        }
+
+        // 12:00 AM NIGHT RESET COUNTDOWN LOGIC
+        function initializeSystemMidnightClock() {
+            setInterval(() => {
+                const now = new Date();
+                const midnight = new Date();
+                midnight.setHours(24, 0, 0, 0);
+                const difference = midnight - now;
+
+                const hrs = String(Math.floor((difference / (1000 * 60 * 60)) % 24)).padStart(2, '0');
+                const mins = String(Math.floor((difference / (1000 * 60)) % 60)).padStart(2, '0');
+                const secs = String(Math.floor((difference / 1000) % 60)).padStart(2, '0');
+
+                document.getElementById("countdownTimer").innerText = `${hrs}:${mins}:${secs}`;
+                
+                // Realtime structural safety cleanup verification check
+                if(hrs === "00" && mins === "00" && secs === "00") {
+                    wipeMetricsOnMidnightBoundary();
+                }
+            }, 1000);
+        }
+
+        function wipeMetricsOnMidnightBoundary() {
+            db.collection("users").doc(currentUserUID).update({
+                dailyAdCount: 0,
+                spinCount: 0,
+                scratchCount: 0,
+                quizCount: 0
+            });
+        }
+
+        // SIMULATED BROADCAST NETWORK MODULE
+        function invokeAdBroadcastChannel(callback) {
+            console.log("Initializing dynamic ad stream render interceptor token...");
+            setTimeout(() => {
+                callback();
+            }, 1200); 
+        }
+
+        // TASK ACTION 1: EXTRACT DAILY RETRIEVAL
+        function triggerDailyCheckInSequence() {
+            const lastCheckIn = userDataState.lastCheckInTimestamp;
+            const todayString = new Date().toDateString();
+
+            if (lastCheckIn === todayString) {
+                alert("🔒 Validation Warning: Data block already retrieved for today! Check back after midnight reset.");
+                return;
+            }
+
+            invokeAdBroadcastChannel(() => {
+                let currentStreak = userDataState.checkInStreak || 0;
+                let awardPayload = 15;
+                
+                // Evaluate sequential historical continuity matrix parameters
+                const yesterdayString = new Date(Date.now() - 86400000).toDateString();
+                if (lastCheckIn !== yesterdayString && lastCheckIn !== undefined) {
+                    currentStreak = 0; // Break system pipeline continuity token structure
+                }
+
+                currentStreak += 1;
+
+                if (currentStreak === 30) {
+                    awardPayload += 300;
+                    alert("🎉 MEGA BONUS CONVERGENCE! You secured an absolute 30-Day streak payout of 300 Extra MM Coins!");
+                    currentStreak = 0; // Dynamic structural auto reset parameter boundary loop rule execution
+                }
+
+                db.collection("users").doc(currentUserUID).update({
+                    coins: firebase.firestore.FieldValue.increment(awardPayload),
+                    lastCheckInTimestamp: todayString,
+                    checkInStreak: currentStreak
+                }).then(() => {
+                    alert(`✅ Verified Payload Dispatched: Successfully added ${awardPayload} MM Coins to profile!`);
+                });
+            });
+        }
+
+        // TASK ACTION 2: EXTRACT BROADCAST MINING (DAILY COINS MATRIX)
+        function executeAdMiningIteration() {
+            let totalAdsProcessed = userDataState.dailyAdCount || 0;
+
+            if (totalAdsProcessed >= 10) {
+                invokeAdBroadcastChannel(() => {
+                    alert("Daily ad limits full.");
+                });
+                return;
+            }
+
+            invokeAdBroadcastChannel(() => {
+                db.collection("users").doc(currentUserUID).update({
+                    coins: firebase.firestore.FieldValue.increment(10),
+                    leaderboardPoints: firebase.firestore.FieldValue.increment(20),
+                    dailyAdCount: firebase.firestore.FieldValue.increment(1)
+                }).then(() => {
+                    alert("10 coins and 20 leaderboard points earned you.");
+                });
+            });
+        }
+
+        // HUB BOX 1: HIGH PRECISION QUANTUM SPIN RIG FLOW
+        function engageQuantumSpinCycle() {
+            let spinsRan = userDataState.spinCount || 0;
+            if (spinsRan >= 40) {
+                alert("⛔ Security Block: Daily operation limits filled for this dynamic calculation asset engine!");
+                return;
+            }
+
+            invokeAdBroadcastChannel(() => {
+                const probabilitySeed = Math.random() * 100;
+                let awardText = "";
+                let updates = { spinCount: firebase.firestore.FieldValue.increment(1) };
+
+                if (probabilitySeed <= 0.01) { // 0.01% Ultimate Jackpot
+                    updates.coins = firebase.firestore.FieldValue.increment(1500);
+                    awardText = "🏆 1500 MM COINS MEGA JACKPOT PACK!";
+                } else if (probabilitySeed <= 5.01) { // 5% Epic
+                    updates.coins = firebase.firestore.FieldValue.increment(50);
+                    awardText = "🔥 50 MM Coins Payload Allocation!";
+                } else if (probabilitySeed <= 15.01) { // 10% Rare Vouchers
+                    updates.vouchers = firebase.firestore.FieldValue.increment(3);
+                    awardText = "🎟️ 3 Tactical System Vouchers Allocation!";
+                } else if (probabilitySeed <= 25.01) { // 10% Uncommon Coins
+                    updates.coins = firebase.firestore.FieldValue.increment(10);
+                    awardText = "⚡ 10 MM Coins Uncommon Asset Packet!";
+                } else if (probabilitySeed <= 58.01) { // 33% Retry Null Outcome
+                    awardText = "❌ Retry try again. System alignment offset.";
+                } else { // 41% Common Coins Base Value
+                    updates.coins = firebase.firestore.FieldValue.increment(5);
+                    awardText = "📦 5 MM Coins Common Resource Extraction.";
+                }
+
+                db.collection("users").doc(currentUserUID).update(updates).then(() => {
+                    alert(`[Spin Outcome] -\n${awardText}`);
+                });
+            });
+        }
+
+        function purchaseVoucherAsset() {
+            let currentCoins = userDataState.coins || 0;
+            if (currentCoins < 5) {
+                alert("❌ Resource Deficiency: Wallet contains insufficient balance allocation assets to trigger transfer!");
+                return;
+            }
+
+            db.collection("users").doc(currentUserUID).update({
+                coins: firebase.firestore.FieldValue.increment(-5),
+                vouchers: firebase.firestore.FieldValue.increment(1)
+            }).then(() => {
+                alert("🎟️ Asset Transfer Document Committed: 1 System Voucher added successfully!");
+            });
+        }
+
+        // HUB BOX 2: CANVAS SCRATCH PACK SUB-ROUTINE INTERFACES
+        function unlockScratchMatrixSystem() {
+            let scratchesDone = userDataState.scratchCount || 0;
+            if (scratchesDone >= 15) {
+                alert("⛔ Resource Limit Exception: Daily runtime allocations complete for scratch data arrays.");
+                return;
+            }
+
+            invokeAdBroadcastChannel(() => {
+                document.getElementById("scratchUnlockBtn").classList.add("hidden");
+                const canvas = document.getElementById("scratchPadCanvas");
+                const text = document.getElementById("scratchUnderlayText");
+                
+                canvas.classList.remove("hidden");
+                text.classList.remove("hidden");
+
+                // Seed reward allocation array calculations
+                const rawLuckIndex = Math.floor(Math.random() * 1000000);
+                let payoutCoins = Math.floor(Math.random() * 4) + 3; // 3 to 6 coins random uniform calculation 
+
+                if (rawLuckIndex === 77777) { // 1 in a million algorithmic trigger 
+                    payoutCoins = 500;
+                }
+
+                document.getElementById("scratchResultAmount").innerText = `${payoutCoins} MM Coins`;
+                setupScratchInteractiveCanvas(canvas, payoutCoins);
+            });
+        }
+
+        function setupScratchInteractiveCanvas(canvas, payoutAmount) {
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#3f3f46";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Render textual overlay elements onto canvas context frame directly
+            ctx.font = "bold 10px monospace";
+            ctx.fillStyle = "#a855f7";
+            ctx.fillText("SCRATCH SURFACE DATA LAYER", 55, 52);
+
+            let pointsScratched = 0;
+            let transactionLocked = false;
+
+            function clearPixelCircle(x, y) {
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.beginPath();
+                ctx.arc(x, y, 16, 0, Math.PI * 2);
+                ctx.fill();
+                pointsScratched++;
+
+                if (pointsScratched > 45 && !transactionLocked) {
+                    transactionLocked = true;
+                    canvas.classList.add("hidden");
+                    
+                    db.collection("users").doc(currentUserUID).update({
+                        coins: firebase.firestore.FieldValue.increment(payoutAmount),
+                        scratchCount: firebase.firestore.FieldValue.increment(1)
+                    }).then(() => {
+                        alert(`🎉 Payload Confirmed: Scratch array produced ${payoutAmount} MM Coins!`);
+                        document.getElementById("scratchUnlockBtn").classList.remove("hidden");
+                    });
+                }
+            }
+
+            canvas.onmousemove = (e) => { if(e.buttons === 1) clearPixelCircle(e.offsetX, e.offsetY); };
+            canvas.ontouchmove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const t = e.touches[0];
+                clearPixelCircle(t.clientX - rect.left, t.clientY - rect.top);
+            };
+        }
+
+        // HUB BOX 3: QUIZ WORKSPACE DATA FLOW MATRIX ROUTINES
+        function initializeActiveQuizSession() {
+            let quizzesPlayed = userDataState.quizCount || 0;
+            if (quizzesPlayed >= 15) {
+                alert("⛔ Operational limits filled for Quiz operations.");
+                return;
+            }
+
+            // Shuffle array sequences instantly via algorithmic randomness logic
+            ongoingQuizState.trackingList = questionPoolData.sort(() => 0.5 - Math.random()).slice(0, 5);
+            ongoingQuizState.activeIndex = 0;
+            ongoingQuizState.correctScore = 0;
+
+            document.getElementById("quizSetupContainer").classList.add("hidden");
+            document.getElementById("quizWorkspaceContainer").classList.remove("hidden");
+
+            renderActiveQuizQuestionElement();
+        }
+
+        function renderActiveQuizQuestionElement() {
+            const state = ongoingQuizState;
+            if(state.activeIndex >= 5) {
+                evaluateFinalQuizPayloadScoreText();
+                return;
+            }
+
+            document.getElementById("quizProgressTracker").innerText = `Question ${state.activeIndex + 1} of 5`;
+            document.getElementById("quizScoreTracker").innerText = `Score: ${state.correctScore}`;
+            
+            const item = state.trackingList[state.activeIndex];
+            document.getElementById("quizQuestionBody").innerText = item.q;
+            
+            const optionBox = document.getElementById("quizOptionsStack");
+            optionBox.innerHTML = "";
+
+            item.a.forEach((opt, idx) => {
+                const btn = document.createElement("button");
+                btn.className = "w-full py-2 text-left px-3 text-[10px] bg-black/40 hover:bg-purple-950/30 border border-gray-950 hover:border-purple-900/40 text-gray-300 rounded-lg transition-all font-medium";
+                btn.innerText = opt;
+                btn.onclick = () => logQuizAnswerSelection(idx);
+                optionBox.appendChild(btn);
+            });
+        }
+
+        function logQuizAnswerSelection(selectedIdx) {
+            const state = ongoingQuizState;
+            const currentItem = state.trackingList[state.activeIndex];
+
+            if(selectedIdx === currentItem.c) {
+                state.correctScore += 1;
+            }
+
+            state.activeIndex += 1;
+            renderActiveQuizQuestionElement();
+        }
+
+        function evaluateFinalQuizPayloadScoreText() {
+            const finalScore = ongoingQuizState.correctScore;
+            
+            document.getElementById("quizSetupContainer").classList.remove("hidden");
+            document.getElementById("quizWorkspaceContainer").classList.add("hidden");
+
+            if (finalScore >= 3) {
+                invokeAdBroadcastChannel(() => {
+                    const generatedAwardCoins = Math.floor(Math.random() * 3) + 5; // 5 to 7 coins
+                    db.collection("users").doc(currentUserUID).update({
+                        coins: firebase.firestore.FieldValue.increment(generatedAwardCoins),
+                        quizCount: firebase.firestore.FieldValue.increment(1)
+                    }).then(() => {
+                        alert(`🎯 Threshold Passed!\nCorrect Answers: ${finalScore}/5\nDispatched: ${generatedAwardCoins} MM Coins payload allocated to dashboard!`);
+                    });
+                });
+            } else {
+                alert(`❌ Core Evaluation Underflow:\nCorrect Answers: ${finalScore}/5\nYou scored below the 3-answer threshold line. 0 coins awarded.`);
+                db.collection("users").doc(currentUserUID).update({
+                    quizCount: firebase.firestore.FieldValue.increment(1)
+                });
+            }
+        }
+
+        // HUB BOX 4: SECURE SECURITY EXTRACTION PROTOCOL MODULE
+        function dispatchSecureRecoveryProtocol() {
+            let currentCoins = userDataState.coins || 0;
+            if (currentCoins < 500) {
+                alert("❌ Balance Fault: Extraction requires a processing fee toll threshold equivalent to 500 MM Coins!");
+                return;
+            }
+
+            invokeAdBroadcastChannel(() => {
+                // Post encrypted ticket record straight to backend user mailbox database tree architecture
+                const mailRef = db.collection("users").doc(currentUserUID).collection("mailbox").doc();
+                
+                db.runTransaction((transaction) => {
+                    const sfDocRef = db.collection("users").doc(currentUserUID);
+                    return transaction.get(sfDocRef).then((sfDoc) => {
+                        if (!sfDoc.exists) throw "Document mismatch context exception.";
+                        
+                        let currentBal = sfDoc.data().coins || 0;
+                        if (currentBal < 500) throw "Insufficient parameters.";
+
+                        transaction.update(sfDocRef, { coins: currentBal - 500 });
+                        transaction.set(mailRef, {
+                            title: "🔒 Credentials Vault Recovery Extraction",
+                            body: `System Registry Match Found!\n• Secure PIN Value: ${sfDoc.data().securePin || "Not configured"}\n• Registered Recovery DOB: ${sfDoc.data().recoveryDob || "Unbound"}`,
+                            timestamp: new Date().toLocaleString(),
+                            read: false
+                        });
+                    });
+                }).then(() => {
+                    alert("your pin and DOB on your mailbox upto 48 hours");
+                }).catch((err) => {
+                    alert("Vault Transaction Execution Fault: " + err);
+                });
+            });
+        }
+
+        // SECURE MAILBOX SYSTEM DRAWER ANIMATION CONTROLS
+        function toggleMailboxDrawer() {
+            const drawer = document.getElementById("mailboxContentDrawer");
+            const chev = document.getElementById("mailboxChevron");
+            if(drawer.classList.contains("hidden")) {
+                drawer.classList.remove("hidden");
+                chev.className = "fa-solid fa-chevron-up text-purple-400 text-[10px]";
+            } else {
+                drawer.classList.add("hidden");
+                chev.className = "fa-solid fa-chevron-down text-gray-600 text-[10px]";
+            }
+        }
+
+        function renderMailboxContent() {
+            db.collection("users").doc(currentUserUID).collection("mailbox").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                const container = document.getElementById("mailItemsContainer");
+                const emptyPrompt = document.getElementById("emptyMailboxPrompt");
+                const badge = document.getElementById("mailboxBadge");
+                
+                container.innerHTML = "";
+                let unreadCount = 0;
+
+                if (snapshot.empty) {
+                    emptyPrompt.classList.remove("hidden");
+                    badge.classList.add("hidden");
+                    return;
+                }
+
+                emptyPrompt.classList.add("hidden");
+
+                snapshot.forEach((doc) => {
+                    const mail = doc.data();
+                    if(!mail.read) unreadCount++;
+
+                    const block = document.createElement("div");
+                    block.className = `p-2.5 rounded-xl text-[9px] border transition-all ${mail.read ? 'bg-black/10 border-gray-900 text-gray-500' : 'bg-purple-950/15 border-purple-900/40 text-gray-200'}`;
+                    block.innerHTML = `
+                        <div class="flex justify-between font-black uppercase text-[8px] tracking-wide mb-1 ${mail.read ? 'text-gray-500' : 'text-purple-400'}">
+                            <span>${mail.title}</span>
+                            <span class="font-mono text-[7px] text-gray-600">${mail.timestamp || ''}</span>
+                        </div>
+                        <p class="font-mono leading-relaxed whitespace-pre-line">${mail.body}</p>
+                    `;
+                    
+                    // Auto-mark text readings on expand action loop execution bounds
+                    block.onclick = () => {
+                        if(!mail.read) db.collection("users").doc(currentUserUID).collection("mailbox").doc(doc.id).update({ read: true });
+                    };
+
+                    container.appendChild(block);
+                });
+
+                if(unreadCount > 0) {
+                    badge.innerText = unreadCount;
+                    badge.classList.remove("hidden");
+                } else {
+                    badge.classList.add("hidden");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
