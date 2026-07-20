@@ -7,13 +7,33 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         body { background-color: #09070f; color: #f3f4f6; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .premium-panel { background: rgba(19, 15, 36, 0.9); border: 1px solid rgba(147, 51, 234, 0.2); }
+        .premium-panel { background: rgba(19, 15, 36, 0.9); border: 1px solid rgba(168, 85, 247, 0.2); }
+        .scratch-card-container {
+            position: relative;
+            width: 280px;
+            height: 160px;
+            margin: 0 auto;
+            border-radius: 1rem;
+            overflow: hidden;
+            user-select: none;
+        }
+        #scratchCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            touch-action: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen justify-between">
@@ -31,25 +51,38 @@
             </div>
         </div>
 
-        <!-- MAIN SCRATCH CARD CONTAINER -->
+        <!-- MAIN SCRATCH CONTAINER -->
         <div class="p-5 rounded-3xl premium-panel text-center space-y-4 shadow-2xl">
+            
             <div class="flex justify-between items-center border-b border-purple-900/30 pb-3">
-                <h2 class="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-2">
-                    <i class="fa-solid fa-sparkles text-amber-400"></i> Lucky Crypt Scratch
+                <h2 class="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt text-purple-500"></i> Lucky Crypt Scratch
                 </h2>
-                <span id="scratchTracker" class="text-xs font-mono text-gray-400 font-bold">Limits: --/15</span>
+                <span id="scratchLimitText" class="text-xs font-mono text-gray-400 font-bold">Limits: --/15</span>
             </div>
 
-            <p class="text-[10px] text-amber-400/90 font-bold uppercase tracking-tight">Match your luck to win up to 500 coins!</p>
+            <p class="text-[11px] text-amber-400 font-bold uppercase tracking-wide">Match your luck to win up to 500 Coins!</p>
 
-            <div class="relative w-full h-36 bg-black/60 border border-purple-900/40 rounded-2xl flex items-center justify-center overflow-hidden my-4 shadow-inner">
-                <div id="scratchRevealFrame" class="text-center hidden">
-                    <span class="text-[10px] text-gray-500 block font-mono">YOUR REWARD</span>
-                    <span id="scratchOutcomeText" class="text-xl font-black text-amber-400 font-mono">0 Coins</span>
+            <!-- SCRATCH CARD AREA -->
+            <div class="scratch-card-container border border-purple-500/30 bg-black/60 shadow-inner flex flex-col items-center justify-center">
+                
+                <!-- UNDERLYING REWARD VALUE -->
+                <div id="rewardBox" class="text-center">
+                    <span class="text-[10px] text-gray-400 uppercase font-black tracking-widest block">Your Reward</span>
+                    <h3 id="rewardAmount" class="text-2xl font-black text-amber-400 font-mono mt-1">+0 Coins</h3>
                 </div>
-                <canvas id="scratchPad" width="300" height="144" class="absolute inset-0 z-30 hidden cursor-pointer touch-none"></canvas>
-                <button id="scratchUnlockBtn" onclick="initiateScratchPadInterface()" class="z-40 px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">Unlock Card (Ad)</button>
+
+                <!-- OVERLAY CANVAS -->
+                <canvas id="scratchCanvas"></canvas>
             </div>
+
+            <!-- ACTION BUTTONS -->
+            <div>
+                <button id="unlockBtn" onclick="unlockNewCard()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 font-black text-xs text-black uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
+                    UNLOCK CARD (AD)
+                </button>
+            </div>
+
         </div>
 
     </div>
@@ -69,6 +102,17 @@
         const auth = firebase.auth(), db = firebase.firestore();
 
         let uid = null, userState = {};
+        let isCardUnlocked = false;
+        let isScratchedCompleted = false;
+        let currentReward = 0;
+
+        const canvas = document.getElementById("scratchCanvas");
+        const ctx = canvas.getContext("2d");
+
+        function getTodayDateString() {
+            const today = new Date();
+            return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        }
 
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -77,71 +121,135 @@
                     if (doc.exists) {
                         userState = doc.data();
                         document.getElementById("userCoins").innerText = userState.coins || 0;
-                        document.getElementById("scratchTracker").innerText = `Limits: ${15 - (userState.scratchCount || 0)}/15`;
+                        
+                        const todayStr = getTodayDateString();
+                        const todayScratches = userState.lastScratchDate === todayStr ? (userState.scratchCount || 0) : 0;
+                        const remaining = Math.max(0, 15 - todayScratches);
+                        document.getElementById("scratchLimitText").innerText = `Limits: ${remaining}/15`;
                     }
                 });
+                resetCardState();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        function initiateScratchPadInterface() {
-            if ((userState.scratchCount || 0) >= 15) { 
-                alert("⛔ Daily Scratch limit (15/15) reached!"); 
-                return; 
-            }
-
-            setTimeout(() => {
-                document.getElementById("scratchUnlockBtn").classList.add("hidden");
-                const p = document.getElementById("scratchPad"), r = document.getElementById("scratchRevealFrame");
-                p.classList.remove("hidden"); 
-                r.classList.remove("hidden");
-
-                const rngJackpot = Math.floor(Math.random() * 100);
-                let payoutValue = Math.floor(Math.random() * 4) + 3; // 3-6 Coins
-                if (rngJackpot === 77) payoutValue = 500;
-
-                document.getElementById("scratchOutcomeText").innerText = `+${payoutValue} Coins`;
-                bindScratchInterfaceEvents(p, payoutValue);
-            }, 600);
+        // Probability Odds System for Scratch Card
+        function getRandomScratchReward() {
+            const rand = Math.random() * 100;
+            if (rand < 45) return Math.floor(Math.random() * 4) + 2;   // 2 to 5 Coins (64.499% chance)
+            if (rand < 80) return Math.floor(Math.random() * 5) + 6;   // 6 to 10 Coins (30% chance)
+            if (rand < 95) return Math.floor(Math.random() * 15) + 11; // 11 to 15 Coins (5% chance)
+            if (rand < 99.5) return 50;                                 // 50 Coins (0.5% chance)
+            return 500;                                                // 500 Coins Super Rare (0.001% chance)
         }
 
-        function bindScratchInterfaceEvents(canvas, value) {
-            const c = canvas.getContext("2d");
-            c.fillStyle = "#281e45"; 
-            c.fillRect(0, 0, canvas.width, canvas.height);
-            c.font = "bold 11px sans-serif"; 
-            c.fillStyle = "#a855f7";
-            c.fillText("SCRATCH WITH FINGER TO REVEAL", 40, 75);
-
-            let dots = 0, logged = false;
+        function resetCardState() {
+            isCardUnlocked = false;
+            isScratchedCompleted = false;
+            document.getElementById("unlockBtn").style.display = "block";
+            document.getElementById("rewardAmount").innerText = "? Coins";
             
-            function clean(x, y) {
-                c.globalCompositeOperation = "destination-out";
-                c.beginPath(); 
-                c.arc(x, y, 16, 0, Math.PI * 2); 
-                c.fill(); 
-                dots++;
+            // Redraw Grey Coating Surface
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.fillStyle = "#1e1b4b";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = "bold 11px sans-serif";
+            ctx.fillStyle = "#a855f7";
+            ctx.textAlign = "center";
+            ctx.fillText("UNLOCK CARD FIRST", canvas.width / 2, canvas.height / 2 + 4);
+        }
 
-                if (dots > 35 && !logged) {
-                    logged = true; 
-                    canvas.classList.add("hidden");
-                    db.collection("users").doc(uid).update({
-                        coins: firebase.firestore.FieldValue.increment(value),
-                        scratchCount: firebase.firestore.FieldValue.increment(1)
-                    }).then(() => {
-                        alert(`🎉 Collected +${value} Coins!`);
-                        document.getElementById("scratchUnlockBtn").classList.remove("hidden");
-                    });
-                }
+        function unlockNewCard() {
+            const todayStr = getTodayDateString();
+            const todayScratches = userState.lastScratchDate === todayStr ? (userState.scratchCount || 0) : 0;
+
+            if (todayScratches >= 15) {
+                alert("🚫 Daily Scratch Limit Reached (15/15)! Come back tomorrow after 12:00 AM.");
+                return;
             }
 
-            canvas.onmousemove = (e) => { if (e.buttons === 1) clean(e.offsetX, e.offsetY); };
-            canvas.ontouchmove = (e) => {
-                const bounding = canvas.getBoundingClientRect(), t = e.touches[0];
-                clean(t.clientX - bounding.left, t.clientY - bounding.top);
-            };
+            // Trigger Ad simulation
+            document.getElementById("unlockBtn").style.display = "none";
+            
+            // Calculate Reward Secretly
+            currentReward = getRandomScratchReward();
+            document.getElementById("rewardAmount").innerText = `+${currentReward} Coins`;
+
+            // Draw Metallic Scratch Surface
+            ctx.fillStyle = "#312e81";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "bold 11px sans-serif";
+            ctx.fillStyle = "#c084fc";
+            ctx.textAlign = "center";
+            ctx.fillText("SCRATCH WITH FINGER TO REVEAL", canvas.width / 2, canvas.height / 2 + 4);
+
+            isCardUnlocked = true;
         }
+
+        // Scratch Canvas Event Handlers
+        let isDrawing = false;
+
+        function scratch(e) {
+            if (!isCardUnlocked || isScratchedCompleted) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 16, 0, Math.PI * 2);
+            ctx.fill();
+
+            checkScratchPercentage();
+        }
+
+        function checkScratchPercentage() {
+            if (isScratchedCompleted) return;
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let clearedPixels = 0;
+            for (let i = 3; i < imageData.data.length; i += 4) {
+                if (imageData.data[i] === 0) clearedPixels++;
+            }
+
+            const percentage = (clearedPixels / (imageData.data.length / 4)) * 100;
+            if (percentage > 45) { // Card 45% scratch hote hi complete trigger hoga
+                isScratchedCompleted = true;
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear remaining overlay
+                claimScratchReward();
+            }
+        }
+
+        function claimScratchReward() {
+            const todayStr = getTodayDateString();
+            const todayScratches = userState.lastScratchDate === todayStr ? (userState.scratchCount || 0) : 0;
+
+            db.collection("users").doc(uid).update({
+                coins: firebase.firestore.FieldValue.increment(currentReward),
+                scratchCount: todayScratches + 1,
+                lastScratchDate: todayStr
+            }).then(() => {
+                setTimeout(() => {
+                    alert(`🎉 Collected +${currentReward} Coins!`);
+                    resetCardState(); // Reset Clean state after alert
+                }, 300);
+            });
+        }
+
+        canvas.addEventListener("mousedown", () => isDrawing = true);
+        canvas.addEventListener("mouseup", () => isDrawing = false);
+        canvas.addEventListener("mousemove", (e) => { if (isDrawing) scratch(e); });
+
+        canvas.addEventListener("touchstart", () => isDrawing = true);
+        canvas.addEventListener("touchend", () => isDrawing = false);
+        canvas.addEventListener("touchmove", (e) => { if (isDrawing) scratch(e); });
     </script>
 </body>
 </html>
