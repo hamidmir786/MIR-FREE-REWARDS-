@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Core Quiz - MIR FREE REWARDS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        body {
+            background-color: #09070f;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .premium-panel {
+            background: rgba(19, 15, 36, 0.9);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .option-btn {
+            background: linear-gradient(135deg, #130f26 0%, #0d0a1a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+        }
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="p-4 flex flex-col min-h-screen justify-between">
+
+    <div class="max-w-md mx-auto w-full space-y-4">
+        
+        <!-- HEADER NAV -->
+        <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
+            <a href="homepage.html" class="px-3 py-1.5 bg-emerald-950/60 border border-emerald-800/40 rounded-xl text-emerald-300 text-xs font-bold flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Home
+            </a>
+            <div class="flex items-center gap-1.5 bg-black/50 px-3 py-1 rounded-xl border border-amber-500/30 font-mono">
+                <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                <span id="userCoins" class="text-xs font-black text-amber-300">0</span>
+            </div>
+        </div>
+
+        <!-- MAIN QUIZ CONTAINER -->
+        <div class="p-5 rounded-3xl premium-panel text-center space-y-4 shadow-2xl">
+            
+            <div class="flex justify-between items-center border-b border-emerald-900/30 pb-3">
+                <h2 class="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                    <i class="fa-solid fa-brain text-emerald-500"></i> Core Quiz Challenge
+                </h2>
+                <span id="quizProgress" class="text-xs font-mono text-gray-400 font-bold">Q: 1/5</span>
+            </div>
+
+            <!-- QUESTION CARD -->
+            <div id="quizBox" class="space-y-4">
+                <div class="p-4 rounded-2xl bg-black/40 border border-emerald-900/30 min-h-[90px] flex items-center justify-center">
+                    <p id="questionText" class="text-xs font-bold text-white leading-relaxed">Loading Question...</p>
+                </div>
+
+                <!-- OPTIONS GRID -->
+                <div id="optionsContainer" class="grid grid-cols-1 gap-2.5">
+                    <!-- Dynamic Buttons will be inserted here -->
+                </div>
+            </div>
+
+            <!-- RESULT / COMPLETION BOX (HIDDEN BY DEFAULT) -->
+            <div id="resultBox" class="hidden space-y-4 py-4">
+                <div class="w-16 h-16 rounded-full bg-emerald-900/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto text-2xl">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-white uppercase">Quiz Completed!</h3>
+                    <p id="rewardSummary" class="text-xs text-emerald-400 font-mono mt-1">+0 Coins Earned</p>
+                </div>
+                <button onclick="window.location.href='homepage.html'" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
+                    Return to Dashboard
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FIREBASE AND QUIZ ENGINE SCRIPT -->
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
+          authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
+          databaseURL: "https://mir-free-rewards-log-and-earn-default-rtdb.firebaseio.com",
+          projectId: "mir-free-rewards-log-and-earn",
+          storageBucket: "mir-free-rewards-log-and-earn.firebasestorage.app",
+          messagingSenderId: "1055267295995",
+          appId: "1:1055267295995:web:35ebcfaa35a650a832165e"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(), db = firebase.firestore();
+
+        let uid = null, userState = {};
+        let currentQuestionIndex = 0;
+        let totalCoinsEarned = 0;
+
+        const quizData = [
+            {
+                q: "What is the primary currency used in MIR FREE REWARDS?",
+                options: ["Gems", "Coins & Vouchers", "Tokens", "Diamonds"],
+                correct: 1,
+                reward: 10
+            },
+            {
+                q: "How many continuous check-in days trigger a +300 bonus?",
+                options: ["7 Days", "15 Days", "30 Days", "60 Days"],
+                correct: 2,
+                reward: 10
+            },
+            {
+                q: "Which game mode allows you to win up to 500 Coins?",
+                options: ["Core Quiz", "Lucky Scratch", "Daily Ad Broadcast", "Profile Edit"],
+                correct: 1,
+                reward: 10
+            },
+            {
+                q: "Where do PIN and DOB recovery responses get delivered?",
+                options: ["SMS", "System Mailbox", "WhatsApp", "Email Inbox"],
+                correct: 1,
+                reward: 10
+            },
+            {
+                q: "How many daily broadcast ad limits are available on Home?",
+                options: ["5", "10", "15", "Unlimited"],
+                correct: 1,
+                reward: 10
+            }
+        ];
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                uid = user.uid;
+                db.collection("users").doc(uid).onSnapshot((doc) => {
+                    if (doc.exists) {
+                        userState = doc.data();
+                        document.getElementById("userCoins").innerText = userState.coins || 0;
+                    }
+                });
+                renderQuestion();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function renderQuestion() {
+            if (currentQuestionIndex >= quizData.length) {
+                showQuizCompletion();
+                return;
+            }
+
+            const current = quizData[currentQuestionIndex];
+            document.getElementById("quizProgress").innerText = `Q: ${currentQuestionIndex + 1}/${quizData.length}`;
+            document.getElementById("questionText").innerText = current.q;
+
+            const optionsContainer = document.getElementById("optionsContainer");
+            optionsContainer.innerHTML = "";
+
+            current.options.forEach((opt, idx) => {
+                const btn = document.createElement("button");
+                btn.className = "w-full p-3 rounded-xl option-btn text-xs font-bold text-gray-200 text-left flex justify-between items-center";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-solid fa-chevron-right text-[10px] text-gray-500"></i>`;
+                btn.onclick = () => validateAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function validateAnswer(selectedIndex, btnElement) {
+            const current = quizData[currentQuestionIndex];
+            const allBtns = document.getElementById("optionsContainer").children;
+            
+            // Disable all buttons to prevent double clicking
+            for (let b of allBtns) { b.disabled = true; }
+
+            if (selectedIndex === current.correct) {
+                btnElement.classList.add("bg-emerald-900/60", "border-emerald-500", "text-emerald-300");
+                totalCoinsEarned += current.reward;
+                
+                // Update Firestore
+                db.collection("users").doc(uid).update({
+                    coins: firebase.firestore.FieldValue.increment(current.reward)
+                });
+            } else {
+                btnElement.classList.add("bg-red-900/60", "border-red-500", "text-red-300");
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                renderQuestion();
+            }, 1000);
+        }
+
+        function showQuizCompletion() {
+            document.getElementById("quizBox").classList.add("hidden");
+            document.getElementById("quizProgress").classList.add("hidden");
+            document.getElementById("resultBox").classList.remove("hidden");
+            document.getElementById("rewardSummary").innerText = `+${totalCoinsEarned} Coins Added to Wallet!`;
+        }
+    </script>
+</body>
+</html>
