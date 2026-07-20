@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quantum Spin Wheel - MIR FREE REWARDS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        body {
+            background-color: #09070f;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            touch-action: manipulation;
+        }
+        .premium-panel {
+            background: rgba(19, 15, 36, 0.9);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+        .wheel-wrapper {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 20px auto;
+        }
+        .wheel-pointer {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            width: 0; 
+            height: 0; 
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-top: 26px solid #f59e0b;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+        }
+        .wheel-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #281742;
+            box-shadow: 0 0 30px rgba(126, 34, 206, 0.4);
+            transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.05);
+        }
+    </style>
+</head>
+<body class="p-4 flex flex-col min-h-screen justify-between">
+
+    <div class="max-w-md mx-auto w-full space-y-4">
+        
+        <!-- HEADER NAV -->
+        <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
+            <a href="index.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Home
+            </a>
+            <div class="flex items-center gap-3 font-mono">
+                <div class="flex items-center gap-1.5 bg-black/50 px-3 py-1 rounded-xl border border-purple-900/40">
+                    <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                    <span id="userCoins" class="text-xs font-black text-amber-300">0</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-black/50 px-3 py-1 rounded-xl border border-purple-900/40">
+                    <i class="fa-solid fa-ticket text-indigo-400 text-xs"></i>
+                    <span id="userVouchers" class="text-xs font-black text-indigo-300">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPIN MAIN CONTAINER -->
+        <div class="p-5 rounded-3xl premium-panel text-center space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-purple-900/30 pb-3">
+                <h2 class="text-sm font-black uppercase tracking-wider text-purple-300 flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-spin text-purple-400 animate-spin"></i> Quantum Spin Wheel
+                </h2>
+                <span id="spinLimitDisplay" class="text-xs font-mono text-gray-400 font-bold">Limits: --/40</span>
+            </div>
+
+            <!-- WHEEL ENGINE -->
+            <div class="wheel-wrapper">
+                <div class="wheel-pointer"></div>
+                <canvas id="wheelCanvas" class="wheel-canvas" width="280" height="280"></canvas>
+            </div>
+
+            <!-- SPIN ACTION BUTTON -->
+            <button id="spinBtn" onclick="executeSpinSequence()" class="w-full py-3.5 bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 font-black text-xs text-white uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all">
+                Spin Now (Watch Ad)
+            </button>
+
+            <!-- VOUCHER EXCHANGE -->
+            <div class="flex justify-between items-center bg-black/40 p-3 rounded-2xl border border-purple-900/20 text-xs">
+                <span class="font-semibold text-gray-300">Buy 1 System Voucher</span>
+                <button onclick="exchangeCoinsForVoucher()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase text-[10px] rounded-xl active:scale-95 transition-all">
+                    Exchange (5 Coins)
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FIREBASE & SCRIPT ENGINE -->
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
+          authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
+          databaseURL: "https://mir-free-rewards-log-and-earn-default-rtdb.firebaseio.com",
+          projectId: "mir-free-rewards-log-and-earn",
+          storageBucket: "mir-free-rewards-log-and-earn.firebasestorage.app",
+          messagingSenderId: "1055267295995",
+          appId: "1:1055267295995:web:35ebcfaa35a650a832165e"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(), db = firebase.firestore();
+
+        let uid = null, userData = {}, isSpinning = false;
+
+        // 6 SEGMENTS (Each slice = 60 Degrees)
+        const segments = [
+            { text: "5 Coins", val: 5, type: "coins", color: "#1e1b4b" },
+            { text: "Retry", val: 0, type: "retry", color: "#3b0764" },
+            { text: "10 Coins", val: 10, type: "coins", color: "#1e1b4b" },
+            { text: "3 Vouchers", val: 3, type: "vouchers", color: "#3b0764" },
+            { text: "50 Coins", val: 50, type: "coins", color: "#1e1b4b" },
+            { text: "1500 Coins", val: 1500, type: "coins", color: "#713f12" }
+        ];
+
+        const canvas = document.getElementById("wheelCanvas");
+        const ctx = canvas.getContext("2d");
+        const numSegments = segments.length;
+        const segmentAngle = (2 * Math.PI) / numSegments;
+
+        // AUTH CHECK
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                uid = user.uid;
+                db.collection("users").doc(uid).onSnapshot((doc) => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        document.getElementById("userCoins").innerText = userData.coins || 0;
+                        document.getElementById("userVouchers").innerText = userData.vouchers || 0;
+                        document.getElementById("spinLimitDisplay").innerText = `Limits: ${40 - (userData.spinCount || 0)}/40`;
+                    }
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // DRAW STATIC WHEEL (Top Pointer Align Math)
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2 - 8;
+
+            for (let i = 0; i < numSegments; i++) {
+                // Adjust startAngle so top center aligns accurately
+                const startAngle = i * segmentAngle - Math.PI / 2;
+                const endAngle = startAngle + segmentAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.fillStyle = segments[i].color;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "rgba(147, 51, 234, 0.3)";
+                ctx.stroke();
+
+                // TEXT DRAWING
+                ctx.save();
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 11px sans-serif";
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + segmentAngle / 2);
+                ctx.textAlign = "right";
+                ctx.fillText(segments[i].text, radius - 15, 4);
+                ctx.restore();
+            }
+        }
+        drawWheel();
+
+        // SPIN EXECUTION LOGIC
+        function executeSpinSequence() {
+            if (isSpinning) return;
+
+            const currentSpins = userData.spinCount || 0;
+            if (currentSpins >= 40) {
+                alert("⛔ Daily Spin Limit (40/40) Reached!");
+                return;
+            }
+
+            // Mock Ad Trigger (Replace with AdMob/Unity Ad trigger)
+            isSpinning = true;
+            document.getElementById("spinBtn").disabled = true;
+
+            // Weighted RNG Outcome
+            const random = Math.random() * 100;
+            let targetIndex = 1; // Default to Retry
+
+            if (random < 40) targetIndex = 0;       // 5 Coins (40%)
+            else if (random < 70) targetIndex = 1;  // Retry (30%)
+            else if (random < 85) targetIndex = 2;  // 10 Coins (15%)
+            else if (random < 95) targetIndex = 3;  // 3 Vouchers (10%)
+            else if (random < 99.9) targetIndex = 4;// 50 Coins (4.9%)
+            else targetIndex = 5;                   // 1500 Coins (0.1%)
+
+            // Rotation Angle Calculation for Exact Arrow Stop
+            const degreesPerSegment = 360 / numSegments;
+            // Stop inside segment slice
+            const targetDegree = 360 - (targetIndex * degreesPerSegment) - (degreesPerSegment / 2); 
+            const totalRotation = (360 * 6) + targetDegree; // 6 Full Spins
+
+            canvas.style.transition = "transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.05)";
+            canvas.style.transform = `rotate(${totalRotation}deg)`;
+
+            setTimeout(() => {
+                const prize = segments[targetIndex];
+                let updatePayload = { spinCount: firebase.firestore.FieldValue.increment(1) };
+                let resultMessage = "";
+
+                if (prize.type === "coins") {
+                    updatePayload.coins = firebase.firestore.FieldValue.increment(prize.val);
+                    resultMessage = `🎉 Congratulations! You won ${prize.val} Coins!`;
+                } else if (prize.type === "vouchers") {
+                    updatePayload.vouchers = firebase.firestore.FieldValue.increment(prize.val);
+                    resultMessage = `🎟️ Awesome! You got +${prize.val} Vouchers!`;
+                } else {
+                    resultMessage = "🔄 Retry try again.";
+                }
+
+                db.collection("users").doc(uid).update(updatePayload).then(() => {
+                    alert(resultMessage);
+                    
+                    // Reset transform seamlessly
+                    canvas.style.transition = "none";
+                    canvas.style.transform = `rotate(${targetDegree}deg)`;
+                    
+                    isSpinning = false;
+                    document.getElementById("spinBtn").disabled = false;
+                });
+            }, 4000);
+        }
+
+        // EXCHANGE VOUCHER LOGIC
+        function exchangeCoinsForVoucher() {
+            if ((userData.coins || 0) < 5) {
+                alert("❌ Insufficient Coins! You need at least 5 Coins.");
+                return;
+            }
+            db.collection("users").doc(uid).update({
+                coins: firebase.firestore.FieldValue.increment(-5),
+                vouchers: firebase.firestore.FieldValue.increment(1)
+            }).then(() => alert("✅ Successfully purchased 1 Voucher for 5 Coins!"));
+        }
+    </script>
+</body>
+</html>
