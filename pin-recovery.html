@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PIN Recovery - MIR FREE REWARDS</title>
+    <title>PIN & DOB Recovery - MIR FREE REWARDS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -23,39 +23,41 @@
         
         <!-- HEADER NAV -->
         <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
-            <a href="index.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left"></i> Login
+            <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Home
             </a>
-            <span class="text-xs font-black text-purple-400 font-mono">RECOVERY CENTER</span>
+            <div class="flex items-center gap-1.5 bg-black/50 px-3 py-1 rounded-xl border border-amber-500/30 font-mono">
+                <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                <span id="userCoins" class="text-xs font-black text-amber-300">0</span>
+            </div>
         </div>
 
         <!-- MAIN FORM -->
         <div class="p-5 rounded-3xl premium-panel space-y-4 shadow-2xl">
             <div class="text-center space-y-1">
-                <h2 class="text-sm font-black uppercase text-white tracking-wider">Recover Account PIN</h2>
-                <p class="text-[11px] text-gray-400">Enter your Username & DOB to verify identity.</p>
+                <h2 class="text-sm font-black uppercase text-white tracking-wider">PIN & DOB Manual Recovery</h2>
+                <p class="text-[11px] text-amber-400 font-bold">Cost: 500 Coins (Response within 48 Hours)</p>
+            </div>
+
+            <div class="p-3 bg-purple-950/40 border border-purple-800/30 rounded-xl text-[11px] text-gray-300 space-y-1">
+                <p>📌 Request submit karne par **500 Coins** deduct honge.</p>
+                <p>📌 Admin manual verification ke baad aapke **System Mailbox** me PIN & DOB bhej dega (48 Ghante ke andar).</p>
             </div>
 
             <div class="space-y-3">
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Registered Username / Email</label>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Registered Email / Username</label>
                     <input id="recoverInput" type="text" placeholder="Enter username or email" class="w-full p-3 rounded-xl bg-black/50 border border-purple-900/40 text-xs text-white focus:outline-none focus:border-purple-500">
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Date of Birth (DOB)</label>
-                    <input id="recoverDOB" type="date" class="w-full p-3 rounded-xl bg-black/50 border border-purple-900/40 text-xs text-white focus:outline-none focus:border-purple-500">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Describe Your Problem / Account Details</label>
+                    <textarea id="recoverNote" rows="3" placeholder="Describe account details or issue..." class="w-full p-3 rounded-xl bg-black/50 border border-purple-900/40 text-xs text-white focus:outline-none focus:border-purple-500"></textarea>
                 </div>
 
-                <button onclick="verifyAndRecoverPIN()" class="w-full py-3.5 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
-                    VERIFY & RECOVER PIN
+                <button id="submitReqBtn" onclick="submitRecoveryRequest()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-xs uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
+                    PAY 500 COINS & SUBMIT REQUEST
                 </button>
-            </div>
-
-            <!-- RESULT DISPLAY -->
-            <div id="recoveryResult" class="hidden p-3 rounded-xl bg-emerald-950/50 border border-emerald-500/30 text-center space-y-1">
-                <p class="text-[10px] text-emerald-400 font-bold uppercase">Identity Verified!</p>
-                <p class="text-xs text-white font-mono">Your Security PIN: <span id="revealedPIN" class="font-bold text-amber-400">----</span></p>
             </div>
         </div>
 
@@ -73,34 +75,60 @@
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const auth = firebase.auth(), db = firebase.firestore();
 
-        function verifyAndRecoverPIN() {
+        let uid = null, userState = {};
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                uid = user.uid;
+                db.collection("users").doc(uid).onSnapshot((doc) => {
+                    if (doc.exists) {
+                        userState = doc.data();
+                        document.getElementById("userCoins").innerText = userState.coins || 0;
+                    }
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function submitRecoveryRequest() {
             const userInput = document.getElementById("recoverInput").value.trim();
-            const dobInput = document.getElementById("recoverDOB").value;
+            const userNote = document.getElementById("recoverNote").value.trim();
 
-            if (!userInput || !dobInput) {
-                alert("❌ Please enter Username/Email and DOB.");
+            if (!userInput || !userNote) {
+                alert("❌ Please fill in all fields.");
                 return;
             }
 
-            db.collection("users").where("dob", "==", dobInput).get().then((snapshot) => {
-                let foundUser = null;
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if (data.username === userInput || data.email === userInput) {
-                        foundUser = data;
-                    }
-                });
+            const currentCoins = userState.coins || 0;
+            if (currentCoins < 500) {
+                alert("❌ Insufficient Coins! You need at least 500 Coins to submit a recovery request.");
+                return;
+            }
 
-                if (foundUser) {
-                    document.getElementById("recoveryResult").classList.remove("hidden");
-                    document.getElementById("revealedPIN").innerText = foundUser.pin || "No PIN Set";
-                } else {
-                    alert("❌ Invalid Details! DOB or Username does not match.");
-                }
+            document.getElementById("submitReqBtn").disabled = true;
+
+            // Deduct 500 Coins and Push Request to Admin
+            db.collection("users").doc(uid).update({
+                coins: firebase.firestore.FieldValue.increment(-500)
+            }).then(() => {
+                db.collection("recovery_requests").add({
+                    userId: uid,
+                    userEmail: userState.email || "N/A",
+                    username: userState.username || "N/A",
+                    providedInput: userInput,
+                    issueNote: userNote,
+                    status: "Pending",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    alert("✅ Request Submitted Successfully! 500 Coins Deducted. Check your System Mailbox within 48 Hours.");
+                    window.location.href = "homepage.html";
+                });
             }).catch(() => {
-                alert("⚠️ Error fetching data. Try again.");
+                alert("⚠️ Request failed. Try again.");
+                document.getElementById("submitReqBtn").disabled = false;
             });
         }
     </script>
