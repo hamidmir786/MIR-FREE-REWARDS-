@@ -52,7 +52,7 @@
             
             <div class="flex justify-between items-center border-b border-emerald-900/30 pb-3">
                 <h2 class="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                    <i class="fa-solid fa-brain text-emerald-500"></i> Core Quiz Challenge
+                    <i class="fa-solid fa-brain text-emerald-500"></i> Daily Quiz Mission
                 </h2>
                 <span id="quizProgress" class="text-xs font-mono text-gray-400 font-bold">Q: 1/5</span>
             </div>
@@ -64,18 +64,16 @@
                 </div>
 
                 <!-- OPTIONS GRID -->
-                <div id="optionsContainer" class="grid grid-cols-1 gap-2.5">
-                    <!-- Dynamic Buttons will be inserted here -->
-                </div>
+                <div id="optionsContainer" class="grid grid-cols-1 gap-2.5"></div>
             </div>
 
-            <!-- RESULT / COMPLETION BOX (HIDDEN BY DEFAULT) -->
+            <!-- COMPLETED / LIMIT REACHED CONTAINER -->
             <div id="resultBox" class="hidden space-y-4 py-4">
-                <div class="w-16 h-16 rounded-full bg-emerald-900/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto text-2xl">
+                <div id="statusIcon" class="w-16 h-16 rounded-full bg-emerald-900/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto text-2xl">
                     <i class="fa-solid fa-trophy"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-black text-white uppercase">Quiz Completed!</h3>
+                    <h3 id="resultTitle" class="text-sm font-black text-white uppercase">Quiz Completed!</h3>
                     <p id="rewardSummary" class="text-xs text-emerald-400 font-mono mt-1">+0 Coins Earned</p>
                 </div>
                 <button onclick="window.location.href='homepage.html'" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
@@ -87,7 +85,6 @@
 
     </div>
 
-    <!-- FIREBASE AND QUIZ ENGINE SCRIPT -->
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
@@ -104,40 +101,20 @@
 
         let uid = null, userState = {};
         let currentQuestionIndex = 0;
-        let totalCoinsEarned = 0;
+        let correctAnswersCount = 0;
 
         const quizData = [
-            {
-                q: "What is the primary currency used in MIR FREE REWARDS?",
-                options: ["Gems", "Coins & Vouchers", "Tokens", "Diamonds"],
-                correct: 1,
-                reward: 10
-            },
-            {
-                q: "How many continuous check-in days trigger a +300 bonus?",
-                options: ["7 Days", "15 Days", "30 Days", "60 Days"],
-                correct: 2,
-                reward: 10
-            },
-            {
-                q: "Which game mode allows you to win up to 500 Coins?",
-                options: ["Core Quiz", "Lucky Scratch", "Daily Ad Broadcast", "Profile Edit"],
-                correct: 1,
-                reward: 10
-            },
-            {
-                q: "Where do PIN and DOB recovery responses get delivered?",
-                options: ["SMS", "System Mailbox", "WhatsApp", "Email Inbox"],
-                correct: 1,
-                reward: 10
-            },
-            {
-                q: "How many daily broadcast ad limits are available on Home?",
-                options: ["5", "10", "15", "Unlimited"],
-                correct: 1,
-                reward: 10
-            }
+            { q: "What is the primary currency used in MIR FREE REWARDS?", options: ["Gems", "Coins & Vouchers", "Tokens", "Diamonds"], correct: 1 },
+            { q: "How many continuous check-in days trigger a +300 bonus?", options: ["7 Days", "15 Days", "30 Days", "60 Days"], correct: 2 },
+            { q: "Which game mode allows you to win up to 500 Coins?", options: ["Core Quiz", "Lucky Scratch", "Daily Ad Broadcast", "Profile Edit"], correct: 1 },
+            { q: "Where do PIN and DOB recovery responses get delivered?", options: ["SMS", "System Mailbox", "WhatsApp", "Email Inbox"], correct: 1 },
+            { q: "How many daily broadcast ad limits are available on Home?", options: ["5", "10", "15", "Unlimited"], correct: 1 }
         ];
+
+        function getTodayDateString() {
+            const today = new Date();
+            return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        }
 
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -146,9 +123,16 @@
                     if (doc.exists) {
                         userState = doc.data();
                         document.getElementById("userCoins").innerText = userState.coins || 0;
+                        
+                        // Check Midnight Reset Limit
+                        const todayStr = getTodayDateString();
+                        if (userState.lastQuizDate === todayStr) {
+                            showLimitReached();
+                        } else {
+                            renderQuestion();
+                        }
                     }
                 });
-                renderQuestion();
             } else {
                 window.location.href = "index.html";
             }
@@ -156,7 +140,7 @@
 
         function renderQuestion() {
             if (currentQuestionIndex >= quizData.length) {
-                showQuizCompletion();
+                finalizeQuizSession();
                 return;
             }
 
@@ -180,17 +164,11 @@
             const current = quizData[currentQuestionIndex];
             const allBtns = document.getElementById("optionsContainer").children;
             
-            // Disable all buttons to prevent double clicking
             for (let b of allBtns) { b.disabled = true; }
 
             if (selectedIndex === current.correct) {
                 btnElement.classList.add("bg-emerald-900/60", "border-emerald-500", "text-emerald-300");
-                totalCoinsEarned += current.reward;
-                
-                // Update Firestore
-                db.collection("users").doc(uid).update({
-                    coins: firebase.firestore.FieldValue.increment(current.reward)
-                });
+                correctAnswersCount++;
             } else {
                 btnElement.classList.add("bg-red-900/60", "border-red-500", "text-red-300");
             }
@@ -198,14 +176,53 @@
             setTimeout(() => {
                 currentQuestionIndex++;
                 renderQuestion();
-            }, 1000);
+            }, 800);
         }
 
-        function showQuizCompletion() {
+        function showAd(callback) {
+            // Simulated Ad trigger (Replace with AdMob/Unity Ad trigger)
+            setTimeout(callback, 1000);
+        }
+
+        function finalizeQuizSession() {
+            const todayStr = getTodayDateString();
+            
+            showAd(() => {
+                let rewardCoins = 0;
+                
+                // Strict Rule: ONLY 5/5 Correct gives 5 Coins
+                if (correctAnswersCount === 5) {
+                    rewardCoins = 5;
+                }
+
+                // Update Firestore - Lock for the day & add reward if earned
+                db.collection("users").doc(uid).update({
+                    coins: firebase.firestore.FieldValue.increment(rewardCoins),
+                    lastQuizDate: todayStr
+                }).then(() => {
+                    document.getElementById("quizBox").classList.add("hidden");
+                    document.getElementById("quizProgress").classList.add("hidden");
+                    document.getElementById("resultBox").classList.remove("hidden");
+                    
+                    if (rewardCoins > 0) {
+                        document.getElementById("resultTitle").innerText = "Perfect Score! (5/5)";
+                        document.getElementById("rewardSummary").innerText = "+5 Coins Added to Wallet!";
+                    } else {
+                        document.getElementById("resultTitle").innerText = `Score: ${correctAnswersCount}/5 Correct`;
+                        document.getElementById("rewardSummary").innerText = "0 Coins Earned (Need 5/5 correct for 5 coins)";
+                        document.getElementById("rewardSummary").className = "text-xs text-red-400 font-mono mt-1";
+                    }
+                });
+            });
+        }
+
+        function showLimitReached() {
             document.getElementById("quizBox").classList.add("hidden");
             document.getElementById("quizProgress").classList.add("hidden");
             document.getElementById("resultBox").classList.remove("hidden");
-            document.getElementById("rewardSummary").innerText = `+${totalCoinsEarned} Coins Added to Wallet!`;
+            document.getElementById("resultTitle").innerText = "Daily Limit Reached";
+            document.getElementById("rewardSummary").innerText = "Come back tomorrow after 12:00 AM Night!";
+            document.getElementById("rewardSummary").className = "text-xs text-amber-400 font-mono mt-1";
         }
     </script>
 </body>
