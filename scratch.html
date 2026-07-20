@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lucky Scratch - MIR FREE REWARDS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        body { background-color: #09070f; color: #f3f4f6; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .premium-panel { background: rgba(19, 15, 36, 0.9); border: 1px solid rgba(147, 51, 234, 0.2); }
+    </style>
+</head>
+<body class="p-4 flex flex-col min-h-screen justify-between">
+
+    <div class="max-w-md mx-auto w-full space-y-4">
+        
+        <!-- HEADER NAV -->
+        <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
+            <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Home
+            </a>
+            <div class="flex items-center gap-1.5 bg-black/50 px-3 py-1 rounded-xl border border-amber-500/30 font-mono">
+                <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                <span id="userCoins" class="text-xs font-black text-amber-300">0</span>
+            </div>
+        </div>
+
+        <!-- MAIN SCRATCH CARD CONTAINER -->
+        <div class="p-5 rounded-3xl premium-panel text-center space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-purple-900/30 pb-3">
+                <h2 class="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-2">
+                    <i class="fa-solid fa-sparkles text-amber-400"></i> Lucky Crypt Scratch
+                </h2>
+                <span id="scratchTracker" class="text-xs font-mono text-gray-400 font-bold">Limits: --/15</span>
+            </div>
+
+            <p class="text-[10px] text-amber-400/90 font-bold uppercase tracking-tight">Match your luck to win up to 500 coins!</p>
+
+            <div class="relative w-full h-36 bg-black/60 border border-purple-900/40 rounded-2xl flex items-center justify-center overflow-hidden my-4 shadow-inner">
+                <div id="scratchRevealFrame" class="text-center hidden">
+                    <span class="text-[10px] text-gray-500 block font-mono">YOUR REWARD</span>
+                    <span id="scratchOutcomeText" class="text-xl font-black text-amber-400 font-mono">0 Coins</span>
+                </div>
+                <canvas id="scratchPad" width="300" height="144" class="absolute inset-0 z-30 hidden cursor-pointer touch-none"></canvas>
+                <button id="scratchUnlockBtn" onclick="initiateScratchPadInterface()" class="z-40 px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">Unlock Card (Ad)</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
+          authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
+          databaseURL: "https://mir-free-rewards-log-and-earn-default-rtdb.firebaseio.com",
+          projectId: "mir-free-rewards-log-and-earn",
+          storageBucket: "mir-free-rewards-log-and-earn.firebasestorage.app",
+          messagingSenderId: "1055267295995",
+          appId: "1:1055267295995:web:35ebcfaa35a650a832165e"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(), db = firebase.firestore();
+
+        let uid = null, userState = {};
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                uid = user.uid;
+                db.collection("users").doc(uid).onSnapshot((doc) => {
+                    if (doc.exists) {
+                        userState = doc.data();
+                        document.getElementById("userCoins").innerText = userState.coins || 0;
+                        document.getElementById("scratchTracker").innerText = `Limits: ${15 - (userState.scratchCount || 0)}/15`;
+                    }
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function initiateScratchPadInterface() {
+            if ((userState.scratchCount || 0) >= 15) { 
+                alert("⛔ Daily Scratch limit (15/15) reached!"); 
+                return; 
+            }
+
+            setTimeout(() => {
+                document.getElementById("scratchUnlockBtn").classList.add("hidden");
+                const p = document.getElementById("scratchPad"), r = document.getElementById("scratchRevealFrame");
+                p.classList.remove("hidden"); 
+                r.classList.remove("hidden");
+
+                const rngJackpot = Math.floor(Math.random() * 100);
+                let payoutValue = Math.floor(Math.random() * 4) + 3; // 3-6 Coins
+                if (rngJackpot === 77) payoutValue = 500;
+
+                document.getElementById("scratchOutcomeText").innerText = `+${payoutValue} Coins`;
+                bindScratchInterfaceEvents(p, payoutValue);
+            }, 600);
+        }
+
+        function bindScratchInterfaceEvents(canvas, value) {
+            const c = canvas.getContext("2d");
+            c.fillStyle = "#281e45"; 
+            c.fillRect(0, 0, canvas.width, canvas.height);
+            c.font = "bold 11px sans-serif"; 
+            c.fillStyle = "#a855f7";
+            c.fillText("SCRATCH WITH FINGER TO REVEAL", 40, 75);
+
+            let dots = 0, logged = false;
+            
+            function clean(x, y) {
+                c.globalCompositeOperation = "destination-out";
+                c.beginPath(); 
+                c.arc(x, y, 16, 0, Math.PI * 2); 
+                c.fill(); 
+                dots++;
+
+                if (dots > 35 && !logged) {
+                    logged = true; 
+                    canvas.classList.add("hidden");
+                    db.collection("users").doc(uid).update({
+                        coins: firebase.firestore.FieldValue.increment(value),
+                        scratchCount: firebase.firestore.FieldValue.increment(1)
+                    }).then(() => {
+                        alert(`🎉 Collected +${value} Coins!`);
+                        document.getElementById("scratchUnlockBtn").classList.remove("hidden");
+                    });
+                }
+            }
+
+            canvas.onmousemove = (e) => { if (e.buttons === 1) clean(e.offsetX, e.offsetY); };
+            canvas.ontouchmove = (e) => {
+                const bounding = canvas.getBoundingClientRect(), t = e.touches[0];
+                clean(t.clientX - bounding.left, t.clientY - bounding.top);
+            };
+        }
+    </script>
+</body>
+</html>
