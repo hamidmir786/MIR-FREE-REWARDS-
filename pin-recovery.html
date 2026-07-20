@@ -33,7 +33,7 @@
         <div class="p-5 rounded-3xl premium-panel space-y-4 shadow-2xl">
             <div class="text-center space-y-1">
                 <h2 class="text-sm font-black uppercase text-white tracking-wider">Recover Account PIN</h2>
-                <p class="text-[11px] text-gray-400">Enter your registered Details & DOB to verify ownership.</p>
+                <p class="text-[11px] text-gray-400">Enter your Username & DOB to verify identity.</p>
             </div>
 
             <div class="space-y-3">
@@ -55,7 +55,7 @@
             <!-- RESULT DISPLAY -->
             <div id="recoveryResult" class="hidden p-3 rounded-xl bg-emerald-950/50 border border-emerald-500/30 text-center space-y-1">
                 <p class="text-[10px] text-emerald-400 font-bold uppercase">Identity Verified!</p>
-                <p class="text-xs text-white font-mono">Your Account Security PIN is: <span id="revealedPIN" class="font-bold text-amber-400">----</span></p>
+                <p class="text-xs text-white font-mono">Your Security PIN: <span id="revealedPIN" class="font-bold text-amber-400">----</span></p>
             </div>
         </div>
 
@@ -80,7 +80,7 @@
             const dobInput = document.getElementById("recoverDOB").value;
 
             if (!userInput || !dobInput) {
-                alert("❌ Please enter both Username/Email and Date of Birth.");
+                alert("❌ Please enter Username/Email and DOB.");
                 return;
             }
 
@@ -97,10 +97,10 @@
                     document.getElementById("recoveryResult").classList.remove("hidden");
                     document.getElementById("revealedPIN").innerText = foundUser.pin || "No PIN Set";
                 } else {
-                    alert("❌ Incorrect Credentials! DOB or Username does not match our records.");
+                    alert("❌ Invalid Details! DOB or Username does not match.");
                 }
             }).catch(() => {
-                alert("⚠️ Error connecting to server. Please try again.");
+                alert("⚠️ Error fetching data. Try again.");
             });
         }
     </script>
