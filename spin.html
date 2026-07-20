@@ -13,43 +13,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        body {
-            background-color: #09070f;
-            color: #f3f4f6;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            touch-action: manipulation;
-        }
-        .premium-panel {
-            background: rgba(19, 15, 36, 0.9);
-            border: 1px solid rgba(147, 51, 234, 0.2);
-        }
-        .wheel-wrapper {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 20px auto;
-        }
-        .wheel-pointer {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-            width: 0; 
-            height: 0; 
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-top: 26px solid #f59e0b;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
-        }
-        .wheel-canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 6px solid #281742;
-            box-shadow: 0 0 30px rgba(126, 34, 206, 0.4);
-            transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.05);
-        }
+        body { background-color: #09070f; color: #f3f4f6; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .premium-panel { background: rgba(19, 15, 36, 0.9); border: 1px solid rgba(168, 85, 247, 0.2); }
+        .wheel-container { position: relative; width: 260px; height: 260px; margin: 0 auto; }
+        #wheel { width: 100%; height: 100%; border-radius: 50%; border: 4px solid #a855f7; transition: transform 4s cubic-bezier(0.15, 0.99, 0.18, 1); }
+        .pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 20px solid #eab308; z-index: 10; }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen justify-between">
@@ -58,53 +26,58 @@
         
         <!-- HEADER NAV -->
         <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
-            <a href="index.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
+            <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> Home
             </a>
-            <div class="flex items-center gap-3 font-mono">
-                <div class="flex items-center gap-1.5 bg-black/50 px-3 py-1 rounded-xl border border-purple-900/40">
-                    <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
-                    <span id="userCoins" class="text-xs font-black text-amber-300">0</span>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 bg-black/50 px-2.5 py-1 rounded-xl border border-amber-500/30 font-mono text-xs">
+                    <i class="fa-solid fa-coins text-amber-400"></i>
+                    <span id="userCoins" class="font-black text-amber-300">0</span>
                 </div>
-                <div class="flex items-center gap-1.5 bg-black/50 px-3 py-1 rounded-xl border border-purple-900/40">
-                    <i class="fa-solid fa-ticket text-indigo-400 text-xs"></i>
-                    <span id="userVouchers" class="text-xs font-black text-indigo-300">0</span>
+                <div class="flex items-center gap-1 bg-black/50 px-2.5 py-1 rounded-xl border border-purple-500/30 font-mono text-xs">
+                    <i class="fa-solid fa-ticket text-purple-400"></i>
+                    <span id="userVouchers" class="font-black text-purple-300">0</span>
                 </div>
             </div>
         </div>
 
-        <!-- SPIN MAIN CONTAINER -->
-        <div class="p-5 rounded-3xl premium-panel text-center space-y-4 shadow-2xl">
+        <!-- MAIN CONTAINER -->
+        <div class="p-5 rounded-3xl premium-panel text-center space-y-5 shadow-2xl">
+            
             <div class="flex justify-between items-center border-b border-purple-900/30 pb-3">
-                <h2 class="text-sm font-black uppercase tracking-wider text-purple-300 flex items-center gap-2">
-                    <i class="fa-solid fa-arrows-spin text-purple-400 animate-spin"></i> Quantum Spin Wheel
+                <h2 class="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-spin text-purple-500"></i> Quantum Spin Wheel
                 </h2>
-                <span id="spinLimitDisplay" class="text-xs font-mono text-gray-400 font-bold">Limits: --/40</span>
+                <span id="spinLimitText" class="text-xs font-mono text-gray-400 font-bold">Limits: --/40</span>
             </div>
 
-            <!-- WHEEL ENGINE -->
-            <div class="wheel-wrapper">
-                <div class="wheel-pointer"></div>
-                <canvas id="wheelCanvas" class="wheel-canvas" width="280" height="280"></canvas>
+            <!-- SPIN WHEEL CANVAS -->
+            <div class="wheel-container my-4">
+                <div class="pointer"></div>
+                <svg id="wheel" viewBox="0 0 100 100">
+                    <!-- Dynamic SVG Segments Rendered by JS -->
+                </svg>
             </div>
 
-            <!-- SPIN ACTION BUTTON -->
-            <button id="spinBtn" onclick="executeSpinSequence()" class="w-full py-3.5 bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 font-black text-xs text-white uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all">
-                Spin Now (Watch Ad)
-            </button>
-
-            <!-- VOUCHER EXCHANGE -->
-            <div class="flex justify-between items-center bg-black/40 p-3 rounded-2xl border border-purple-900/20 text-xs">
-                <span class="font-semibold text-gray-300">Buy 1 System Voucher</span>
-                <button onclick="exchangeCoinsForVoucher()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase text-[10px] rounded-xl active:scale-95 transition-all">
-                    Exchange (5 Coins)
+            <!-- ACTIONS -->
+            <div class="space-y-2.5">
+                <button id="spinBtn" onclick="executeSpin()" class="w-full py-3.5 bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 font-black text-xs text-white uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all">
+                    SPIN NOW (1 Voucher)
                 </button>
+
+                <div class="flex items-center justify-between p-2.5 bg-black/40 rounded-xl border border-purple-900/20">
+                    <span class="text-[11px] font-bold text-gray-300">Buy 1 System Voucher</span>
+                    <button onclick="buyVoucher()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-[10px] uppercase rounded-lg shadow active:scale-95 transition-all">
+                        Exchange (5 Coins)
+                    </button>
+                </div>
             </div>
+
         </div>
 
     </div>
 
-    <!-- FIREBASE & SCRIPT ENGINE -->
+    <!-- FIREBASE AND SPIN ENGINE -->
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
@@ -119,145 +92,147 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), db = firebase.firestore();
 
-        let uid = null, userData = {}, isSpinning = false;
+        let uid = null, userState = {};
+        let isSpinning = false;
+        let currentRotation = 0;
 
-        // 6 SEGMENTS (Each slice = 60 Degrees)
-        const segments = [
-            { text: "5 Coins", val: 5, type: "coins", color: "#1e1b4b" },
-            { text: "Retry", val: 0, type: "retry", color: "#3b0764" },
-            { text: "10 Coins", val: 10, type: "coins", color: "#1e1b4b" },
-            { text: "3 Vouchers", val: 3, type: "vouchers", color: "#3b0764" },
-            { text: "50 Coins", val: 50, type: "coins", color: "#1e1b4b" },
-            { text: "1500 Coins", val: 1500, type: "coins", color: "#713f12" }
+        const rewards = [
+            { label: "5 Coins", value: 5, type: "coins", color: "#4c1d95" },
+            { label: "Retry", value: 0, type: "none", color: "#1e1b4b" },
+            { label: "10 Coins", value: 10, type: "coins", color: "#581c87" },
+            { label: "3 Vouchers", value: 3, type: "vouchers", color: "#312e81" },
+            { label: "50 Coins", value: 50, type: "coins", color: "#6b21a8" },
+            { label: "1500 Coins", value: 1500, type: "coins", color: "#7e22ce" }
         ];
 
-        const canvas = document.getElementById("wheelCanvas");
-        const ctx = canvas.getContext("2d");
-        const numSegments = segments.length;
-        const segmentAngle = (2 * Math.PI) / numSegments;
+        function getTodayDateString() {
+            const today = new Date();
+            return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        }
 
-        // AUTH CHECK
         auth.onAuthStateChanged((user) => {
             if (user) {
                 uid = user.uid;
                 db.collection("users").doc(uid).onSnapshot((doc) => {
                     if (doc.exists) {
-                        userData = doc.data();
-                        document.getElementById("userCoins").innerText = userData.coins || 0;
-                        document.getElementById("userVouchers").innerText = userData.vouchers || 0;
-                        document.getElementById("spinLimitDisplay").innerText = `Limits: ${40 - (userData.spinCount || 0)}/40`;
+                        userState = doc.data();
+                        document.getElementById("userCoins").innerText = userState.coins || 0;
+                        document.getElementById("userVouchers").innerText = userState.vouchers || 0;
+
+                        const todayStr = getTodayDateString();
+                        const todaySpins = userState.lastSpinDate === todayStr ? (userState.spinCount || 0) : 0;
+                        document.getElementById("spinLimitText").innerText = `Limits: ${todaySpins}/40`;
                     }
                 });
+                drawWheel();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        // DRAW STATIC WHEEL (Top Pointer Align Math)
         function drawWheel() {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = canvas.width / 2 - 8;
+            const svg = document.getElementById("wheel");
+            const numSlices = rewards.length;
+            const sliceAngle = 360 / numSlices;
+            let svgContent = "";
 
-            for (let i = 0; i < numSegments; i++) {
-                // Adjust startAngle so top center aligns accurately
-                const startAngle = i * segmentAngle - Math.PI / 2;
-                const endAngle = startAngle + segmentAngle;
+            rewards.forEach((reward, i) => {
+                const startAngle = i * sliceAngle;
+                const endAngle = (i + 1) * sliceAngle;
+                const x1 = 50 + 50 * Math.cos(Math.PI * (startAngle - 90) / 180);
+                const y1 = 50 + 50 * Math.sin(Math.PI * (startAngle - 90) / 180);
+                const x2 = 50 + 50 * Math.cos(Math.PI * (endAngle - 90) / 180);
+                const y2 = 50 + 50 * Math.sin(Math.PI * (endAngle - 90) / 180);
 
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-                ctx.fillStyle = segments[i].color;
-                ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "rgba(147, 51, 234, 0.3)";
-                ctx.stroke();
+                const textAngle = startAngle + sliceAngle / 2;
+                const tx = 50 + 32 * Math.cos(Math.PI * (textAngle - 90) / 180);
+                const ty = 50 + 32 * Math.sin(Math.PI * (textAngle - 90) / 180);
 
-                // TEXT DRAWING
-                ctx.save();
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 11px sans-serif";
-                ctx.translate(centerX, centerY);
-                ctx.rotate(startAngle + segmentAngle / 2);
-                ctx.textAlign = "right";
-                ctx.fillText(segments[i].text, radius - 15, 4);
-                ctx.restore();
-            }
+                svgContent += `
+                    <path d="M50,50 L${x1},${y1} A50,50 0 0,1 ${x2},${y2} Z" fill="${reward.color}" stroke="#09070f" stroke-width="1"/>
+                    <text x="${tx}" y="${ty}" fill="#ffffff" font-size="5.5" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(${textAngle}, ${tx}, ${ty})">
+                        ${reward.label}
+                    </text>
+                `;
+            });
+
+            svg.innerHTML = svgContent;
         }
-        drawWheel();
 
-        // SPIN EXECUTION LOGIC
-        function executeSpinSequence() {
-            if (isSpinning) return;
-
-            const currentSpins = userData.spinCount || 0;
-            if (currentSpins >= 40) {
-                alert("⛔ Daily Spin Limit (40/40) Reached!");
+        function buyVoucher() {
+            const coins = userState.coins || 0;
+            if (coins < 5) {
+                alert("❌ Insufficient Coins! You need at least 5 Coins to buy 1 Voucher.");
                 return;
             }
 
-            // Mock Ad Trigger (Replace with AdMob/Unity Ad trigger)
-            isSpinning = true;
-            document.getElementById("spinBtn").disabled = true;
-
-            // Weighted RNG Outcome
-            const random = Math.random() * 100;
-            let targetIndex = 1; // Default to Retry
-
-            if (random < 40) targetIndex = 0;       // 5 Coins (40%)
-            else if (random < 70) targetIndex = 1;  // Retry (30%)
-            else if (random < 85) targetIndex = 2;  // 10 Coins (15%)
-            else if (random < 95) targetIndex = 3;  // 3 Vouchers (10%)
-            else if (random < 99.9) targetIndex = 4;// 50 Coins (4.9%)
-            else targetIndex = 5;                   // 1500 Coins (0.1%)
-
-            // Rotation Angle Calculation for Exact Arrow Stop
-            const degreesPerSegment = 360 / numSegments;
-            // Stop inside segment slice
-            const targetDegree = 360 - (targetIndex * degreesPerSegment) - (degreesPerSegment / 2); 
-            const totalRotation = (360 * 6) + targetDegree; // 6 Full Spins
-
-            canvas.style.transition = "transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.05)";
-            canvas.style.transform = `rotate(${totalRotation}deg)`;
-
-            setTimeout(() => {
-                const prize = segments[targetIndex];
-                let updatePayload = { spinCount: firebase.firestore.FieldValue.increment(1) };
-                let resultMessage = "";
-
-                if (prize.type === "coins") {
-                    updatePayload.coins = firebase.firestore.FieldValue.increment(prize.val);
-                    resultMessage = `🎉 Congratulations! You won ${prize.val} Coins!`;
-                } else if (prize.type === "vouchers") {
-                    updatePayload.vouchers = firebase.firestore.FieldValue.increment(prize.val);
-                    resultMessage = `🎟️ Awesome! You got +${prize.val} Vouchers!`;
-                } else {
-                    resultMessage = "🔄 Retry try again.";
-                }
-
-                db.collection("users").doc(uid).update(updatePayload).then(() => {
-                    alert(resultMessage);
-                    
-                    // Reset transform seamlessly
-                    canvas.style.transition = "none";
-                    canvas.style.transform = `rotate(${targetDegree}deg)`;
-                    
-                    isSpinning = false;
-                    document.getElementById("spinBtn").disabled = false;
-                });
-            }, 4000);
-        }
-
-        // EXCHANGE VOUCHER LOGIC
-        function exchangeCoinsForVoucher() {
-            if ((userData.coins || 0) < 5) {
-                alert("❌ Insufficient Coins! You need at least 5 Coins.");
-                return;
-            }
             db.collection("users").doc(uid).update({
                 coins: firebase.firestore.FieldValue.increment(-5),
                 vouchers: firebase.firestore.FieldValue.increment(1)
-            }).then(() => alert("✅ Successfully purchased 1 Voucher for 5 Coins!"));
+            }).then(() => {
+                alert("✅ Successfully Purchased 1 Voucher for 5 Coins!");
+            });
+        }
+
+        function executeSpin() {
+            if (isSpinning) return;
+
+            const vouchers = userState.vouchers || 0;
+            if (vouchers < 1) {
+                alert("❌ You don't have enough Vouchers! Exchange 5 Coins to buy 1 Voucher.");
+                return;
+            }
+
+            const todayStr = getTodayDateString();
+            const todaySpins = userState.lastSpinDate === todayStr ? (userState.spinCount || 0) : 0;
+
+            if (todaySpins >= 40) {
+                alert("🚫 Daily Spin Limit Reached (40/40)! Come back tomorrow after 12:00 AM.");
+                return;
+            }
+
+            isSpinning = true;
+            document.getElementById("spinBtn").disabled = true;
+
+            // DEDUCT 1 VOUCHER IMMEDIATELY ON SPIN START
+            db.collection("users").doc(uid).update({
+                vouchers: firebase.firestore.FieldValue.increment(-1)
+            }).then(() => {
+                const winningIndex = Math.floor(Math.random() * rewards.length);
+                const sliceAngle = 360 / rewards.length;
+                const targetDegree = 360 - (winningIndex * sliceAngle + sliceAngle / 2);
+                
+                const extraRounds = 5 * 360;
+                currentRotation += extraRounds + (targetDegree - (currentRotation % 360));
+                
+                const wheel = document.getElementById("wheel");
+                wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+                setTimeout(() => {
+                    const winningReward = rewards[winningIndex];
+                    let coinInc = 0;
+                    let voucherInc = 0;
+
+                    if (winningReward.type === "coins") coinInc = winningReward.value;
+                    if (winningReward.type === "vouchers") voucherInc = winningReward.value;
+
+                    // Update Rewards & Daily Count
+                    db.collection("users").doc(uid).update({
+                        coins: firebase.firestore.FieldValue.increment(coinInc),
+                        vouchers: firebase.firestore.FieldValue.increment(voucherInc),
+                        spinCount: todaySpins + 1,
+                        lastSpinDate: todayStr
+                    }).then(() => {
+                        if (winningReward.type === "none") {
+                            alert("🔁 Retry try again.");
+                        } else {
+                            alert(`🎉 Congratulations! You won ${winningReward.label}!`);
+                        }
+                        isSpinning = false;
+                        document.getElementById("spinBtn").disabled = false;
+                    });
+                }, 4000);
+            });
         }
     </script>
 </body>
