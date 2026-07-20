@@ -54,9 +54,7 @@
             <!-- SPIN WHEEL CANVAS -->
             <div class="wheel-container my-4">
                 <div class="pointer"></div>
-                <svg id="wheel" viewBox="0 0 100 100">
-                    <!-- Dynamic SVG Segments Rendered by JS -->
-                </svg>
+                <svg id="wheel" viewBox="0 0 100 100"></svg>
             </div>
 
             <!-- ACTIONS -->
@@ -96,13 +94,14 @@
         let isSpinning = false;
         let currentRotation = 0;
 
+        // Wheel visual display configuration
         const rewards = [
-            { label: "5 Coins", value: 5, type: "coins", color: "#4c1d95" },
-            { label: "Retry", value: 0, type: "none", color: "#1e1b4b" },
-            { label: "10 Coins", value: 10, type: "coins", color: "#581c87" },
-            { label: "3 Vouchers", value: 3, type: "vouchers", color: "#312e81" },
-            { label: "50 Coins", value: 50, type: "coins", color: "#6b21a8" },
-            { label: "1500 Coins", value: 1500, type: "coins", color: "#7e22ce" }
+            { label: "5 Coins", value: 5, type: "coins", color: "#4c1d95", chance: 300 },
+            { label: "Retry", value: 0, type: "none", color: "#1e1b4b", chance: 350 },
+            { label: "10 Coins", value: 10, type: "coins", color: "#581c87", chance: 200 },
+            { label: "3 Vouchers", value: 3, type: "vouchers", color: "#312e81", chance: 100 },
+            { label: "25 Coins", value: 50, type: "coins", color: "#6b21a8", chance: 10 },
+            { label: "1500 Coins", value: 1500, type: "coins", color: "#7e22ce", chance: 0.01 } // 0.001% chance
         ];
 
         function getTodayDateString() {
@@ -174,6 +173,20 @@
             });
         }
 
+        // Weighted Probability Algorithm
+        function getWeightedRandomIndex() {
+            const totalWeight = rewards.reduce((sum, r) => sum + r.chance, 0);
+            let randomNum = Math.floor(Math.random() * totalWeight);
+            
+            for (let i = 0; i < rewards.length; i++) {
+                if (randomNum < rewards[i].chance) {
+                    return i;
+                }
+                randomNum -= rewards[i].chance;
+            }
+            return 1; // Fallback to Retry
+        }
+
         function executeSpin() {
             if (isSpinning) return;
 
@@ -194,11 +207,13 @@
             isSpinning = true;
             document.getElementById("spinBtn").disabled = true;
 
-            // DEDUCT 1 VOUCHER IMMEDIATELY ON SPIN START
+            // DEDUCT 1 VOUCHER IMMEDIATELY
             db.collection("users").doc(uid).update({
                 vouchers: firebase.firestore.FieldValue.increment(-1)
             }).then(() => {
-                const winningIndex = Math.floor(Math.random() * rewards.length);
+                // Calculate outcome based on STRICT percentages
+                const winningIndex = getWeightedRandomIndex();
+                
                 const sliceAngle = 360 / rewards.length;
                 const targetDegree = 360 - (winningIndex * sliceAngle + sliceAngle / 2);
                 
@@ -216,7 +231,7 @@
                     if (winningReward.type === "coins") coinInc = winningReward.value;
                     if (winningReward.type === "vouchers") voucherInc = winningReward.value;
 
-                    // Update Rewards & Daily Count
+                    // Sync Reward & Daily Count in Database
                     db.collection("users").doc(uid).update({
                         coins: firebase.firestore.FieldValue.increment(coinInc),
                         vouchers: firebase.firestore.FieldValue.increment(voucherInc),
