@@ -66,7 +66,7 @@
                 <div class="flex items-center justify-between p-2.5 bg-black/40 rounded-xl border border-purple-900/20">
                     <span class="text-[11px] font-bold text-gray-300">Buy 1 System Voucher</span>
                     <button onclick="buyVoucher()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-[10px] uppercase rounded-lg shadow active:scale-95 transition-all">
-                        Exchange (5 Coins)
+                        Exchange (3 Coins)
                     </button>
                 </div>
             </div>
@@ -96,8 +96,8 @@
 
         // Wheel visual display configuration
         const rewards = [
-            { label: "5 Coins", value: 5, type: "coins", color: "#4c1d95", chance: 300 },
-            { label: "Retry", value: 0, type: "none", color: "#1e1b4b", chance: 400 },
+            { label: "5 Coins", value: 5, type: "coins", color: "#4c1d95", chance: 400 },
+            { label: "Retry", value: 0, type: "none", color: "#1e1b4b", chance: 300 },
             { label: "10 Coins", value: 10, type: "coins", color: "#581c87", chance: 150 },
             { label: "2 Vouchers", value: 2, type: "vouchers", color: "#312e81", chance: 139.99 },
             { label: "25 Coins", value: 25, type: "coins", color: "#6b21a8", chance: 10 },
@@ -160,16 +160,16 @@
 
         function buyVoucher() {
             const coins = userState.coins || 0;
-            if (coins < 5) {
-                alert("❌ Insufficient Coins! You need at least 5 Coins to buy 1 Voucher.");
+            if (coins < 3) {
+                alert("❌ Insufficient Coins! You need at least 3 Coins to buy 1 Voucher.");
                 return;
             }
 
             db.collection("users").doc(uid).update({
-                coins: firebase.firestore.FieldValue.increment(-5),
+                coins: firebase.firestore.FieldValue.increment(-3),
                 vouchers: firebase.firestore.FieldValue.increment(1)
             }).then(() => {
-                alert("✅ Successfully Purchased 1 Voucher for 5 Coins!");
+                alert("✅ Successfully Purchased 1 Voucher for 3 Coins!");
             });
         }
 
