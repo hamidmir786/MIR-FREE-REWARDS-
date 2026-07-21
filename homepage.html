@@ -298,9 +298,13 @@
 
                 snap.forEach((doc) => {
                     const m = doc.data();
+                    // BUG FIX: Multi-field fallback check to prevent undefined
+                    const mailText = m.message || m.msg || m.body || m.text || "No details provided";
+                    const mailTitle = m.title || "Notification";
+
                     const block = document.createElement("div");
                     block.className = "p-2 rounded-xl text-[9px] font-mono bg-black/50 border border-purple-900/40 text-gray-300";
-                    block.innerHTML = `<div class="font-bold text-purple-400 mb-0.5">${m.title}</div><p class="text-gray-400 whitespace-pre-line">${m.body}</p>`;
+                    block.innerHTML = `<div class="font-bold text-purple-400 mb-0.5">${mailTitle}</div><p class="text-gray-400 whitespace-pre-line">${mailText}</p>`;
                     cont.appendChild(block);
                 });
             });
