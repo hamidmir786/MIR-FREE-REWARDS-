@@ -137,9 +137,9 @@
         // Probability Odds System for Scratch Card
         function getRandomScratchReward() {
             const rand = Math.random() * 100;
-            if (rand < 45) return Math.floor(Math.random() * 4) + 2;   // 2 to 5 Coins (64.499% chance)
-            if (rand < 80) return Math.floor(Math.random() * 5) + 6;   // 6 to 10 Coins (30% chance)
-            if (rand < 95) return Math.floor(Math.random() * 15) + 11; // 11 to 15 Coins (5% chance)
+            if (rand < 45) return Math.floor(Math.random() * 4) + 2;   // 2 to 5 Coins (89.499% chance)
+            if (rand < 80) return Math.floor(Math.random() * 5) + 6;   // 6 to 10 Coins (7% chance)
+            if (rand < 95) return Math.floor(Math.random() * 15) + 11; // 11 to 15 Coins (3% chance)
             if (rand < 99.5) return 50;                                 // 50 Coins (0.5% chance)
             return 500;                                                // 500 Coins Super Rare (0.001% chance)
         }
