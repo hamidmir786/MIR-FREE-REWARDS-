@@ -190,6 +190,12 @@
 
         let uid = null, userState = {};
 
+        // Helper Function to Get Today's Date String Format
+        const getTodayDateString = () => {
+            const today = new Date();
+            return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        };
+
         auth.onAuthStateChanged((user) => {
             if (user) {
                 uid = user.uid;
@@ -204,10 +210,29 @@
             db.collection("users").doc(uid).onSnapshot((doc) => {
                 if (doc.exists) {
                     userState = doc.data();
+                    checkAndResetDailyAds(); // Auto 12:00 AM Reset Verification
                     renderApplicationCounters();
                     syncLiveMailboxFeed();
                 }
             });
+        }
+
+        // 🎯 AUTOMATIC 12:00 AM DAILY ADS RESET ENGINE
+        function checkAndResetDailyAds() {
+            const todayStr = getTodayDateString();
+            const lastWatchDate = userState.lastAdWatchDate || "";
+
+            // Agar date change ho gayi hai (12 AM beet chuka hai)
+            if (lastWatchDate !== todayStr) {
+                db.collection("users").doc(uid).update({
+                    dailyAdCount: 0,
+                    lastAdWatchDate: todayStr
+                }).then(() => {
+                    console.log("✅ Daily Ads limit auto reset to 0 for a new day!");
+                }).catch(err => {
+                    console.error("Reset error:", err);
+                });
+            }
         }
 
         function renderApplicationCounters() {
@@ -271,11 +296,14 @@
                 alert("⛔ Daily broadcast limit (10/10) reached.");
                 return;
             }
+            const todayStr = getTodayDateString();
+
             loadAd(() => {
                 db.collection("users").doc(uid).update({
                     coins: firebase.firestore.FieldValue.increment(10),
                     leaderboardPoints: firebase.firestore.FieldValue.increment(20),
-                    dailyAdCount: firebase.firestore.FieldValue.increment(1)
+                    dailyAdCount: firebase.firestore.FieldValue.increment(1),
+                    lastAdWatchDate: todayStr
                 }).then(() => alert("🎉 Earned +10 Coins & +20 Rank Points!"));
             });
         }
@@ -298,7 +326,7 @@
 
                 snap.forEach((doc) => {
                     const m = doc.data();
-                    // BUG FIX: Multi-field fallback check to prevent undefined
+                    // Multi-field fallback check to prevent undefined
                     const mailText = m.message || m.msg || m.body || m.text || "No details provided";
                     const mailTitle = m.title || "Notification";
 
