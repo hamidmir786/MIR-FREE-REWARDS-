@@ -61,7 +61,7 @@
                 <i class="fa-solid fa-users-gear"></i> Users Hub
             </button>
             <button onclick="switchAdminTab('userRequestsSection')" id="tabBtn-requests" class="py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 relative">
-                <i class="fa-solid fa-headset text-amber-400"></i> User Requests
+                <i class="fa-solid fa-headset text-amber-400"></i> Recovery Requests
                 <span id="requestsBadge" class="hidden bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.2 rounded-full ml-1">0</span>
             </button>
             <button onclick="switchAdminTab('redeemRequestsSection')" id="tabBtn-redeem" class="py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 relative">
@@ -90,11 +90,11 @@
             </div>
         </section>
 
-        <!-- SECTION 2: USER RECOVERY REQUESTS & PROBLEMS PORTAL -->
+        <!-- SECTION 2: USER RECOVERY REQUESTS PORTAL -->
         <section id="userRequestsSection" class="space-y-3 hidden">
             <div class="flex justify-between items-center px-1">
                 <h4 class="text-[10px] font-black text-amber-400 uppercase tracking-widest"><i class="fa-solid fa-headset text-amber-500"></i> PIN/DOB Recovery Requests</h4>
-                <p class="text-[9px] text-gray-500 font-mono">Paid 500 Coins Desk</p>
+                <p class="text-[9px] text-gray-500 font-mono">adminRequests Collection</p>
             </div>
             <div id="userRequestsContainer" class="space-y-2.5">
                 <!-- Recovery requests render dynamically here -->
@@ -105,7 +105,7 @@
         <section id="redeemRequestsSection" class="space-y-3 hidden">
             <div class="flex justify-between items-center px-1">
                 <h4 class="text-[10px] font-black text-yellow-400 uppercase tracking-widest"><i class="fa-solid fa-receipt text-yellow-500"></i> Pending Redeem Queue</h4>
-                <p class="text-[9px] text-gray-500 font-mono">Real-time Claims Desk</p>
+                <p class="text-[9px] text-gray-500 font-mono">withdrawals Collection</p>
             </div>
             <div id="redeemRequestsContainer" class="space-y-2.5">
                 <!-- Redeem rows render dynamically here -->
@@ -122,7 +122,6 @@
     </div>
 
     <script>
-        // Core Web Configuration Keys
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
           authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
@@ -141,7 +140,6 @@
         let cachedUsersList = [];
         let isLeaderboardFrozenState = false;
 
-        // DIRECT REFRESH AUTO RUN
         window.onload = function() {
             fetchLatestAdminData();
             listenToLeaderboardConfig();
@@ -149,7 +147,7 @@
             listenToRedeemRequestsRealtime();
         };
 
-        // CORE SYNC & DATA FETCH
+        // FETCH USERS
         function fetchLatestAdminData() {
             db.collection("users").get().then(snap => {
                 cachedUsersList = [];
@@ -172,131 +170,92 @@
                 document.getElementById("statCirculatingCoins").innerText = totalCoins;
 
                 renderUsersListMarkup(cachedUsersList);
-            }).catch(err => {
-                console.error("Database connection missing:", err);
             });
         }
 
-        // FETCH USER RECOVERY REQUESTS
+        // RECOVERY REQUESTS (Listens to 'adminRequests' & 'recovery_requests')
         function fetchUserRecoveryRequests() {
-            db.collection("recovery_requests").onSnapshot(snap => {
-                const container = document.getElementById("userRequestsContainer");
-                const badge = document.getElementById("requestsBadge");
-                container.innerHTML = "";
-                
-                let pendingCount = 0;
-
-                if (snap.empty) {
-                    container.innerHTML = `<p class="text-center text-gray-600 py-6 text-xs font-semibold">No recovery requests found!</p>`;
-                    badge.classList.add("hidden");
-                    return;
-                }
-
-                let reqList = [];
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
-                    reqList.push(data);
-                    if (data.status === "Pending") pendingCount++;
-                });
-
-                if (pendingCount > 0) {
-                    badge.innerText = pendingCount;
-                    badge.classList.remove("hidden");
-                } else {
-                    badge.classList.add("hidden");
-                }
-
-                reqList.sort((a, b) => {
-                    const timeA = a.timestamp ? (a.timestamp.seconds || 0) : 0;
-                    const timeB = b.timestamp ? (b.timestamp.seconds || 0) : 0;
-                    return timeB - timeA;
-                });
-
-                reqList.forEach(req => {
-                    const card = document.createElement("div");
-                    const isPending = (req.status === "Pending");
-                    const targetUid = req.userId || req.userUid || req.uid || "";
-
-                    card.className = `p-3.5 bg-black/40 border ${isPending ? 'border-amber-900/50' : 'border-gray-900'} rounded-2xl text-xs space-y-2`;
-
-                    card.innerHTML = `
-                        <div class="flex justify-between items-center">
-                            <span class="text-[9px] font-mono text-gray-400">User: <strong class="text-white">${req.username || 'N/A'}</strong></span>
-                            <span class="px-2 py-0.5 rounded text-[8px] font-black tracking-wider ${isPending ? 'bg-amber-950/50 text-amber-400 border border-amber-800/40' : 'bg-emerald-950/50 text-emerald-400 border border-emerald-800/40'}">${req.status || 'Pending'}</span>
-                        </div>
-                        <div class="space-y-1 bg-black/30 p-2 rounded-xl text-[10px] text-gray-300">
-                            <p><strong>Input:</strong> ${req.providedInput || 'N/A'}</p>
-                            <p><strong>Problem Note:</strong> ${req.issueNote || 'N/A'}</p>
-                            <p class="font-mono text-[9px] text-purple-400">Target UID: ${targetUid || 'MISSING UID!'}</p>
-                        </div>
-                        ${isPending ? `
-                        <div class="flex gap-2 pt-1">
-                            <button onclick="resolveUserRequest('${req.id}', '${targetUid}')" class="w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-[9px] uppercase tracking-wider rounded-lg transition-all">
-                                <i class="fa-solid fa-paper-plane"></i> Resolve & Send PIN to Mailbox
-                            </button>
-                        </div>
-                        ` : ''}
-                    `;
-                    container.appendChild(card);
+            db.collection("adminRequests").onSnapshot(snap => {
+                renderRecoveryData(snap);
+            }, err => {
+                db.collection("recovery_requests").onSnapshot(snap2 => {
+                    renderRecoveryData(snap2);
                 });
             });
         }
 
-        function resolveUserRequest(requestId, userUid) {
-            if (!userUid || userUid === "" || userUid === "undefined") {
-                alert("⚠️ Error: Is request me User UID valid nahi hai!");
+        function renderRecoveryData(snap) {
+            const container = document.getElementById("userRequestsContainer");
+            const badge = document.getElementById("requestsBadge");
+            container.innerHTML = "";
+            
+            let pendingCount = 0;
+
+            if (snap.empty) {
+                container.innerHTML = `<p class="text-center text-gray-600 py-6 text-xs font-semibold">No recovery requests found!</p>`;
+                badge.classList.add("hidden");
                 return;
             }
 
-            const message = prompt("Enter PIN / DOB Details or Message to send to User's Mailbox:");
-            if (message === null || message.trim() === "") return;
+            let reqList = [];
+            snap.forEach(doc => {
+                const data = doc.data();
+                data.id = doc.id;
+                reqList.push(data);
 
-            const fullMessageText = `Admin Response: ${message.trim()}`;
+                const st = (data.status || "PENDING").toUpperCase();
+                if (st === "PENDING") pendingCount++;
+            });
 
-            db.collection("recovery_requests").doc(requestId).update({
-                status: "RESOLVED",
-                resolvedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                db.collection("users").doc(userUid).collection("mailbox").add({
-                    title: "🔐 PIN & DOB Recovery Details",
-                    message: fullMessageText,
-                    msg: fullMessageText,
-                    body: fullMessageText,
-                    text: fullMessageText,
-                    date: new Date().toLocaleDateString(),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    read: false,
-                    type: "recovery"
-                }).then(() => {
-                    alert("✅ Successfully Resolved! Recovery Details delivered to User Mailbox.");
-                });
+            if (pendingCount > 0) {
+                badge.innerText = pendingCount;
+                badge.classList.remove("hidden");
+            } else {
+                badge.classList.add("hidden");
+            }
+
+            reqList.sort((a, b) => {
+                const timeA = a.timestamp ? (a.timestamp.seconds || 0) : 0;
+                const timeB = b.timestamp ? (b.timestamp.seconds || 0) : 0;
+                return timeB - timeA;
+            });
+
+            reqList.forEach(req => {
+                const card = document.createElement("div");
+                const st = (req.status || "PENDING").toUpperCase();
+                const isPending = (st === "PENDING");
+                const targetUid = req.userId || req.userUid || req.uid || "";
+
+                card.className = `p-3.5 bg-black/40 border ${isPending ? 'border-amber-900/50' : 'border-gray-900'} rounded-2xl text-xs space-y-2`;
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-[9px] font-mono text-gray-400">User: <strong class="text-white">${req.userName || req.username || 'User'}</strong></span>
+                        <span class="px-2 py-0.5 rounded text-[8px] font-black tracking-wider ${isPending ? 'bg-amber-950/50 text-amber-400 border border-amber-800/40' : 'bg-emerald-950/50 text-emerald-400 border border-emerald-800/40'}">${st}</span>
+                    </div>
+                    <div class="space-y-1 bg-black/30 p-2 rounded-xl text-[10px] text-gray-300">
+                        <p><strong>Type:</strong> ${req.requestType || 'RECOVERY_PIN_AND_DOB'}</p>
+                        <p><strong>Email:</strong> ${req.userEmail || 'N/A'}</p>
+                        <p class="font-mono text-[9px] text-purple-400">UID: ${targetUid}</p>
+                    </div>
+                    ${isPending ? `
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="resolveUserRequest('${req.id}', '${targetUid}')" class="w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-[9px] uppercase tracking-wider rounded-lg transition-all">
+                            <i class="fa-solid fa-paper-plane"></i> Resolve & Send PIN to Mailbox
+                        </button>
+                    </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
             });
         }
 
-        function listenToLeaderboardConfig() {
-            db.collection("app_admin").doc("leaderboard_config").onSnapshot(doc => {
-                if (doc.exists) {
-                    isLeaderboardFrozenState = doc.data().frozen || false;
-                    const btn = document.getElementById("leaderboardFreezeBtn");
-                    if (isLeaderboardFrozenState) {
-                        btn.className = "py-2.5 bg-red-950/20 border border-red-900/40 text-red-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
-                        btn.innerHTML = `<i class="fa-solid fa-snowflake animate-spin-slow"></i> Frozen`;
-                    } else {
-                        btn.className = "py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
-                        btn.innerHTML = `<i class="fa-solid fa-snowflake"></i> Freeze Board`;
-                    }
-                }
-            });
-        }
-
-        // REALTIME LISTENER FOR ALL REDEEM COLLECTIONS (redeems, redeem_requests, withdrawals)
+        // REDEEM REQUESTS (Listens to 'withdrawals' & 'redeems')
         function listenToRedeemRequestsRealtime() {
-            // Binding to 'redeems' collection with fallback
-            db.collection("redeems").onSnapshot(snap => {
+            db.collection("withdrawals").onSnapshot(snap => {
                 processAndRenderRedeems(snap);
             }, err => {
-                db.collection("redeem_requests").onSnapshot(snap2 => {
+                db.collection("redeems").onSnapshot(snap2 => {
                     processAndRenderRedeems(snap2);
                 });
             });
@@ -342,11 +301,11 @@
                 const reqId = req.id;
                 const item = document.createElement("div");
                 
-                const label = req.rewardName || req.amountLabel || "Withdrawal Request";
-                const targetAddress = req.payoutDetails || req.targetAddress || req.targetId || "Mailbox / Bank";
+                const label = req.rewardName || req.rewardname || "Redeem Code";
+                const targetAddress = req.payoutDetails || req.targetAddress || "Mailbox";
                 const userEmail = req.userEmail || req.userName || "User";
                 const coinsUsed = req.coinsUsed || req.coins || 0;
-                const rupees = req.rupees || req.amountRupees || "";
+                const rupees = req.rupees || req.amount || "";
                 
                 const statusVal = (req.status || "Pending").toUpperCase();
                 const isPending = (statusVal === "PENDING");
@@ -363,7 +322,7 @@
                             <span>${label} ${rupees ? '(₹' + rupees + ')' : ''}</span>
                             <span class="text-amber-400 font-mono">${coinsUsed} 🪙</span>
                         </p>
-                        <p class="text-purple-400 font-mono text-[10px] mt-0.5">Payout Address / UPI: <strong class="text-white select-all">${targetAddress}</strong></p>
+                        <p class="text-purple-400 font-mono text-[10px] mt-0.5">Payout Details: <strong class="text-white select-all">${targetAddress}</strong></p>
                     </div>
                     ${isPending ? `
                     <div class="flex gap-2 pt-1">
@@ -376,13 +335,93 @@
             });
         }
 
-        // RENDER DOM ELEMENTS
+        // RESOLVE RECOVERY REQUEST
+        function resolveUserRequest(requestId, userUid) {
+            const message = prompt("Enter PIN / DOB Details or Recovery Code for user's Mailbox:");
+            if (message === null || message.trim() === "") return;
+
+            const fullMessageText = `Admin Response: ${message.trim()}`;
+
+            db.collection("adminRequests").doc(requestId).update({
+                status: "RESOLVED"
+            }).catch(() => {
+                db.collection("recovery_requests").doc(requestId).update({ status: "RESOLVED" });
+            }).then(() => {
+                if (userUid && userUid !== "" && userUid !== "undefined") {
+                    db.collection("users").doc(userUid).collection("mailbox").add({
+                        title: "🔐 Recovery Details Delivered",
+                        message: fullMessageText,
+                        msg: fullMessageText,
+                        body: fullMessageText,
+                        date: new Date().toLocaleDateString(),
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        read: false,
+                        type: "recovery"
+                    });
+                }
+                alert("✅ Recovery Request Resolved!");
+            });
+        }
+
+        // APPROVE REDEEM TICKET
+        function approveRedeemTicket(requestId, userUid, amountLabel) {
+            const code = prompt("Enter the Redeem Code / Voucher Key to send to user's Mailbox:");
+            if (code === null || code.trim() === "") return;
+
+            const redeemMsg = `Your request for ${amountLabel} has been APPROVED!\nCode: ${code.trim()}`;
+
+            const updateObj = { status: "APPROVED", resolvedCode: code.trim() };
+            
+            db.collection("withdrawals").doc(requestId).update(updateObj).catch(() => {
+                db.collection("redeems").doc(requestId).update(updateObj);
+            });
+
+            if(userUid && userUid !== "" && userUid !== "undefined") {
+                db.collection("users").doc(userUid).collection("mailbox").add({
+                    title: "🎁 Redeem Request Approved!",
+                    message: redeemMsg,
+                    msg: redeemMsg,
+                    systemCode: code.trim(),
+                    date: new Date().toLocaleDateString(),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false,
+                    type: "payout"
+                });
+            }
+            alert("✅ Redeem Request Approved & Code Sent!");
+        }
+
+        // REJECT REDEEM TICKET
+        function rejectRedeemTicket(requestId, userUid) {
+            if (!confirm("Reject this withdrawal request?")) return;
+
+            const rejectMsg = `Your withdrawal request was rejected by Admin. Please contact support.`;
+            const updateObj = { status: "REJECTED" };
+
+            db.collection("withdrawals").doc(requestId).update(updateObj).catch(() => {
+                db.collection("redeems").doc(requestId).update(updateObj);
+            });
+
+            if(userUid && userUid !== "" && userUid !== "undefined") {
+                db.collection("users").doc(userUid).collection("mailbox").add({
+                    title: "⚠️ Request Rejected",
+                    message: rejectMsg,
+                    msg: rejectMsg,
+                    date: new Date().toLocaleDateString(),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false,
+                    type: "payout"
+                });
+            }
+            alert("Ticket rejected.");
+        }
+
         function renderUsersListMarkup(list) {
             const container = document.getElementById("usersDataContainer");
             container.innerHTML = "";
 
             if (list.length === 0) {
-                container.innerHTML = `<p class="text-center text-gray-600 py-6 text-xs">No users match your criteria</p>`;
+                container.innerHTML = `<p class="text-center text-gray-600 py-6 text-xs">No users found</p>`;
                 return;
             }
 
@@ -419,7 +458,6 @@
             });
         }
 
-        // TAB NAVIGATION ROUTINES
         function switchAdminTab(activeSectionId) {
             document.getElementById("usersListSection").classList.add("hidden");
             document.getElementById("userRequestsSection").classList.add("hidden");
@@ -440,7 +478,22 @@
             }
         }
 
-        // LEADERBOARD FREEZE CONTROL
+        function listenToLeaderboardConfig() {
+            db.collection("app_admin").doc("leaderboard_config").onSnapshot(doc => {
+                if (doc.exists) {
+                    isLeaderboardFrozenState = doc.data().frozen || false;
+                    const btn = document.getElementById("leaderboardFreezeBtn");
+                    if (isLeaderboardFrozenState) {
+                        btn.className = "py-2.5 bg-red-950/20 border border-red-900/40 text-red-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
+                        btn.innerHTML = `<i class="fa-solid fa-snowflake animate-spin-slow"></i> Frozen`;
+                    } else {
+                        btn.className = "py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
+                        btn.innerHTML = `<i class="fa-solid fa-snowflake"></i> Freeze Board`;
+                    }
+                }
+            });
+        }
+
         function toggleLeaderboardFreeze() {
             const targetState = !isLeaderboardFrozenState;
             db.collection("app_admin").doc("leaderboard_config").set({
@@ -450,7 +503,6 @@
             });
         }
 
-        // FILTER SEARCH
         function executeClientSearchFilter() {
             const query = document.getElementById("adminUserSearchBar").value.toLowerCase().trim();
             if (query === "") {
@@ -468,7 +520,6 @@
             renderUsersListMarkup(filtered);
         }
 
-        // ADMIN DATABASE ACTIONS
         function promptEditCoins(userUid, currentCoins) {
             const amount = prompt(`Enter new coin amount for this user:`, currentCoins);
             if (amount === null || isNaN(amount) || amount === "") return;
@@ -487,69 +538,6 @@
                 alert("User record cleared!");
                 fetchLatestAdminData();
             });
-        }
-
-        // APPROVE / REJECT TICKETS
-        function approveRedeemTicket(requestId, userUid, amountLabel) {
-            const code = prompt("Enter the Reward Redeem Code or Transaction Note to send to the user:");
-            if (code === null || code.trim() === "") return;
-
-            const redeemMsg = `Your withdrawal for ${amountLabel} has been APPROVED!\nDetails/Code: ${code.trim()}`;
-
-            // Update in redeems & withdrawals collections
-            const updateObj = { status: "APPROVED", resolvedCode: code.trim() };
-            
-            db.collection("redeems").doc(requestId).update(updateObj).catch(() => {});
-            db.collection("withdrawals").doc(requestId).update(updateObj).catch(() => {});
-            db.collection("redeem_requests").doc(requestId).update(updateObj).catch(() => {});
-
-            if(userUid && userUid !== "" && userUid !== "undefined") {
-                db.collection("users").doc(userUid).collection("mailbox").add({
-                    title: "🎁 Payout Approved!",
-                    message: redeemMsg,
-                    msg: redeemMsg,
-                    body: redeemMsg,
-                    text: redeemMsg,
-                    systemCode: code.trim(),
-                    date: new Date().toLocaleDateString(),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    read: false,
-                    type: "payout"
-                }).then(() => {
-                    alert("✅ Ticket approved and code sent to User Mailbox!");
-                });
-            } else {
-                alert("✅ Ticket approved!");
-            }
-        }
-
-        function rejectRedeemTicket(requestId, userUid) {
-            if (!confirm("Reject this withdrawal request?")) return;
-
-            const rejectMsg = `Your withdrawal request was rejected by Admin. Please contact support.`;
-            const updateObj = { status: "REJECTED" };
-
-            db.collection("redeems").doc(requestId).update(updateObj).catch(() => {});
-            db.collection("withdrawals").doc(requestId).update(updateObj).catch(() => {});
-            db.collection("redeem_requests").doc(requestId).update(updateObj).catch(() => {});
-
-            if(userUid && userUid !== "" && userUid !== "undefined") {
-                db.collection("users").doc(userUid).collection("mailbox").add({
-                    title: "⚠️ Payout Rejected",
-                    message: rejectMsg,
-                    msg: rejectMsg,
-                    body: rejectMsg,
-                    text: rejectMsg,
-                    date: new Date().toLocaleDateString(),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    read: false,
-                    type: "payout"
-                }).then(() => {
-                    alert("Ticket rejected!");
-                });
-            } else {
-                alert("Ticket rejected.");
-            }
         }
 
         function triggerKeyConfigModal() {
