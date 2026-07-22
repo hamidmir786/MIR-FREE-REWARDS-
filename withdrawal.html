@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIR FREE REWARDS - Withdraw Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase Core Modules -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        body { background-color: #09070f; color: #f3f4f6; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
+        .premium-panel { background: rgba(19, 15, 36, 0.85); border: 1px solid rgba(147, 51, 234, 0.15); }
+        .reward-card { background: linear-gradient(135deg, #130f26 0%, #0d0a1a 100%); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.2s ease; }
+        .reward-card:active { transform: scale(0.98); }
+        .app-container { width: 100%; max-width: 480px; margin: 0 auto; padding-bottom: 90px; }
+        .neon-focus:focus { box-shadow: 0 0 15px rgba(147, 51, 234, 0.5); border-color: #a855f7; }
+        .modal-bg { background: rgba(6, 4, 10, 0.92); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="p-3 select-none">
+
+    <div class="app-container space-y-4">
+        
+        <!-- HEADER -->
+        <div class="w-full p-4 rounded-2xl premium-panel flex justify-between items-center shadow-2xl">
+            <div class="flex items-center gap-3">
+                <a href="homepage.html" class="w-8 h-8 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </a>
+                <div>
+                    <h2 class="text-sm font-black text-white uppercase tracking-wider">Withdrawal Store</h2>
+                    <p class="text-[9px] text-purple-400">Redeem coins for real money & vouchers</p>
+                </div>
+            </div>
+            <div class="px-3 py-1.5 rounded-xl bg-black/60 border border-amber-500/30 flex items-center gap-2">
+                <i class="fa-solid fa-coins text-amber-400 text-sm"></i>
+                <div>
+                    <span id="coinCounter" class="text-xs font-black text-amber-300 block leading-none">0</span>
+                    <span class="text-[8px] text-gray-400 font-bold">Coins</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 MAIN CATEGORIES -->
+        <div class="grid grid-cols-1 gap-3">
+            
+            <!-- 1. GOOGLE PLAY REDEEM CODE -->
+            <div onclick="openCategoryModal('play')" class="w-full p-4 rounded-2xl reward-card flex items-center justify-between cursor-pointer border-emerald-500/20 hover:border-emerald-500/40">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-lg">
+                        <i class="fa-brands fa-google-play"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-white uppercase tracking-wider">Play Store Redeem Code</h3>
+                        <p class="text-[9px] text-emerald-400 font-semibold mt-0.5">Instant Codes (₹10 to ₹250 + Custom)</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+            </div>
+
+            <!-- 2. UPI / PAYTM MONEY TRANSFER -->
+            <div onclick="openCategoryModal('upi')" class="w-full p-4 rounded-2xl reward-card flex items-center justify-between cursor-pointer border-sky-500/20 hover:border-sky-500/40">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-sky-950/40 border border-sky-500/30 flex items-center justify-center text-sky-400 text-2xl shadow-lg">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-white uppercase tracking-wider">UPI / Paytm Transfer</h3>
+                        <p class="text-[9px] text-sky-400 font-semibold mt-0.5">Direct Bank Cash (₹50 to ₹500)</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+            </div>
+
+            <!-- 3. AMAZON PAY VOUCHER -->
+            <div onclick="openCategoryModal('amazon')" class="w-full p-4 rounded-2xl reward-card flex items-center justify-between cursor-pointer border-amber-500/20 hover:border-amber-500/40">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-950/40 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl shadow-lg">
+                        <i class="fa-brands fa-amazon"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-white uppercase tracking-wider">Amazon Pay Gift Card</h3>
+                        <p class="text-[9px] text-amber-400 font-semibold mt-0.5">Official Vouchers (₹30 to ₹200)</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+            </div>
+
+            <!-- 4. FLIPKART VOUCHER -->
+            <div onclick="openCategoryModal('flipkart')" class="w-full p-4 rounded-2xl reward-card flex items-center justify-between cursor-pointer border-blue-500/20 hover:border-blue-500/40">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-950/40 border border-blue-500/30 flex items-center justify-center text-blue-400 text-2xl shadow-lg">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-white uppercase tracking-wider">Flipkart Gift Voucher</h3>
+                        <p class="text-[9px] text-blue-400 font-semibold mt-0.5">Shopping Cards (₹30 to ₹200)</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+            </div>
+
+        </div>
+
+        <!-- RECENT TRANSACTIONS HISTORY -->
+        <div class="w-full p-4 rounded-2xl bg-black/40 border border-gray-900 space-y-3 mt-4">
+            <h4 class="text-xs font-black uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left"></i> My Withdrawal Requests
+            </h4>
+            <div id="historyList" class="space-y-2 text-[10px] text-gray-400 font-mono">
+                <p class="text-center text-gray-600 py-2">Loading transactions...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CATEGORY OPTIONS MODAL -->
+    <div id="optionsModal" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-50">
+        <div class="w-full max-w-sm p-5 rounded-3xl bg-[#0e0a1a] border border-purple-500/30 shadow-2xl relative max-h-[85vh] overflow-y-auto space-y-4">
+            
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider" id="categoryTitle">Category Options</h3>
+                <button onclick="closeModal('optionsModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-sm"></i></button>
+            </div>
+
+            <!-- UPI INPUT FIELD (ONLY FOR UPI CATEGORY) -->
+            <div id="upiInputContainer" class="hidden space-y-1">
+                <label class="block text-[9px] font-black text-sky-400 uppercase tracking-widest">Enter Your UPI ID / Phone Pe Number</label>
+                <input type="text" id="userUpiId" placeholder="e.g. 9876543210@paytm / name@upi" class="w-full px-3 py-2 text-xs bg-black/60 border border-sky-800/60 rounded-xl outline-none text-white neon-focus font-mono">
+            </div>
+
+            <!-- OPTIONS CONTAINER -->
+            <div id="optionsGrid" class="space-y-2"></div>
+
+            <!-- CUSTOM PLAY STORE CONTAINER -->
+            <div id="customRcContainer" class="hidden p-3 rounded-2xl bg-black/50 border border-emerald-500/30 space-y-2">
+                <span class="text-[9px] font-black text-emerald-400 uppercase tracking-wider block">Custom Redeem Code (₹10 to ₹200)</span>
+                <div class="flex gap-2">
+                    <input type="number" id="customAmountInput" placeholder="Amount in ₹" oninput="calculateCustomCoins()" class="w-2/3 px-3 py-2 text-xs bg-black/80 border border-gray-800 rounded-xl outline-none text-white font-mono">
+                    <button onclick="selectCustomOption()" class="w-1/3 bg-emerald-600 text-white font-black text-[10px] uppercase rounded-xl">Apply</button>
+                </div>
+                <p id="customCalcText" class="text-[8px] text-gray-400 font-mono">1 ₹ = 200 Coins + 250 Coins Fee</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SECURITY VERIFICATION MODAL (PIN / DOB) -->
+    <div id="securityModal" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-50">
+        <div class="w-full max-w-xs p-5 rounded-3xl bg-[#0d0918] border border-purple-500/30 shadow-2xl space-y-4 text-center">
+            
+            <div class="w-12 h-12 bg-purple-950/60 border border-purple-500/30 rounded-2xl flex items-center justify-center text-purple-400 text-lg mx-auto">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+
+            <div>
+                <h3 class="text-xs font-black text-white uppercase tracking-wider" id="secModalTitle">Verification Required</h3>
+                <p class="text-[9px] text-amber-400 font-bold mt-1" id="secModalCost">Coins to deduct: 0</p>
+            </div>
+
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="block text-[8px] font-black text-purple-400 uppercase tracking-widest mb-1">Enter 4-Digit PIN</label>
+                    <input type="password" id="inputPin" maxlength="4" placeholder="••••" class="w-full px-3 py-2 text-center text-base font-black bg-black/70 border border-gray-800 rounded-xl outline-none text-white neon-focus font-mono" inputmode="numeric">
+                </div>
+                
+                <div class="text-center">
+                    <span class="text-[8px] font-black uppercase text-gray-600 tracking-widest">— OR IF FORGOTTEN —</span>
+                </div>
+
+                <div>
+                    <label class="block text-[8px] font-black text-purple-400 uppercase tracking-widest mb-1">Enter Recovery Date of Birth</label>
+                    <input type="date" id="inputDob" class="w-full px-3 py-2 text-xs bg-black/70 border border-gray-800 rounded-xl outline-none text-gray-300 neon-focus font-mono">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <button onclick="closeModal('securityModal')" class="py-2.5 bg-gray-800 text-gray-400 text-[10px] font-black uppercase rounded-xl">Cancel</button>
+                <button onclick="executeFinalWithdrawal()" class="py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-black uppercase rounded-xl shadow-lg active:scale-95">Submit</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
+        <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-house text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Home</span></a>
+        <a href="refer.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
+        <a href="withdrawal.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span></a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-trophy text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Ranks</span></a>
+        <a href="profile.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-gears text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Profile</span></a>
+    </nav>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
+          authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
+          databaseURL: "https://mir-free-rewards-log-and-earn-default-rtdb.firebaseio.com",
+          projectId: "mir-free-rewards-log-and-earn",
+          storageBucket: "mir-free-rewards-log-and-earn.firebasestorage.app",
+          messagingSenderId: "1055267295995",
+          appId: "1:1055267295995:web:35ebcfaa35a650a832165e"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(), db = firebase.firestore();
+
+        let currentUser = null, userCoins = 0, dbPin = "", dbDob = "";
+        let selectedCategory = "", selectedItemName = "", selectedCost = 0, selectedRupees = 0;
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                syncUserData();
+                loadHistory();
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        function syncUserData() {
+            db.collection("users").doc(currentUser.uid).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const d = doc.data();
+                    userCoins = d.coins || 0;
+                    dbPin = d.securePin || "";
+                    dbDob = d.recoveryDob || "";
+                    document.getElementById("coinCounter").innerText = userCoins;
+                }
+            });
+        }
+
+        function loadHistory() {
+            db.collection("withdrawals")
+              .where("uid", "==", currentUser.uid)
+              .orderBy("timestamp", "desc")
+              .limit(5)
+              .onSnapshot((snap) => {
+                  const box = document.getElementById("historyList");
+                  if (snap.empty) {
+                      box.innerHTML = `<p class="text-center text-gray-600 py-2">No withdrawal history found.</p>`;
+                      return;
+                  }
+                  let h = "";
+                  snap.forEach(doc => {
+                      const data = doc.data();
+                      const statusColor = data.status === 'Pending' ? 'text-amber-400' : (data.status === 'Success' ? 'text-emerald-400' : 'text-red-400');
+                      h += `
+                        <div class="flex justify-between items-center p-2 rounded-xl bg-black/50 border border-white/5">
+                            <div>
+                                <p class="text-white font-bold">${data.rewardName}</p>
+                                <p class="text-[8px] text-gray-500">${data.payoutDetails || 'Mailbox Deliver'}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="${statusColor} font-bold uppercase text-[9px]">${data.status}</span>
+                                <p class="text-[8px] text-gray-500">-${data.coinsUsed} Coins</p>
+                            </div>
+                        </div>
+                      `;
+                  });
+                  box.innerHTML = h;
+              });
+        }
+
+        function openCategoryModal(cat) {
+            selectedCategory = cat;
+            const grid = document.getElementById("optionsGrid");
+            const upiBox = document.getElementById("upiInputContainer");
+            const customBox = document.getElementById("customRcContainer");
+            grid.innerHTML = "";
+            upiBox.classList.add("hidden");
+            customBox.classList.add("hidden");
+
+            if (cat === 'play') {
+                document.getElementById("categoryTitle").innerText = "Google Play Redeem Code";
+                const playRates = [
+                    { rupees: 10, coins: 2000 },
+                    { rupees: 30, coins: 5800 },
+                    { rupees: 50, coins: 9500 },
+                    { rupees: 100, coins: 18000 },
+                    { rupees: 250, coins: 42000 }
+                ];
+                playRates.forEach(r => renderOptionItem(`₹${r.rupees} Play Redeem Code`, r.coins, r.rupees));
+                customBox.classList.remove("hidden");
+            } 
+            else if (cat === 'upi') {
+                document.getElementById("categoryTitle").innerText = "UPI / Paytm Cash Transfer";
+                upiBox.classList.remove("hidden");
+                const upiRates = [
+                    { rupees: 50, coins: 12000 },
+                    { rupees: 100, coins: 24000 },
+                    { rupees: 300, coins: 35000 },
+                    { rupees: 500, coins: 45000 }
+                ];
+                upiRates.forEach(r => renderOptionItem(`₹${r.rupees} Direct Bank Cash`, r.coins, r.rupees));
+            } 
+            else if (cat === 'amazon') {
+                document.getElementById("categoryTitle").innerText = "Amazon Pay Gift Card";
+                const amzRates = [
+                    { rupees: 30, coins: 6300 },
+                    { rupees: 50, coins: 10500 },
+                    { rupees: 100, coins: 20000 },
+                    { rupees: 200, coins: 38000 }
+                ];
+                amzRates.forEach(r => renderOptionItem(`₹${r.rupees} Amazon Pay Voucher`, r.coins, r.rupees));
+            } 
+            else if (cat === 'flipkart') {
+                document.getElementById("categoryTitle").innerText = "Flipkart Gift Voucher";
+                const fkRates = [
+                    { rupees: 30, coins: 6300 },
+                    { rupees: 50, coins: 10500 },
+                    { rupees: 100, coins: 20000 },
+                    { rupees: 200, coins: 38000 }
+                ];
+                fkRates.forEach(r => renderOptionItem(`₹${r.rupees} Flipkart Gift Voucher`, r.coins, r.rupees));
+            }
+
+            document.getElementById("optionsModal").style.display = "flex";
+        }
+
+        function renderOptionItem(name, cost, rupees) {
+            const grid = document.getElementById("optionsGrid");
+            grid.innerHTML += `
+                <div onclick="initiateSecurity('${name}', ${cost}, ${rupees})" class="w-full p-3 rounded-xl bg-black/60 border border-purple-900/40 flex justify-between items-center cursor-pointer hover:border-purple-500">
+                    <div>
+                        <p class="text-xs font-black text-white uppercase">${name}</p>
+                        <p class="text-[9px] text-amber-400 font-bold"><i class="fa-solid fa-coins"></i> ${cost} Coins</p>
+                    </div>
+                    <button class="px-3 py-1.5 bg-purple-600 text-white text-[9px] font-black uppercase rounded-lg">Select</button>
+                </div>
+            `;
+        }
+
+        function calculateCustomCoins() {
+            const rupees = parseInt(document.getElementById("customAmountInput").value) || 0;
+            const requiredCoins = (rupees * 200) + 250;
+            document.getElementById("customCalcText").innerText = `Required Coins: ${requiredCoins} Coins (${rupees} ₹ x 200 + 250 Fee)`;
+        }
+
+        function selectCustomOption() {
+            const rupees = parseInt(document.getElementById("customAmountInput").value);
+            if (!rupees || rupees < 10 || rupees > 200) {
+                alert("❌ Custom Redeem Code limit is between ₹10 and ₹200!");
+                return;
+            }
+            const requiredCoins = (rupees * 200) + 250;
+            initiateSecurity(`₹${rupees} Custom Play Redeem Code`, requiredCoins, rupees);
+        }
+
+        function initiateSecurity(name, cost, rupees) {
+            // If UPI, strict check for UPI ID first
+            if (selectedCategory === 'upi') {
+                const upiVal = document.getElementById("userUpiId").value.trim();
+                if (!upiVal || upiVal.length < 5) {
+                    alert("⚠️ Please enter a valid UPI ID / Number first!");
+                    return;
+                }
+            }
+
+            // Insufficient Balance Check
+            if (userCoins < cost) {
+                alert(`❌ Insufficient Coins!\nYou need ${cost - userCoins} more coins to withdraw this.`);
+                return;
+            }
+
+            selectedItemName = name;
+            selectedCost = cost;
+            selectedRupees = rupees;
+
+            closeModal('optionsModal');
+
+            document.getElementById("secModalTitle").innerText = name;
+            document.getElementById("secModalCost").innerText = `Coins to deduct: ${cost}`;
+            document.getElementById("inputPin").value = "";
+            document.getElementById("inputDob").value = "";
+            document.getElementById("securityModal").style.display = "flex";
+        }
+
+        function executeFinalWithdrawal() {
+            const enteredPin = document.getElementById("inputPin").value.trim();
+            const enteredDob = document.getElementById("inputDob").value;
+
+            let isVerified = false;
+
+            if (enteredPin !== "" && enteredPin === dbPin) {
+                isVerified = true;
+            } else if (enteredDob !== "" && enteredDob === dbDob) {
+                isVerified = true;
+            }
+
+            if (!isVerified) {
+                alert("❌ Authentication Failed! Incorrect 4-Digit PIN or Recovery Date of Birth.");
+                return;
+            }
+
+            const upiAddress = selectedCategory === 'upi' ? document.getElementById("userUpiId").value.trim() : "Mailbox";
+
+            // Deduct Coins & Add Record
+            db.collection("users").doc(currentUser.uid).update({
+                coins: firebase.firestore.FieldValue.increment(-selectedCost)
+            }).then(() => {
+                db.collection("withdrawals").add({
+                    uid: currentUser.uid,
+                    userName: currentUser.displayName,
+                    userEmail: currentUser.email,
+                    category: selectedCategory,
+                    rewardName: selectedItemName,
+                    rupees: selectedRupees,
+                    coinsUsed: selectedCost,
+                    payoutDetails: upiAddress,
+                    status: "Pending",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    closeModal('securityModal');
+
+                    if (selectedCategory === 'upi') {
+                        alert("✅ Your UPI payment will credit upto 48 hours on your bank and also notification with mailbox");
+                    } else {
+                        alert("✅ Your Payment is Successful. Payment will approve upto 48 hours on your Mailbox");
+                    }
+                });
+            }).catch(err => {
+                alert("Transaction Failed: " + err.message);
+            });
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = "none";
+        }
+    </script>
+</body>
+</html>
