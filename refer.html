@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIR FREE REWARDS - Refer & Earn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase core module drivers -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        body {
+            background-color: #09070f;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+        .premium-panel {
+            background: rgba(19, 15, 36, 0.85);
+            border: 1px solid rgba(147, 51, 234, 0.15);
+        }
+        .task-card {
+            background: linear-gradient(135deg, #130f26 0%, #0d0a1a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding-bottom: 90px;
+        }
+    </style>
+</head>
+<body class="p-3 select-none">
+
+    <div class="app-container space-y-4">
+        
+        <!-- HEADER -->
+        <div class="w-full p-4 rounded-2xl premium-panel flex justify-between items-center shadow-2xl">
+            <div class="flex items-center gap-3">
+                <a href="homepage.html" class="w-8 h-8 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </a>
+                <div>
+                    <h2 class="text-sm font-black text-white uppercase tracking-wider">Refer & Earn</h2>
+                    <p class="text-[9px] text-purple-400">Invite friends & earn up to 100 Coins!</p>
+                </div>
+            </div>
+            <div class="px-3 py-1 rounded-xl bg-black/50 border border-amber-500/30 flex items-center gap-1.5">
+                <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                <span id="coinCounter" class="text-xs font-black text-amber-300">0</span>
+            </div>
+        </div>
+
+        <!-- YOUR REFER CODE CARD -->
+        <div class="w-full p-4 rounded-2xl task-card text-center space-y-3 border border-purple-500/20 shadow-xl">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400">Your Unique Referral ID</p>
+            
+            <div class="flex items-center justify-between p-3 rounded-xl bg-black/60 border border-purple-900/60 font-mono">
+                <span id="myReferCode" class="text-sm font-black text-white tracking-widest">LOADING...</span>
+                <button onclick="copyReferCode()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded-lg transition-all active:scale-95">
+                    <i class="fa-regular fa-copy"></i> Copy
+                </button>
+            </div>
+
+            <!-- SHARE SOCIAL BUTTONS -->
+            <div class="pt-2">
+                <p class="text-[9px] text-gray-400 mb-2 font-semibold">Share via social media:</p>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="shareSocial('whatsapp')" class="p-2.5 rounded-xl bg-emerald-900/30 border border-emerald-500/30 text-emerald-400 text-xs flex flex-col items-center gap-1 hover:bg-emerald-800/40 transition-all">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        <span class="text-[8px] font-bold">WhatsApp</span>
+                    </button>
+                    <button onclick="shareSocial('facebook')" class="p-2.5 rounded-xl bg-blue-900/30 border border-blue-500/30 text-blue-400 text-xs flex flex-col items-center gap-1 hover:bg-blue-800/40 transition-all">
+                        <i class="fa-brands fa-facebook text-lg"></i>
+                        <span class="text-[8px] font-bold">Facebook</span>
+                    </button>
+                    <button onclick="shareSocial('telegram')" class="p-2.5 rounded-xl bg-sky-900/30 border border-sky-500/30 text-sky-400 text-xs flex flex-col items-center gap-1 hover:bg-sky-800/40 transition-all">
+                        <i class="fa-brands fa-telegram text-lg"></i>
+                        <span class="text-[8px] font-bold">Telegram</span>
+                    </button>
+                    <button onclick="shareSocial('native')" class="p-2.5 rounded-xl bg-purple-900/30 border border-purple-500/30 text-purple-300 text-xs flex flex-col items-center gap-1 hover:bg-purple-800/40 transition-all">
+                        <i class="fa-solid fa-share-nodes text-lg"></i>
+                        <span class="text-[8px] font-bold">More</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HAVE A REFERRAL CODE? (FOR NEW USERS) -->
+        <div id="referInputBox" class="w-full p-4 rounded-2xl task-card space-y-2 border border-indigo-500/20 shadow-xl">
+            <h3 class="text-xs font-black uppercase text-white flex items-center gap-1.5">
+                <i class="fa-solid fa-gift text-indigo-400"></i> Have a Referral Code?
+            </h3>
+            <p class="text-[9px] text-gray-400">Enter your friend's Unique ID to get <strong>50 Instant Coins</strong>!</p>
+            
+            <div class="flex gap-2 pt-1">
+                <input id="inputReferCode" type="text" placeholder="Paste Referral ID here" class="w-full px-3 py-2 text-xs rounded-xl bg-black/60 border border-gray-800 text-white font-mono focus:outline-none focus:border-purple-500">
+                <button onclick="applyReferralCode()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase rounded-xl transition-all active:scale-95 whitespace-nowrap">Apply</button>
+            </div>
+        </div>
+
+        <!-- REWARD BREAKDOWN & RULES -->
+        <div class="w-full p-4 rounded-2xl bg-black/40 border border-gray-900 space-y-3">
+            <h4 class="text-xs font-black uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-1">
+                <i class="fa-solid fa-circle-info"></i> How Referral Reward Works
+            </h4>
+            <div class="space-y-2 text-[9px] text-gray-300 font-mono">
+                <div class="flex justify-between items-center p-2 rounded-lg bg-black/40 border border-white/5">
+                    <span>🎁 Friend Joins with Code</span>
+                    <span class="text-emerald-400 font-bold">+40 Coins (You) / +50 Coins (Friend)</span>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-black/40 border border-white/5">
+                    <span>📅 Day 1 Check-In by Friend</span>
+                    <span class="text-amber-400 font-bold">+20 Coins</span>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-black/40 border border-white/5">
+                    <span>📅 Day 2 Check-In by Friend</span>
+                    <span class="text-amber-400 font-bold">+20 Coins</span>
+                </div>
+                <div class="flex justify-between items-center p-2 rounded-lg bg-black/40 border border-white/5">
+                    <span>🏆 Day 3 Check-In by Friend</span>
+                    <span class="text-indigo-400 font-bold">+20 Coins & +50 Rank Points</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
+        <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-house text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Home</span></a>
+        <a href="refer.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
+        <a href="withdrawal.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span></a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-trophy text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Ranks</span></a>
+        <a href="profile.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-gears text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Profile</span></a>
+    </nav>
+
+    <!-- FIREBASE & REFERRAL SCRIPT -->
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
+          authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
+          databaseURL: "https://mir-free-rewards-log-and-earn-default-rtdb.firebaseio.com",
+          projectId: "mir-free-rewards-log-and-earn",
+          storageBucket: "mir-free-rewards-log-and-earn.firebasestorage.app",
+          messagingSenderId: "1055267295995",
+          appId: "1:1055267295995:web:35ebcfaa35a650a832165e"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(), db = firebase.firestore();
+
+        let uid = null, userState = {};
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                uid = user.uid;
+                syncUserData();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function syncUserData() {
+            db.collection("users").doc(uid).onSnapshot((doc) => {
+                if (doc.exists) {
+                    userState = doc.data();
+                    document.getElementById("coinCounter").innerText = userState.coins || 0;
+                    document.getElementById("myReferCode").innerText = uid;
+
+                    // Agar user pehle se referral code apply kar chuka hai toh input hide kar do
+                    if (userState.referredBy) {
+                        document.getElementById("referInputBox").innerHTML = `
+                            <div class="p-3 bg-purple-950/30 border border-purple-800/40 rounded-xl text-center">
+                                <p class="text-[10px] text-purple-300 font-bold">✅ Referral code already applied!</p>
+                            </div>`;
+                    }
+                }
+            });
+        }
+
+        function copyReferCode() {
+            navigator.clipboard.writeText(uid);
+            alert("📋 Referral ID copied to clipboard!");
+        }
+
+        function applyReferralCode() {
+            const codeInput = document.getElementById("inputReferCode").value.trim();
+
+            if (!codeInput) {
+                alert("⚠️ Please enter a referral ID.");
+                return;
+            }
+            if (codeInput === uid) {
+                alert("❌ You cannot enter your own referral ID!");
+                return;
+            }
+
+            // Check if referral code exists in Firebase
+            db.collection("users").doc(codeInput).get().then((referrerDoc) => {
+                if (referrerDoc.exists()) {
+                    
+                    // 1. Give New User 50 Coins
+                    db.collection("users").doc(uid).update({
+                        coins: firebase.firestore.FieldValue.increment(50),
+                        referredBy: codeInput
+                    });
+
+                    // 2. Give Referrer 40 Initial Coins & track referred friend
+                    db.collection("users").doc(codeInput).update({
+                        coins: firebase.firestore.FieldValue.increment(40)
+                    });
+
+                    // Create tracking entry in referrer's collection
+                    db.collection("users").doc(codeInput).collection("referredFriends").doc(uid).set({
+                        friendUid: uid,
+                        day1Claimed: false,
+                        day2Claimed: false,
+                        day3Claimed: false,
+                        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    alert("🎉 Success! 50 Coins added to your wallet!");
+
+                } else {
+                    alert("❌ Invalid Referral ID. Please check and try again.");
+                }
+            }).catch((err) => alert("Error applying code: " + err.message));
+        }
+
+        function shareSocial(platform) {
+            const shareText = `Join MIR FREE REWARDS and earn free prizes! Use my Referral ID: ${uid} to get 50 bonus coins instantly! Download now:`;
+            const appUrl = "https://mir-free-rewards-log-and-earn.web.app/login.html";
+
+            if (platform === 'whatsapp') {
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + appUrl)}`);
+            } else if (platform === 'facebook') {
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(appUrl)}`);
+            } else if (platform === 'telegram') {
+                window.open(`https://t.telegram.org/share/url?url=${encodeURIComponent(appUrl)}&text=${encodeURIComponent(shareText)}`);
+            } else if (platform === 'native') {
+                if (navigator.share) {
+                    navigator.share({ title: 'MIR FREE REWARDS', text: shareText, url: appUrl });
+                } else {
+                    copyReferCode();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
