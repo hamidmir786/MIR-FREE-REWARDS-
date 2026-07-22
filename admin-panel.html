@@ -116,7 +116,7 @@
 
     <!-- DYNAMIC OVERLAY MODALS -->
     <div id="adminPortalModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div id="adminModalBody" class="w-full max-w-sm bg-[#0b0b14] border border-gray-900 p-5 rounded-2xl space-y-4">
+        <div id="adminModalBody" class="w-full max-w-sm bg-[#0b0b14] border border-gray-900 p-5 rounded-2xl space-y-4 max-h-[85vh] overflow-y-auto">
             <!-- Dynamic modal content renders here -->
         </div>
     </div>
@@ -147,7 +147,7 @@
             listenToRedeemRequestsRealtime();
         };
 
-        // FETCH USERS
+        // FETCH ALL USERS
         function fetchLatestAdminData() {
             db.collection("users").get().then(snap => {
                 cachedUsersList = [];
@@ -173,7 +173,7 @@
             });
         }
 
-        // RECOVERY REQUESTS (Listens to 'adminRequests' & 'recovery_requests')
+        // RECOVERY REQUESTS
         function fetchUserRecoveryRequests() {
             db.collection("adminRequests").onSnapshot(snap => {
                 renderRecoveryData(snap);
@@ -226,6 +226,12 @@
                 const isPending = (st === "PENDING");
                 const targetUid = req.userId || req.userUid || req.uid || "";
 
+                // Formatted Time
+                let formattedTime = "N/A";
+                if (req.timestamp && req.timestamp.seconds) {
+                    formattedTime = new Date(req.timestamp.seconds * 1000).toLocaleString();
+                }
+
                 card.className = `p-3.5 bg-black/40 border ${isPending ? 'border-amber-900/50' : 'border-gray-900'} rounded-2xl text-xs space-y-2`;
 
                 card.innerHTML = `
@@ -236,7 +242,7 @@
                     <div class="space-y-1 bg-black/30 p-2 rounded-xl text-[10px] text-gray-300">
                         <p><strong>Type:</strong> ${req.requestType || 'RECOVERY_PIN_AND_DOB'}</p>
                         <p><strong>Email:</strong> ${req.userEmail || 'N/A'}</p>
-                        <p class="font-mono text-[9px] text-purple-400">UID: ${targetUid}</p>
+                        <p class="text-amber-400 font-mono text-[9px]">Requested On: ${formattedTime}</p>
                     </div>
                     ${isPending ? `
                     <div class="flex gap-2 pt-1">
@@ -250,7 +256,7 @@
             });
         }
 
-        // REDEEM REQUESTS (Listens to 'withdrawals' & 'redeems')
+        // REDEEM REQUESTS REALTIME LISTENER
         function listenToRedeemRequestsRealtime() {
             db.collection("withdrawals").onSnapshot(snap => {
                 processAndRenderRedeems(snap);
@@ -297,6 +303,8 @@
                 return timeB - timeA;
             });
 
+            const nowInMs = Date.now();
+
             requestsArray.forEach(req => {
                 const reqId = req.id;
                 const item = document.createElement("div");
@@ -306,36 +314,128 @@
                 const userEmail = req.userEmail || req.userName || "User";
                 const coinsUsed = req.coinsUsed || req.coins || 0;
                 const rupees = req.rupees || req.amount || "";
+                const userUid = req.uid || req.userUid || "";
                 
                 const statusVal = (req.status || "Pending").toUpperCase();
                 const isPending = (statusVal === "PENDING");
 
-                item.className = `p-3.5 bg-black/30 border ${isPending ? 'border-yellow-900/40' : 'border-gray-900'} rounded-2xl text-xs space-y-2`;
+                // TIME CALCULATIONS & 48-HOUR WARNING
+                let timeString = "Date Unknown";
+                let isOverdue = false;
+
+                if (req.timestamp && req.timestamp.seconds) {
+                    const requestMs = req.timestamp.seconds * 1000;
+                    timeString = new Date(requestMs).toLocaleString();
+                    const diffHours = (nowInMs - requestMs) / (1000 * 60 * 60);
+                    if (isPending && diffHours >= 48) {
+                        isOverdue = true;
+                    }
+                }
+
+                item.className = `p-3.5 bg-black/30 border ${isOverdue ? 'border-red-600/80 shadow-[0_0_10px_rgba(220,38,38,0.2)]' : (isPending ? 'border-yellow-900/40' : 'border-gray-900')} rounded-2xl text-xs space-y-2 relative`;
 
                 item.innerHTML = `
                     <div class="flex justify-between items-center">
                         <span class="text-[9px] font-mono text-gray-400">User: <strong class="text-white">${userEmail}</strong></span>
-                        <span class="px-2 py-0.5 rounded text-[8px] font-black tracking-wider ${isPending ? 'bg-yellow-950/40 text-yellow-400 border border-yellow-800/30' : (statusVal === 'APPROVED' || statusVal === 'SUCCESS' ? 'bg-green-950/40 text-green-400 border border-green-800/30' : 'bg-red-950/40 text-red-400 border border-red-800/30')}">${statusVal}</span>
+                        <div class="flex items-center gap-1">
+                            ${isOverdue ? `<span class="bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded animate-pulse">⚠️ OVERDUE (48h+)</span>` : ''}
+                            <span class="px-2 py-0.5 rounded text-[8px] font-black tracking-wider ${isPending ? 'bg-yellow-950/40 text-yellow-400 border border-yellow-800/30' : (statusVal === 'APPROVED' || statusVal === 'SUCCESS' ? 'bg-green-950/40 text-green-400 border border-green-800/30' : 'bg-red-950/40 text-red-400 border border-red-800/30')}">${statusVal}</span>
+                        </div>
                     </div>
+                    
                     <div class="bg-black/40 p-2.5 rounded-xl border border-white/5 space-y-1">
                         <p class="font-bold text-white text-xs flex justify-between">
                             <span>${label} ${rupees ? '(₹' + rupees + ')' : ''}</span>
                             <span class="text-amber-400 font-mono">${coinsUsed} 🪙</span>
                         </p>
-                        <p class="text-purple-400 font-mono text-[10px] mt-0.5">Payout Details: <strong class="text-white select-all">${targetAddress}</strong></p>
+                        <p class="text-purple-400 font-mono text-[10px] mt-0.5">Payout Address: <strong class="text-white select-all">${targetAddress}</strong></p>
+                        <p class="text-gray-500 font-mono text-[9px] pt-1 border-t border-white/5 flex justify-between">
+                            <span><i class="fa-regular fa-clock"></i> Requested: ${timeString}</span>
+                        </p>
                     </div>
-                    ${isPending ? `
+
                     <div class="flex gap-2 pt-1">
-                        <button onclick="approveRedeemTicket('${reqId}', '${req.uid || req.userUid || ''}', '${label}')" class="flex-1 py-1.5 bg-green-700 hover:bg-green-600 text-white text-[9px] font-bold rounded-lg uppercase transition-all">Approve & Send Code</button>
-                        <button onclick="rejectRedeemTicket('${reqId}', '${req.uid || req.userUid || ''}')" class="flex-1 py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-400 text-[9px] font-bold rounded-lg uppercase transition-all">Reject</button>
+                        <button onclick="inspectUserFullHistory('${userUid}', '${userEmail}')" class="py-1.5 px-2.5 bg-purple-950/40 hover:bg-purple-900/60 border border-purple-800/40 text-purple-300 text-[9px] font-bold rounded-lg uppercase flex items-center gap-1">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Check History
+                        </button>
+                        ${isPending ? `
+                        <button onclick="approveRedeemTicket('${reqId}', '${userUid}', '${label}')" class="flex-1 py-1.5 bg-green-700 hover:bg-green-600 text-white text-[9px] font-bold rounded-lg uppercase transition-all">Approve & Code</button>
+                        <button onclick="rejectRedeemTicket('${reqId}', '${userUid}')" class="py-1.5 px-2.5 bg-red-900/40 hover:bg-red-900/60 text-red-400 text-[9px] font-bold rounded-lg uppercase transition-all">Reject</button>
+                        ` : ''}
                     </div>
-                    ` : ''}
                 `;
                 container.appendChild(item);
             });
         }
 
-        // RESOLVE RECOVERY REQUEST
+        // INSPECT USER HISTORY & ANTI-SCAM DETECTOR
+        function inspectUserFullHistory(userUid, userEmail) {
+            if (!userUid || userUid === "") {
+                alert("User UID not attached with this request!");
+                return;
+            }
+
+            const modal = document.getElementById("adminPortalModal");
+            const body = document.getElementById("adminModalBody");
+            modal.style.display = "flex";
+
+            body.innerHTML = `
+                <div class="flex justify-between items-center pb-2 border-b border-gray-800">
+                    <div>
+                        <h3 class="text-xs font-bold text-white uppercase"><i class="fa-solid fa-user-shield text-purple-400"></i> User Audit & History</h3>
+                        <p class="text-[9px] text-gray-500 font-mono">${userEmail}</p>
+                    </div>
+                    <button onclick="closeAdminPortalModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="historyModalContent" class="space-y-3 pt-2 text-xs">
+                    <p class="text-center text-gray-500 py-4"><i class="fa-solid fa-spinner animate-spin"></i> Fetching complete activity history...</p>
+                </div>
+            `;
+
+            // Query user data & withdrawal history
+            db.collection("users").doc(userUid).get().then(userDoc => {
+                const userData = userDoc.exists ? userDoc.data() : {};
+                
+                db.collection("withdrawals").where("uid", "==", userUid).get().then(wSnap => {
+                    let historyHTML = `
+                        <div class="bg-black/50 p-2.5 rounded-xl border border-gray-900 space-y-1 font-mono text-[10px]">
+                            <p class="text-gray-400">Current Coins: <strong class="text-yellow-400">${userData.coins || 0} 🪙</strong></p>
+                            <p class="text-gray-400">PIN: <strong class="text-white">${userData.pin || 'N/A'}</strong> | DOB: <strong class="text-white">${userData.dob || 'N/A'}</strong></p>
+                        </div>
+                        <h4 class="text-[10px] font-bold text-purple-400 uppercase tracking-wider pt-1">All Redeem Attempts (${wSnap.size})</h4>
+                        <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    `;
+
+                    if (wSnap.empty) {
+                        historyHTML += `<p class="text-gray-600 text-[10px] text-center py-2">No previous redeem requests found.</p>`;
+                    } else {
+                        wSnap.forEach(hDoc => {
+                            const hData = hDoc.data();
+                            const hStatus = (hData.status || "Pending").toUpperCase();
+                            let hTime = "N/A";
+                            if (hData.timestamp && hData.timestamp.seconds) {
+                                hTime = new Date(hData.timestamp.seconds * 1000).toLocaleDateString();
+                            }
+
+                            historyHTML += `
+                                <div class="p-2 bg-black/30 border border-white/5 rounded-lg text-[10px] flex justify-between items-center">
+                                    <div>
+                                        <p class="font-bold text-white">${hData.rewardName || 'Reward'} (₹${hData.rupees || 0})</p>
+                                        <p class="text-gray-500 text-[8px]">${hTime} • ${hData.coinsUsed || 0} coins</p>
+                                    </div>
+                                    <span class="px-1.5 py-0.5 text-[8px] font-bold rounded ${hStatus === 'APPROVED' ? 'bg-green-950 text-green-400' : (hStatus === 'PENDING' ? 'bg-yellow-950 text-yellow-400' : 'bg-red-950 text-red-400')}">${hStatus}</span>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    historyHTML += `</div>`;
+                    document.getElementById("historyModalContent").innerHTML = historyHTML;
+                });
+            });
+        }
+
+        // RESOLVE RECOVERY
         function resolveUserRequest(requestId, userUid) {
             const message = prompt("Enter PIN / DOB Details or Recovery Code for user's Mailbox:");
             if (message === null || message.trim() === "") return;
@@ -369,7 +469,6 @@
             if (code === null || code.trim() === "") return;
 
             const redeemMsg = `Your request for ${amountLabel} has been APPROVED!\nCode: ${code.trim()}`;
-
             const updateObj = { status: "APPROVED", resolvedCode: code.trim() };
             
             db.collection("withdrawals").doc(requestId).update(updateObj).catch(() => {
