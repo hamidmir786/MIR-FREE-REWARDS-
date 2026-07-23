@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Core Quiz - MIR FREE REWARDS</title>
+    <title>Quiz & Earn - MIR FREE REWARDS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -13,23 +13,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        body {
-            background-color: #09070f;
-            color: #f3f4f6;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        .premium-panel {
-            background: rgba(19, 15, 36, 0.9);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        .option-btn {
-            background: linear-gradient(135deg, #130f26 0%, #0d0a1a 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.2s ease;
-        }
-        .option-btn:active {
-            transform: scale(0.98);
-        }
+        body { background-color: #09070f; color: #f3f4f6; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .premium-panel { background: rgba(19, 15, 36, 0.9); border: 1px solid rgba(168, 85, 247, 0.2); }
+        .option-btn { transition: all 0.2s ease; }
+        .option-btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body class="p-4 flex flex-col min-h-screen justify-between">
@@ -38,7 +25,7 @@
         
         <!-- HEADER NAV -->
         <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
-            <a href="homepage.html" class="px-3 py-1.5 bg-emerald-950/60 border border-emerald-800/40 rounded-xl text-emerald-300 text-xs font-bold flex items-center gap-2">
+            <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> Home
             </a>
             <div class="flex items-center gap-1.5 bg-black/50 px-3 py-1 rounded-xl border border-amber-500/30 font-mono">
@@ -50,35 +37,45 @@
         <!-- MAIN QUIZ CONTAINER -->
         <div class="p-5 rounded-3xl premium-panel text-center space-y-4 shadow-2xl">
             
-            <div class="flex justify-between items-center border-b border-emerald-900/30 pb-3">
-                <h2 class="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                    <i class="fa-solid fa-brain text-emerald-500"></i> Daily Quiz Mission
+            <div class="flex justify-between items-center border-b border-purple-900/30 pb-3">
+                <h2 class="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-2">
+                    <i class="fa-solid fa-brain text-purple-500"></i> Quiz & Earn
                 </h2>
-                <span id="quizProgress" class="text-xs font-mono text-gray-400 font-bold">Q: 1/5</span>
+                <span id="quizLimitText" class="text-xs font-mono text-gray-400 font-bold">Limits: --/1</span>
             </div>
 
-            <!-- QUESTION CARD -->
-            <div id="quizBox" class="space-y-4">
-                <div class="p-4 rounded-2xl bg-black/40 border border-emerald-900/30 min-h-[90px] flex items-center justify-center">
-                    <p id="questionText" class="text-xs font-bold text-white leading-relaxed">Loading Question...</p>
-                </div>
-
-                <!-- OPTIONS GRID -->
-                <div id="optionsContainer" class="grid grid-cols-1 gap-2.5"></div>
-            </div>
-
-            <!-- COMPLETED / LIMIT REACHED CONTAINER -->
-            <div id="resultBox" class="hidden space-y-4 py-4">
-                <div id="statusIcon" class="w-16 h-16 rounded-full bg-emerald-900/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mx-auto text-2xl">
-                    <i class="fa-solid fa-trophy"></i>
-                </div>
-                <div>
-                    <h3 id="resultTitle" class="text-sm font-black text-white uppercase">Quiz Completed!</h3>
-                    <p id="rewardSummary" class="text-xs text-emerald-400 font-mono mt-1">+0 Coins Earned</p>
-                </div>
-                <button onclick="window.location.href='homepage.html'" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
-                    Return to Dashboard
+            <!-- START SCREEN -->
+            <div id="startScreen" class="space-y-4 py-4">
+                <p class="text-xs text-gray-300">Answer 5 random questions. Score <b>5/5</b> to earn <b>30 Rank Points</b>!</p>
+                <button onclick="startQuiz()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 font-black text-xs text-white uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
+                    START QUIZ SESSION
                 </button>
+            </div>
+
+            <!-- QUIZ BOX -->
+            <div id="quizBox" class="hidden space-y-4 text-left">
+                <div class="flex justify-between items-center text-xs font-mono text-purple-300">
+                    <span id="questionTracker">Question 1/5</span>
+                    <span id="timerText" class="text-amber-400 font-bold"><i class="fa-solid fa-clock"></i> 15s</span>
+                </div>
+
+                <div class="p-4 bg-black/40 rounded-2xl border border-purple-900/30">
+                    <h3 id="questionText" class="text-xs font-bold text-gray-100">Loading Question...</h3>
+                </div>
+
+                <div id="optionsContainer" class="space-y-2">
+                    <!-- Options injected dynamically -->
+                </div>
+            </div>
+
+            <!-- RESULT SCREEN -->
+            <div id="resultScreen" class="hidden space-y-4 py-4">
+                <i class="fa-solid fa-trophy text-4xl text-amber-400"></i>
+                <h3 class="text-lg font-black text-white">Quiz Completed!</h3>
+                <p id="resultText" class="text-xs text-purple-300">You scored 0/5</p>
+                <a href="homepage.html" class="block w-full py-3 bg-purple-800 hover:bg-purple-700 font-bold text-xs text-white uppercase rounded-xl text-center">
+                    Back to Home
+                </a>
             </div>
 
         </div>
@@ -101,14 +98,33 @@
 
         let uid = null, userState = {};
         let currentQuestionIndex = 0;
-        let correctAnswersCount = 0;
+        let score = 0;
+        let sessionQuestions = [];
+        let timer = null;
+        let timeLeft = 15;
 
-        const quizData = [
-            { q: "What is the primary currency used in MIR FREE REWARDS?", options: ["Gems", "Coins & Vouchers", "Tokens", "Diamonds"], correct: 1 },
-            { q: "How many continuous check-in days trigger a +300 bonus?", options: ["7 Days", "15 Days", "30 Days", "60 Days"], correct: 2 },
-            { q: "Which game mode allows you to win up to 500 Coins?", options: ["Core Quiz", "Lucky Scratch", "Daily Ad Broadcast", "Profile Edit"], correct: 1 },
-            { q: "Where do PIN and DOB recovery responses get delivered?", options: ["SMS", "System Mailbox", "WhatsApp", "Email Inbox"], correct: 1 },
-            { q: "How many daily broadcast ad limits are available on Home?", options: ["5", "10", "15", "Unlimited"], correct: 1 }
+        // Question Bank with 20 Questions
+        const questionBank = [
+            { q: "What is the capital of France?", options: ["Berlin", "Madrid", "Paris", "Rome"], answer: 2 },
+            { q: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Venus"], answer: 1 },
+            { q: "What is 5 + 7?", options: ["10", "11", "12", "13"], answer: 2 },
+            { q: "Which organ pumps blood in human body?", options: ["Brain", "Lungs", "Heart", "Liver"], answer: 2 },
+            { q: "How many days are in a leap year?", options: ["365", "366", "364", "367"], answer: 1 },
+            { q: "Which gas do plants absorb from atmosphere?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], answer: 1 },
+            { q: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], answer: 3 },
+            { q: "Who wrote 'Romeo and Juliet'?", options: ["Charles Dickens", "William Shakespeare", "Mark Twain", "JK Rowling"], answer: 1 },
+            { q: "How many sides does a hexagon have?", options: ["5", "6", "7", "8"], answer: 1 },
+            { q: "What is the freezing point of water?", options: ["0°C", "100°C", "-10°C", "50°C"], answer: 0 },
+            { q: "Which is the smallest prime number?", options: ["0", "1", "2", "3"], answer: 2 },
+            { q: "Which continent is known as the 'Dark Continent'?", options: ["Asia", "Africa", "Europe", "Australia"], answer: 1 },
+            { q: "What is the hardest natural substance on Earth?", options: ["Gold", "Iron", "Diamond", "Platinum"], answer: 2 },
+            { q: "How many players are in a Cricket team on pitch?", options: ["10", "11", "12", "9"], answer: 1 },
+            { q: "Which device is used to measure temperature?", options: ["Barometer", "Thermometer", "Speedometer", "Altimeter"], answer: 1 },
+            { q: "What is the capital city of Japan?", options: ["Beijing", "Seoul", "Tokyo", "Bangkok"], answer: 2 },
+            { q: "Which animal is known as the Ship of the Desert?", options: ["Horse", "Camel", "Elephant", "Lion"], answer: 1 },
+            { q: "What is the chemical symbol for Gold?", options: ["Ag", "Au", "Fe", "Pb"], answer: 1 },
+            { q: "How many colors are there in a Rainbow?", options: ["5", "6", "7", "8"], answer: 2 },
+            { q: "Which country is home to the Kangaroo?", options: ["Brazil", "India", "Australia", "Canada"], answer: 2 }
         ];
 
         function getTodayDateString() {
@@ -124,13 +140,10 @@
                         userState = doc.data();
                         document.getElementById("userCoins").innerText = userState.coins || 0;
                         
-                        // Check Midnight Reset Limit
                         const todayStr = getTodayDateString();
-                        if (userState.lastQuizDate === todayStr) {
-                            showLimitReached();
-                        } else {
-                            renderQuestion();
-                        }
+                        const todayQuiz = userState.lastQuizDate === todayStr ? (userState.quizCount || 0) : 0;
+                        const remaining = Math.max(0, 1 - todayQuiz);
+                        document.getElementById("quizLimitText").innerText = `Limits: ${remaining}/1`;
                     }
                 });
             } else {
@@ -138,91 +151,105 @@
             }
         });
 
-        function renderQuestion() {
-            if (currentQuestionIndex >= quizData.length) {
-                finalizeQuizSession();
+        function startQuiz() {
+            const todayStr = getTodayDateString();
+            const todayQuiz = userState.lastQuizDate === todayStr ? (userState.quizCount || 0) : 0;
+
+            if (todayQuiz >= 1) {
+                alert("🚫 Daily Quiz Limit Reached (1/1)! Come back tomorrow after 12:00 AM.");
                 return;
             }
 
-            const current = quizData[currentQuestionIndex];
-            document.getElementById("quizProgress").innerText = `Q: ${currentQuestionIndex + 1}/${quizData.length}`;
-            document.getElementById("questionText").innerText = current.q;
+            // Randomize and select 5 Questions from Bank
+            const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
+            sessionQuestions = shuffled.slice(0, 5);
+
+            currentQuestionIndex = 0;
+            score = 0;
+
+            document.getElementById("startScreen").classList.add("hidden");
+            document.getElementById("quizBox").classList.remove("hidden");
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timer);
+            timeLeft = 15;
+            document.getElementById("timerText").innerHTML = `<i class="fa-solid fa-clock"></i> ${timeLeft}s`;
+
+            if (currentQuestionIndex >= sessionQuestions.length) {
+                finishQuiz();
+                return;
+            }
+
+            const currentQ = sessionQuestions[currentQuestionIndex];
+            document.getElementById("questionTracker").innerText = `Question ${currentQuestionIndex + 1}/5`;
+            document.getElementById("questionText").innerText = currentQ.q;
 
             const optionsContainer = document.getElementById("optionsContainer");
             optionsContainer.innerHTML = "";
 
-            current.options.forEach((opt, idx) => {
+            currentQ.options.forEach((opt, index) => {
                 const btn = document.createElement("button");
-                btn.className = "w-full p-3 rounded-xl option-btn text-xs font-bold text-gray-200 text-left flex justify-between items-center";
-                btn.innerHTML = `<span>${opt}</span> <i class="fa-solid fa-chevron-right text-[10px] text-gray-500"></i>`;
-                btn.onclick = () => validateAnswer(idx, btn);
+                btn.className = "option-btn w-full p-3 bg-purple-950/40 hover:bg-purple-900/60 border border-purple-800/40 rounded-xl text-xs text-gray-200 text-left font-semibold flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-purple-400"></i>`;
+                btn.onclick = () => selectAnswer(index);
                 optionsContainer.appendChild(btn);
             });
+
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timerText").innerHTML = `<i class="fa-solid fa-clock"></i> ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    nextQuestion();
+                }
+            }, 1000);
         }
 
-        function validateAnswer(selectedIndex, btnElement) {
-            const current = quizData[currentQuestionIndex];
-            const allBtns = document.getElementById("optionsContainer").children;
-            
-            for (let b of allBtns) { b.disabled = true; }
+        function selectAnswer(selectedIndex) {
+            clearInterval(timer);
+            const currentQ = sessionQuestions[currentQuestionIndex];
 
-            if (selectedIndex === current.correct) {
-                btnElement.classList.add("bg-emerald-900/60", "border-emerald-500", "text-emerald-300");
-                correctAnswersCount++;
-            } else {
-                btnElement.classList.add("bg-red-900/60", "border-red-500", "text-red-300");
+            if (selectedIndex === currentQ.answer) {
+                score++;
             }
 
-            setTimeout(() => {
-                currentQuestionIndex++;
-                renderQuestion();
-            }, 800);
+            nextQuestion();
         }
 
-        function showAd(callback) {
-            // Simulated Ad trigger (Replace with AdMob/Unity Ad trigger)
-            setTimeout(callback, 1000);
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
         }
 
-        function finalizeQuizSession() {
+        function finishQuiz() {
+            clearInterval(timer);
             const todayStr = getTodayDateString();
+
+            // Sahi answers ke coins calculation (e.g. 2 Coins per correct answer)
+            const coinsEarned = score * 2;
             
-            showAd(() => {
-                let rewardCoins = 0;
-                
-                // Strict Rule: ONLY 5/5 Correct gives 5 Coins
-                if (correctAnswersCount === 5) {
-                    rewardCoins = 5;
+            // AGAR SCORE EXACT 5/5 HOGA, TOH HI 30 RANK POINTS MILENGE
+            const rankPointsEarned = (score === 5) ? 30 : 0;
+
+            // Database update
+            db.collection("users").doc(uid).update({
+                coins: firebase.firestore.FieldValue.increment(coinsEarned),
+                leaderPoints: firebase.firestore.FieldValue.increment(rankPointsEarned),
+                quizCount: 1,
+                lastQuizDate: todayStr
+            }).then(() => {
+                document.getElementById("quizBox").classList.add("hidden");
+                document.getElementById("resultScreen").classList.remove("hidden");
+
+                if (score === 5) {
+                    document.getElementById("resultText").innerText = `🎯 PERFECT SCORE! You answered 5/5 correctly and won ${coinsEarned} Coins & +30 Rank Points!`;
+                } else {
+                    document.getElementById("resultText").innerText = `You answered ${score}/5 correctly and earned ${coinsEarned} Coins. (Score 5/5 to earn +30 Rank Points!)`;
                 }
-
-                // Update Firestore - Lock for the day & add reward if earned
-                db.collection("users").doc(uid).update({
-                    coins: firebase.firestore.FieldValue.increment(rewardCoins),
-                    lastQuizDate: todayStr
-                }).then(() => {
-                    document.getElementById("quizBox").classList.add("hidden");
-                    document.getElementById("quizProgress").classList.add("hidden");
-                    document.getElementById("resultBox").classList.remove("hidden");
-                    
-                    if (rewardCoins > 0) {
-                        document.getElementById("resultTitle").innerText = "Perfect Score! (5/5)";
-                        document.getElementById("rewardSummary").innerText = "+5 Coins Added to Wallet!";
-                    } else {
-                        document.getElementById("resultTitle").innerText = `Score: ${correctAnswersCount}/5 Correct`;
-                        document.getElementById("rewardSummary").innerText = "0 Coins Earned (Need 5/5 correct for 5 coins)";
-                        document.getElementById("rewardSummary").className = "text-xs text-red-400 font-mono mt-1";
-                    }
-                });
             });
-        }
-
-        function showLimitReached() {
-            document.getElementById("quizBox").classList.add("hidden");
-            document.getElementById("quizProgress").classList.add("hidden");
-            document.getElementById("resultBox").classList.remove("hidden");
-            document.getElementById("resultTitle").innerText = "Daily Limit Reached";
-            document.getElementById("rewardSummary").innerText = "Come back tomorrow after 12:00 AM Night!";
-            document.getElementById("rewardSummary").className = "text-xs text-amber-400 font-mono mt-1";
         }
     </script>
 </body>
