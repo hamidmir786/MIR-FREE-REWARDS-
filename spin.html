@@ -192,7 +192,7 @@
 
             const vouchers = userState.vouchers || 0;
             if (vouchers < 1) {
-                alert("❌ You don't have enough Vouchers! Exchange 5 Coins to buy 1 Voucher.");
+                alert("❌ You don't have enough Vouchers! Exchange 3 Coins to buy 1 Voucher.");
                 return;
             }
 
@@ -231,17 +231,18 @@
                     if (winningReward.type === "coins") coinInc = winningReward.value;
                     if (winningReward.type === "vouchers") voucherInc = winningReward.value;
 
-                    // Sync Reward & Daily Count in Database
+                    // Sync Reward, Daily Count & ADD +15 LEADERBOARD RANK POINTS IN DATABASE
                     db.collection("users").doc(uid).update({
                         coins: firebase.firestore.FieldValue.increment(coinInc),
                         vouchers: firebase.firestore.FieldValue.increment(voucherInc),
+                        leaderPoints: firebase.firestore.FieldValue.increment(15), // +15 Rank Points added on every spin
                         spinCount: todaySpins + 1,
                         lastSpinDate: todayStr
                     }).then(() => {
                         if (winningReward.type === "none") {
-                            alert("🔁 Retry try again.");
+                            alert("🔁 Retry try again! (+15 Rank Points Earned!)");
                         } else {
-                            alert(`🎉 Congratulations! You won ${winningReward.label}!`);
+                            alert(`🎉 Congratulations! You won ${winningReward.label} & +15 Rank Points!`);
                         }
                         isSpinning = false;
                         document.getElementById("spinBtn").disabled = false;
