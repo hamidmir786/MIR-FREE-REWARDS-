@@ -45,7 +45,7 @@
         
         <!-- 1. TOP PROFILE & BALANCE HEADER -->
         <div class="w-full p-3 rounded-2xl premium-panel flex justify-between items-center shadow-2xl">
-            <div class="flex items-center gap-2.5 max-w-[55%]">
+            <div class="flex items-center gap-2.5 max-w-[45%]">
                 <img id="userAvatar" src="https://via.placeholder.com/40" alt="Avatar" class="w-10 h-10 rounded-full border border-purple-500/40 object-cover">
                 <div class="truncate">
                     <h2 id="userName" class="text-xs font-black tracking-wide truncate text-white">Loading...</h2>
@@ -53,12 +53,17 @@
                 </div>
             </div>
             
-            <div class="flex items-center gap-2 font-mono">
-                <div class="px-2.5 py-1 rounded-xl bg-black/50 border border-amber-500/30 flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 font-mono">
+                <div class="px-2 py-1 rounded-xl bg-black/50 border border-amber-500/30 flex items-center gap-1">
                     <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
                     <span id="coinCounter" class="text-xs font-black text-amber-300">0</span>
                 </div>
-                <div class="px-2.5 py-1 rounded-xl bg-black/50 border border-indigo-500/30 flex items-center gap-1.5">
+                <!-- FIXED: Dynamic Leaderboard Points Badge -->
+                <div class="px-2 py-1 rounded-xl bg-black/50 border border-purple-500/30 flex items-center gap-1">
+                    <i class="fa-solid fa-trophy text-purple-400 text-xs"></i>
+                    <span id="rankPointsCounter" class="text-xs font-black text-purple-300">0</span>
+                </div>
+                <div class="px-2 py-1 rounded-xl bg-black/50 border border-indigo-500/30 flex items-center gap-1">
                     <i class="fa-solid fa-ticket text-indigo-400 text-xs"></i>
                     <span id="voucherCounter" class="text-xs font-black text-indigo-300">0</span>
                 </div>
@@ -107,15 +112,13 @@
             </div>
         </div>
 
-        <!-- 4. MODULE NAVIGATION CARDS GRID (CONNECTS TO OUTSIDE PAGES) -->
+        <!-- 4. MODULE NAVIGATION CARDS GRID -->
         <div class="space-y-2 pt-2">
             <div class="px-1 text-[10px] font-bold uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-1">
                 <i class="fa-solid fa-gamepad"></i> Game & Utility Modules
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                
-                <!-- LINK TO SPIN.HTML -->
                 <a href="spin.html" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-purple-500 transition-all active:scale-95">
                     <div class="w-8 h-8 rounded-xl bg-purple-900/50 border border-purple-500/30 flex items-center justify-center text-purple-300">
                         <i class="fa-solid fa-arrows-spin text-base"></i>
@@ -126,7 +129,6 @@
                     </div>
                 </a>
 
-                <!-- LINK TO SCRATCH.HTML -->
                 <a href="scratch.html" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-amber-500/50 transition-all active:scale-95">
                     <div class="w-8 h-8 rounded-xl bg-amber-900/40 border border-amber-500/30 flex items-center justify-center text-amber-300">
                         <i class="fa-solid fa-sparkles text-base"></i>
@@ -137,7 +139,6 @@
                     </div>
                 </a>
 
-                <!-- LINK TO QUIZ.HTML -->
                 <a href="quiz.html" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-emerald-500/50 transition-all active:scale-95">
                     <div class="w-8 h-8 rounded-xl bg-emerald-900/40 border border-emerald-500/30 flex items-center justify-center text-emerald-300">
                         <i class="fa-solid fa-brain text-base"></i>
@@ -148,7 +149,6 @@
                     </div>
                 </a>
 
-                <!-- LINK TO RECOVERY.HTML -->
                 <a href="recovery.html" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-red-500/50 transition-all active:scale-95">
                     <div class="w-8 h-8 rounded-xl bg-red-900/40 border border-red-500/30 flex items-center justify-center text-red-300">
                         <i class="fa-solid fa-key text-base"></i>
@@ -158,7 +158,6 @@
                         <p class="text-[8px] text-gray-400 mt-0.5">Request account credentials</p>
                     </div>
                 </a>
-
             </div>
         </div>
 
@@ -190,7 +189,6 @@
 
         let uid = null, userState = {};
 
-        // Helper Function to Get Today's Date String Format
         const getTodayDateString = () => {
             const today = new Date();
             return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
@@ -210,28 +208,22 @@
             db.collection("users").doc(uid).onSnapshot((doc) => {
                 if (doc.exists) {
                     userState = doc.data();
-                    checkAndResetDailyAds(); // Auto 12:00 AM Reset Verification
+                    checkAndResetDailyAds();
                     renderApplicationCounters();
                     syncLiveMailboxFeed();
                 }
             });
         }
 
-        // 🎯 AUTOMATIC 12:00 AM DAILY ADS RESET ENGINE
         function checkAndResetDailyAds() {
             const todayStr = getTodayDateString();
             const lastWatchDate = userState.lastAdWatchDate || "";
 
-            // Agar date change ho gayi hai (12 AM beet chuka hai)
             if (lastWatchDate !== todayStr) {
                 db.collection("users").doc(uid).update({
                     dailyAdCount: 0,
                     lastAdWatchDate: todayStr
-                }).then(() => {
-                    console.log("✅ Daily Ads limit auto reset to 0 for a new day!");
-                }).catch(err => {
-                    console.error("Reset error:", err);
-                });
+                }).catch(err => console.error("Reset error:", err));
             }
         }
 
@@ -239,6 +231,7 @@
             document.getElementById("userName").innerText = userState.name || "User";
             document.getElementById("userEmail").innerText = userState.email || "Google Account";
             document.getElementById("coinCounter").innerText = userState.coins || 0;
+            document.getElementById("rankPointsCounter").innerText = userState.leaderPoints || 0; // Fixed key sync
             document.getElementById("voucherCounter").innerText = userState.vouchers || 0;
             if (userState.photo) document.getElementById("userAvatar").src = userState.photo;
 
@@ -290,6 +283,7 @@
             });
         }
 
+        // FIXED: Updated leaderPoints field increment logic
         function mineAdBroadcastSession() {
             let activeAds = userState.dailyAdCount || 0;
             if (activeAds >= 10) {
@@ -301,7 +295,7 @@
             loadAd(() => {
                 db.collection("users").doc(uid).update({
                     coins: firebase.firestore.FieldValue.increment(10),
-                    leaderboardPoints: firebase.firestore.FieldValue.increment(20),
+                    leaderPoints: firebase.firestore.FieldValue.increment(20), // Correct field name
                     dailyAdCount: firebase.firestore.FieldValue.increment(1),
                     lastAdWatchDate: todayStr
                 }).then(() => alert("🎉 Earned +10 Coins & +20 Rank Points!"));
@@ -326,7 +320,6 @@
 
                 snap.forEach((doc) => {
                     const m = doc.data();
-                    // Multi-field fallback check to prevent undefined
                     const mailText = m.message || m.msg || m.body || m.text || "No details provided";
                     const mailTitle = m.title || "Notification";
 
