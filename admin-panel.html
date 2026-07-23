@@ -208,9 +208,9 @@
             });
         }
 
-        // LOAD LEADERBOARD TOP WINNERS FOR ADMIN
+        // LOAD LEADERBOARD TOP WINNERS FOR ADMIN (UPDATED FILTER: rewardClaimed != true)
         function loadAdminLeaderboardWinners() {
-            db.collection("users").orderBy("leaderPoints", "desc").limit(3).get().then(snap => {
+            db.collection("users").orderBy("leaderPoints", "desc").get().then(snap => {
                 renderWinnersBox(snap);
             }).catch(() => {
                 db.collection("users").get().then(snap => {
@@ -221,7 +221,7 @@
                         tempArr.push(d);
                     });
                     tempArr.sort((a, b) => (b.leaderPoints || 0) - (a.leaderPoints || 0));
-                    renderWinnersBoxArray(tempArr.slice(0, 3));
+                    renderWinnersBoxArray(tempArr);
                 });
             });
         }
@@ -240,27 +240,34 @@
             const container = document.getElementById("top3WinnersContainer");
             container.innerHTML = "";
 
-            if(list.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 text-center py-2">No leaderboard records yet.</p>`;
+            // Filter out users who have already been sent a reward in this season
+            const pendingWinners = list.filter(u => u.rewardClaimed !== true);
+
+            if(pendingWinners.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-2">All winners rewarded or no records yet!</p>`;
                 return;
             }
 
             const rewardAmounts = ["₹30 Code", "₹20 Code", "₹10 Code"];
             const rankBadges = ["🥇 1st Rank", "🥈 2nd Rank", "🥉 3rd Rank"];
 
-            list.forEach((u, i) => {
+            // Show Top 3 Pending Unrewarded Winners
+            pendingWinners.slice(0, 3).forEach((u, i) => {
                 const pts = parseInt(u.leaderPoints || 0);
                 const isQualified = pts >= 10000;
                 const card = document.createElement("div");
                 card.className = "p-2.5 bg-black/40 border border-white/5 rounded-xl flex justify-between items-center";
 
+                const rankLabel = rankBadges[i] || `#${i + 1} Rank`;
+                const rewardLabel = rewardAmounts[i] || "Voucher Code";
+
                 card.innerHTML = `
                     <div>
-                        <span class="text-[9px] font-bold text-amber-400 block">${rankBadges[i]} (${rewardAmounts[i]})</span>
+                        <span class="text-[9px] font-bold text-amber-400 block">${rankLabel} (${rewardLabel})</span>
                         <p class="font-bold text-white text-xs">${u.name || u.username || 'User'}</p>
                         <p class="text-[9px] font-mono ${isQualified ? 'text-emerald-400' : 'text-gray-500'}">${pts.toLocaleString()} Pts ${isQualified ? '✓ Qualified' : '(Need 10k)'}</p>
                     </div>
-                    <button onclick="sendDirectRedeemToWinner('${u.uid}', '${rewardAmounts[i]}')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-[9px] uppercase tracking-wider rounded-lg transition-all">
+                    <button onclick="sendDirectRedeemToWinner('${u.uid}', '${rewardLabel}')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-[9px] uppercase tracking-wider rounded-lg transition-all">
                         <i class="fa-solid fa-paper-plane"></i> Send Code
                     </button>
                 `;
@@ -274,6 +281,7 @@
 
             const msgText = `🎉 CONGRATULATIONS!\nYou finished in the Leaderboard Top Ranks!\nHere is your ${label}: ${code.trim()}`;
 
+            // 1. Send code to Mailbox
             db.collection("users").doc(userUid).collection("mailbox").add({
                 title: `🏆 Leaderboard ${label} Winner!`,
                 message: msgText,
@@ -284,7 +292,18 @@
                 read: false,
                 type: "payout"
             }).then(() => {
+                // 2. Mark rewardClaimed = true so user hides from leaderboard winners queue
+                return db.collection("users").doc(userUid).update({
+                    rewardClaimed: true,
+                    lastRewardClaimedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }).then(() => {
                 alert("✅ Redeem code delivered to winner's Mailbox!");
+                // 3. Refresh list instantly
+                loadAdminLeaderboardWinners();
+            }).catch(err => {
+                console.error("Error sending code:", err);
+                alert("❌ Failed to process reward distribution.");
             });
         }
 
@@ -337,8 +356,11 @@
                         }
                     }
 
-                    // Reset Leader Points to 0
-                    batch.update(userRef, { leaderPoints: 0 });
+                    // Reset Leader Points to 0 and reset rewardClaimed status for the new month
+                    batch.update(userRef, { 
+                        leaderPoints: 0,
+                        rewardClaimed: false
+                    });
                 });
 
                 // Update Season Rule Banner Config
