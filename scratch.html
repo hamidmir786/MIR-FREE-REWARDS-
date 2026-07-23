@@ -134,14 +134,22 @@
             }
         });
 
-        // Probability Odds System for Scratch Card
+        // Exact Probability Odds System for Scratch Card
         function getRandomScratchReward() {
             const rand = Math.random() * 100;
-            if (rand < 45) return Math.floor(Math.random() * 4) + 2;   // 2 to 5 Coins (94.799% chance)
-            if (rand < 80) return Math.floor(Math.random() * 5) + 6;   // 6 to 10 Coins (4% chance)
-            if (rand < 95) return Math.floor(Math.random() * 15) + 11; // 11 to 15 Coins (1% chance)
-            if (rand < 99.5) return 50;                                 // 50 Coins (0.2% chance)
-            return 500;                                                // 500 Coins Super Rare (0.001% chance)
+
+            // 80% Chance: 2 or 3 Coins
+            if (rand < 80.000) {
+                return Math.random() < 0.5 ? 2 : 3;
+            } 
+            // 0.003% Chance: 500 Coins (Super Rare)
+            else if (rand >= 99.997) {
+                return 500;
+            } 
+            // 19.997% Chance: 4 or 5 Coins
+            else {
+                return Math.random() < 0.5 ? 4 : 5;
+            }
         }
 
         function resetCardState() {
@@ -174,7 +182,7 @@
             // Trigger Ad simulation
             document.getElementById("unlockBtn").style.display = "none";
             
-            // Calculate Reward Secretly
+            // Calculate Reward Secretly based on exact probabilities
             currentReward = getRandomScratchReward();
             document.getElementById("rewardAmount").innerText = `+${currentReward} Coins`;
 
@@ -231,13 +239,15 @@
             const todayStr = getTodayDateString();
             const todayScratches = userState.lastScratchDate === todayStr ? (userState.scratchCount || 0) : 0;
 
+            // Update Coins, +15 Rank Points & Scratch Limit in Firebase
             db.collection("users").doc(uid).update({
                 coins: firebase.firestore.FieldValue.increment(currentReward),
+                leaderPoints: firebase.firestore.FieldValue.increment(15), // +15 Rank Points per scratch
                 scratchCount: todayScratches + 1,
                 lastScratchDate: todayStr
             }).then(() => {
                 setTimeout(() => {
-                    alert(`🎉 Collected +${currentReward} Coins!`);
+                    alert(`🎉 Collected +${currentReward} Coins & +15 Rank Points!`);
                     resetCardState(); // Reset Clean state after alert
                 }, 300);
             });
