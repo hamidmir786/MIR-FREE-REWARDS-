@@ -68,7 +68,13 @@
                 <i class="fa-solid fa-money-bill-transfer"></i> Redeem Requests
                 <span id="redeemBadge" class="hidden bg-yellow-500 text-black text-[8px] font-black px-1.5 py-0.2 rounded-full ml-1">0</span>
             </button>
-            <button onclick="toggleLeaderboardFreeze()" id="leaderboardFreezeBtn" class="py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5">
+            <button onclick="switchAdminTab('leaderboardAdminSection')" id="tabBtn-leaderboard" class="py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-trophy text-yellow-400"></i> Leaderboard
+            </button>
+        </div>
+
+        <div class="flex gap-2">
+            <button onclick="toggleLeaderboardFreeze()" id="leaderboardFreezeBtn" class="w-full py-2 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-snowflake"></i> Freeze Board
             </button>
         </div>
@@ -112,6 +118,34 @@
             </div>
         </section>
 
+        <!-- SECTION 4: LEADERBOARD SEASON & REWARDS MANAGER -->
+        <section id="leaderboardAdminSection" class="space-y-3 hidden">
+            <div class="flex justify-between items-center px-1">
+                <h4 class="text-[10px] font-black text-yellow-400 uppercase tracking-widest"><i class="fa-solid fa-crown text-yellow-500"></i> Season Rewards & Auto-Reset</h4>
+                <button onclick="loadAdminLeaderboardWinners()" class="text-[9px] text-purple-400 hover:text-purple-300 font-bold"><i class="fa-solid fa-arrows-rotate"></i> Refresh Winners</button>
+            </div>
+
+            <!-- TOP 3 REDEEM WINNERS BOX -->
+            <div class="bg-[#0b0b14] border border-yellow-500/30 p-3.5 rounded-2xl space-y-3">
+                <p class="text-[10px] font-black text-yellow-300 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-2">
+                    <i class="fa-solid fa-trophy text-amber-400"></i> Top 3 Redeem Winners List
+                </p>
+                <div id="top3WinnersContainer" class="space-y-2 text-xs">
+                    <p class="text-gray-500 text-center py-2">Loading winners...</p>
+                </div>
+            </div>
+
+            <!-- AUTO DISTRIBUTION & RESET ACTION CARD -->
+            <div class="bg-gradient-to-br from-purple-950/40 to-[#0b0b14] border border-purple-800/40 p-4 rounded-2xl space-y-3">
+                <h5 class="text-xs font-black text-purple-300 uppercase tracking-wider"><i class="fa-solid fa-bolt text-amber-400"></i> End Season & Auto-Distribute Coins</h5>
+                <p class="text-[10px] text-gray-400">Distribute coins automatically to Top 4-50 users (>=10,000 pts) and reset all points to 0 for the new month.</p>
+                
+                <button onclick="processMonthlyLeaderboardRewards()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-gift"></i> Auto-Distribute Coins & Reset Season
+                </button>
+            </div>
+        </section>
+
     </main>
 
     <!-- DYNAMIC OVERLAY MODALS -->
@@ -145,6 +179,7 @@
             listenToLeaderboardConfig();
             fetchUserRecoveryRequests();
             listenToRedeemRequestsRealtime();
+            loadAdminLeaderboardWinners();
         };
 
         // FETCH ALL USERS
@@ -170,6 +205,153 @@
                 document.getElementById("statCirculatingCoins").innerText = totalCoins;
 
                 renderUsersListMarkup(cachedUsersList);
+            });
+        }
+
+        // LOAD LEADERBOARD TOP WINNERS FOR ADMIN
+        function loadAdminLeaderboardWinners() {
+            db.collection("users").orderBy("leaderPoints", "desc").limit(3).get().then(snap => {
+                renderWinnersBox(snap);
+            }).catch(() => {
+                db.collection("users").get().then(snap => {
+                    let tempArr = [];
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        d.uid = doc.id;
+                        tempArr.push(d);
+                    });
+                    tempArr.sort((a, b) => (b.leaderPoints || 0) - (a.leaderPoints || 0));
+                    renderWinnersBoxArray(tempArr.slice(0, 3));
+                });
+            });
+        }
+
+        function renderWinnersBox(snap) {
+            let list = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                d.uid = doc.id;
+                list.push(d);
+            });
+            renderWinnersBoxArray(list);
+        }
+
+        function renderWinnersBoxArray(list) {
+            const container = document.getElementById("top3WinnersContainer");
+            container.innerHTML = "";
+
+            if(list.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-2">No leaderboard records yet.</p>`;
+                return;
+            }
+
+            const rewardAmounts = ["₹30 Code", "₹20 Code", "₹10 Code"];
+            const rankBadges = ["🥇 1st Rank", "🥈 2nd Rank", "🥉 3rd Rank"];
+
+            list.forEach((u, i) => {
+                const pts = parseInt(u.leaderPoints || 0);
+                const isQualified = pts >= 10000;
+                const card = document.createElement("div");
+                card.className = "p-2.5 bg-black/40 border border-white/5 rounded-xl flex justify-between items-center";
+
+                card.innerHTML = `
+                    <div>
+                        <span class="text-[9px] font-bold text-amber-400 block">${rankBadges[i]} (${rewardAmounts[i]})</span>
+                        <p class="font-bold text-white text-xs">${u.name || u.username || 'User'}</p>
+                        <p class="text-[9px] font-mono ${isQualified ? 'text-emerald-400' : 'text-gray-500'}">${pts.toLocaleString()} Pts ${isQualified ? '✓ Qualified' : '(Need 10k)'}</p>
+                    </div>
+                    <button onclick="sendDirectRedeemToWinner('${u.uid}', '${rewardAmounts[i]}')" class="py-1 px-2.5 bg-amber-500 hover:bg-amber-400 text-black font-black text-[9px] uppercase tracking-wider rounded-lg transition-all">
+                        <i class="fa-solid fa-paper-plane"></i> Send Code
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function sendDirectRedeemToWinner(userUid, label) {
+            const code = prompt(`Enter ${label} Redeem Voucher to send to Mailbox:`);
+            if (code === null || code.trim() === "") return;
+
+            const msgText = `🎉 CONGRATULATIONS!\nYou finished in the Leaderboard Top Ranks!\nHere is your ${label}: ${code.trim()}`;
+
+            db.collection("users").doc(userUid).collection("mailbox").add({
+                title: `🏆 Leaderboard ${label} Winner!`,
+                message: msgText,
+                msg: msgText,
+                systemCode: code.trim(),
+                date: new Date().toLocaleDateString(),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                read: false,
+                type: "payout"
+            }).then(() => {
+                alert("✅ Redeem code delivered to winner's Mailbox!");
+            });
+        }
+
+        // AUTO DISTRIBUTE COINS & RESET LEADERBOARD
+        function processMonthlyLeaderboardRewards() {
+            if (!confirm("Are you sure? This will AUTO-DISTRIBUTE coins to qualified Top 4-50 users (10,000+ points) and RESET all Leader Points to 0 across the app!")) return;
+
+            const newSeasonRule = prompt("Enter new season text for rules banner (e.g., '1 October Claim'):", "1 October Claim");
+            if (!newSeasonRule) return;
+
+            db.collection("users").get().then(snap => {
+                let usersList = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    d.uid = doc.id;
+                    usersList.push(d);
+                });
+
+                usersList.sort((a, b) => (b.leaderPoints || 0) - (a.leaderPoints || 0));
+
+                let batch = db.batch();
+
+                usersList.forEach((user, index) => {
+                    const rank = index + 1;
+                    const points = parseInt(user.leaderPoints || 0);
+                    const userRef = db.collection("users").doc(user.uid);
+
+                    // Auto Coin Rewards for Top 4 to 50
+                    if (points >= 10000) {
+                        let rewardCoins = 0;
+                        if (rank >= 4 && rank <= 10) {
+                            rewardCoins = 1000;
+                        } else if (rank >= 11 && rank <= 50) {
+                            rewardCoins = 300;
+                        }
+
+                        if (rewardCoins > 0) {
+                            const currentCoins = parseInt(user.coins || 0);
+                            batch.update(userRef, { coins: currentCoins + rewardCoins });
+
+                            // Mailbox Entry
+                            const mailRef = userRef.collection("mailbox").doc();
+                            batch.set(mailRef, {
+                                title: "🎉 Monthly Leaderboard Reward!",
+                                message: `Congratulations! You finished at Rank #${rank} with ${points} points. ${rewardCoins} Coins have been added to your balance!`,
+                                date: new Date().toLocaleDateString(),
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                                read: false
+                            });
+                        }
+                    }
+
+                    // Reset Leader Points to 0
+                    batch.update(userRef, { leaderPoints: 0 });
+                });
+
+                // Update Season Rule Banner Config
+                batch.set(db.collection("app_admin").doc("leaderboard_config"), {
+                    claimRuleText: newSeasonRule.trim(),
+                    lastResetDate: new Date().toLocaleDateString()
+                }, { merge: true });
+
+                batch.commit().then(() => {
+                    alert("✅ Rewards Distributed Successfully & Leaderboard Reset to 0!");
+                    loadAdminLeaderboardWinners();
+                    fetchLatestAdminData();
+                });
             });
         }
 
@@ -226,7 +408,6 @@
                 const isPending = (st === "PENDING");
                 const targetUid = req.userId || req.userUid || req.uid || "";
 
-                // Formatted Time
                 let formattedTime = "N/A";
                 if (req.timestamp && req.timestamp.seconds) {
                     formattedTime = new Date(req.timestamp.seconds * 1000).toLocaleString();
@@ -319,7 +500,6 @@
                 const statusVal = (req.status || "Pending").toUpperCase();
                 const isPending = (statusVal === "PENDING");
 
-                // TIME CALCULATIONS & 48-HOUR WARNING
                 let timeString = "Date Unknown";
                 let isOverdue = false;
 
@@ -368,7 +548,7 @@
             });
         }
 
-        // INSPECT USER HISTORY & ANTI-SCAM DETECTOR
+        // INSPECT USER HISTORY
         function inspectUserFullHistory(userUid, userEmail) {
             if (!userUid || userUid === "") {
                 alert("User UID not attached with this request!");
@@ -392,7 +572,6 @@
                 </div>
             `;
 
-            // Query user data & withdrawal history
             db.collection("users").doc(userUid).get().then(userDoc => {
                 const userData = userDoc.exists ? userDoc.data() : {};
                 
@@ -400,6 +579,7 @@
                     let historyHTML = `
                         <div class="bg-black/50 p-2.5 rounded-xl border border-gray-900 space-y-1 font-mono text-[10px]">
                             <p class="text-gray-400">Current Coins: <strong class="text-yellow-400">${userData.coins || 0} 🪙</strong></p>
+                            <p class="text-gray-400">Leader Points: <strong class="text-purple-400">${userData.leaderPoints || 0} Pts</strong></p>
                             <p class="text-gray-400">PIN: <strong class="text-white">${userData.pin || 'N/A'}</strong> | DOB: <strong class="text-white">${userData.dob || 'N/A'}</strong></p>
                         </div>
                         <h4 class="text-[10px] font-bold text-purple-400 uppercase tracking-wider pt-1">All Redeem Attempts (${wSnap.size})</h4>
@@ -561,10 +741,12 @@
             document.getElementById("usersListSection").classList.add("hidden");
             document.getElementById("userRequestsSection").classList.add("hidden");
             document.getElementById("redeemRequestsSection").classList.add("hidden");
+            document.getElementById("leaderboardAdminSection").classList.add("hidden");
 
             document.getElementById("tabBtn-users").className = "py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
             document.getElementById("tabBtn-requests").className = "py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 relative";
             document.getElementById("tabBtn-redeem").className = "py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 relative";
+            document.getElementById("tabBtn-leaderboard").className = "py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
 
             document.getElementById(activeSectionId).classList.remove("hidden");
             
@@ -572,8 +754,10 @@
                 document.getElementById("tabBtn-users").className = "py-2.5 bg-purple-900/20 border border-purple-700/50 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
             } else if (activeSectionId === "userRequestsSection") {
                 document.getElementById("tabBtn-requests").className = "py-2.5 bg-amber-900/20 border border-amber-700/50 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 relative";
-            } else {
+            } else if (activeSectionId === "redeemRequestsSection") {
                 document.getElementById("tabBtn-redeem").className = "py-2.5 bg-purple-900/20 border border-purple-700/50 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5 relative";
+            } else {
+                document.getElementById("tabBtn-leaderboard").className = "py-2.5 bg-yellow-900/20 border border-yellow-700/50 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
             }
         }
 
@@ -583,10 +767,10 @@
                     isLeaderboardFrozenState = doc.data().frozen || false;
                     const btn = document.getElementById("leaderboardFreezeBtn");
                     if (isLeaderboardFrozenState) {
-                        btn.className = "py-2.5 bg-red-950/20 border border-red-900/40 text-red-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
+                        btn.className = "w-full py-2 bg-red-950/20 border border-red-900/40 text-red-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
                         btn.innerHTML = `<i class="fa-solid fa-snowflake animate-spin-slow"></i> Frozen`;
                     } else {
-                        btn.className = "py-2.5 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
+                        btn.className = "w-full py-2 bg-black/40 border border-gray-900 text-gray-400 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5";
                         btn.innerHTML = `<i class="fa-solid fa-snowflake"></i> Freeze Board`;
                     }
                 }
@@ -597,7 +781,7 @@
             const targetState = !isLeaderboardFrozenState;
             db.collection("app_admin").doc("leaderboard_config").set({
                 frozen: targetState
-            }).then(() => {
+            }, { merge: true }).then(() => {
                 alert(`Leaderboard status updated!`);
             });
         }
