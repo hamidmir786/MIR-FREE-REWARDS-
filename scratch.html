@@ -235,22 +235,37 @@
             }
         }
 
-        function claimScratchReward() {
+        async function claimScratchReward() {
             const todayStr = getTodayDateString();
             const todayScratches = userState.lastScratchDate === todayStr ? (userState.scratchCount || 0) : 0;
 
-            // Update Coins, +15 Rank Points & Scratch Limit in Firebase
-            db.collection("users").doc(uid).update({
-                coins: firebase.firestore.FieldValue.increment(currentReward),
-                leaderPoints: firebase.firestore.FieldValue.increment(15), // +15 Rank Points per scratch
-                scratchCount: todayScratches + 1,
-                lastScratchDate: todayStr
-            }).then(() => {
+            try {
+                // 1. Check if Leaderboard is Freezed
+                const settingsDoc = await db.collection("settings").doc("leaderboard").get();
+                const isFreezed = settingsDoc.exists && settingsDoc.data().isFreezed;
+
+                // 2. If Freezed, add 0 Points; otherwise add 15 Points
+                const pointsToAdd = isFreezed ? 0 : 15;
+
+                // 3. Update User Document
+                await db.collection("users").doc(uid).update({
+                    coins: firebase.firestore.FieldValue.increment(currentReward),
+                    leaderPoints: firebase.firestore.FieldValue.increment(pointsToAdd),
+                    scratchCount: todayScratches + 1,
+                    lastScratchDate: todayStr
+                });
+
                 setTimeout(() => {
-                    alert(`🎉 Collected +${currentReward} Coins & +15 Rank Points!`);
+                    if (isFreezed) {
+                        alert(`🎉 Collected +${currentReward} Coins! (Leaderboard Freezed: 0 Rank Points)`);
+                    } else {
+                        alert(`🎉 Collected +${currentReward} Coins & +15 Rank Points!`);
+                    }
                     resetCardState(); // Reset Clean state after alert
                 }, 300);
-            });
+            } catch (err) {
+                console.error("Error updating scratch reward/points:", err);
+            }
         }
 
         canvas.addEventListener("mousedown", () => isDrawing = true);
