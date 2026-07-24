@@ -13,6 +13,13 @@
 </head>
 <body class="bg-[#05050a] text-gray-200 min-h-screen font-sans pb-20">
 
+    <!-- FREEZE STATUS WARNING NOTICE BANNER -->
+    <div id="leaderboardFreezeBanner" class="hidden bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-700/60 p-2.5 text-center text-xs font-bold text-red-200 tracking-wide flex items-center justify-center gap-2 sticky top-0 z-50 shadow-lg">
+        <i class="fa-solid fa-snowflake text-cyan-300 animate-spin"></i>
+        <span id="freezeBannerText">Sometimes Leaderboard Freezed</span>
+        <i class="fa-solid fa-lock text-red-400"></i>
+    </div>
+
     <!-- Header Section -->
     <header class="bg-[#0b0b14] border-b border-purple-900/40 p-4 sticky top-0 z-40 flex justify-between items-center">
         <div class="flex items-center gap-3">
@@ -27,6 +34,19 @@
     </header>
 
     <main class="max-w-md mx-auto p-4 space-y-5">
+
+        <!-- TOP WINNERS CLAIM BOX (FOR TOP 3 RANKERS) -->
+        <div id="winnerClaimBoxContainer" class="hidden bg-gradient-to-br from-amber-950/40 via-purple-950/30 to-[#0b0b14] border border-amber-500/40 p-4 rounded-2xl space-y-3 relative overflow-hidden shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+            <div class="flex justify-between items-center border-b border-amber-500/20 pb-2">
+                <h3 class="text-xs font-black text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-crown text-yellow-400"></i> Season Champion Reward
+                </h3>
+                <span class="text-[9px] font-bold bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full">Winner Unlocked</span>
+            </div>
+            <div id="winnerClaimContent" class="space-y-2 text-xs">
+                <!-- Winner code claim dynamically loaded -->
+            </div>
+        </div>
 
         <!-- NOTICE & RULES CARD -->
         <div class="bg-gradient-to-br from-purple-950/40 to-[#0b0b14] border border-purple-800/40 p-4 rounded-2xl space-y-3 relative overflow-hidden">
@@ -148,16 +168,81 @@
         }
         const db = firebase.firestore();
 
+        let currentActiveUserUid = localStorage.getItem("loggedInUid") || sessionStorage.getItem("loggedInUid") || "";
+
         window.onload = function() {
-            loadSeasonConfig();
+            listenToLeaderboardConfigAndFreeze();
+            checkAndRenderWinnerRewardBox();
             fetchLeaderboardData();
         };
 
-        function loadSeasonConfig() {
-            db.collection("app_admin").doc("leaderboard_config").get().then(doc => {
-                if (doc.exists && doc.data().claimRuleText) {
-                    document.getElementById("targetClaimDate").innerText = doc.data().claimRuleText;
+        // REALTIME LEADERBOARD CONFIG & FREEZE BANNER LISTENER
+        function listenToLeaderboardConfigAndFreeze() {
+            db.collection("app_admin").doc("leaderboard_config").onSnapshot(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    
+                    // Update Season Banner Rule Text
+                    if (data.claimRuleText) {
+                        document.getElementById("targetClaimDate").innerText = data.claimRuleText;
+                    }
+
+                    // Check Freeze Status
+                    const freezeBanner = document.getElementById("leaderboardFreezeBanner");
+                    if (data.frozen === true) {
+                        const msgText = data.freezeMessage || "Sometimes Leaderboard Freezed";
+                        document.getElementById("freezeBannerText").innerText = msgText;
+                        freezeBanner.classList.remove("hidden");
+                    } else {
+                        freezeBanner.classList.add("hidden");
+                    }
                 }
+            });
+        }
+
+        // CHECK IF CURRENT LOGGED IN USER IS IN TOP WINNERS & SHOW REDEEM CODE CLAIM BOX
+        function checkAndRenderWinnerRewardBox() {
+            if (!currentActiveUserUid) return;
+
+            db.collection("users").doc(currentActiveUserUid).collection("mailbox")
+              .where("type", "==", "payout")
+              .get().then(snap => {
+                  if (!snap.empty) {
+                      let latestRewardMsg = null;
+                      snap.forEach(doc => {
+                          const d = doc.data();
+                          if (d.systemCode || (d.title && d.title.includes("Leaderboard"))) {
+                              latestRewardMsg = d;
+                          }
+                      });
+
+                      if (latestRewardMsg) {
+                          const container = document.getElementById("winnerClaimBoxContainer");
+                          const content = document.getElementById("winnerClaimContent");
+                          container.classList.remove("hidden");
+
+                          content.innerHTML = `
+                              <p class="text-white font-bold">${latestRewardMsg.title || "🎉 Leaderboard Reward Delivered!"}</p>
+                              <p class="text-gray-300 text-[10px]">${latestRewardMsg.message || latestRewardMsg.msg || ""}</p>
+                              ${latestRewardMsg.systemCode ? `
+                              <div class="bg-black/60 p-2.5 rounded-xl border border-yellow-500/30 flex justify-between items-center mt-2">
+                                  <span class="font-mono text-yellow-400 font-black text-sm select-all">${latestRewardMsg.systemCode}</span>
+                                  <button onclick="copyWinnerVoucherCode('${latestRewardMsg.systemCode}')" class="px-3 py-1 bg-amber-500 text-black font-black text-[9px] rounded-lg uppercase">
+                                      <i class="fa-solid fa-copy"></i> Copy Code
+                                  </button>
+                              </div>
+                              ` : ''}
+                          `;
+                      }
+                  }
+              }).catch(err => {
+                  console.log("Winner mailbox check skipped:", err);
+              });
+        }
+
+        function copyWinnerVoucherCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                alert("📋 Voucher code copied to clipboard!");
             });
         }
 
