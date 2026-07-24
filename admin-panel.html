@@ -208,7 +208,7 @@
             });
         }
 
-        // LOAD LEADERBOARD TOP WINNERS FOR ADMIN (UPDATED FILTER: rewardClaimed != true)
+        // LOAD LEADERBOARD TOP WINNERS FOR ADMIN
         function loadAdminLeaderboardWinners() {
             db.collection("users").orderBy("leaderPoints", "desc").get().then(snap => {
                 renderWinnersBox(snap);
@@ -240,7 +240,6 @@
             const container = document.getElementById("top3WinnersContainer");
             container.innerHTML = "";
 
-            // Filter out users who have already been sent a reward in this season
             const pendingWinners = list.filter(u => u.rewardClaimed !== true);
 
             if(pendingWinners.length === 0) {
@@ -251,7 +250,6 @@
             const rewardAmounts = ["₹30 Code", "₹20 Code", "₹10 Code"];
             const rankBadges = ["🥇 1st Rank", "🥈 2nd Rank", "🥉 3rd Rank"];
 
-            // Show Top 3 Pending Unrewarded Winners
             pendingWinners.slice(0, 3).forEach((u, i) => {
                 const pts = parseInt(u.leaderPoints || 0);
                 const isQualified = pts >= 10000;
@@ -281,7 +279,6 @@
 
             const msgText = `🎉 CONGRATULATIONS!\nYou finished in the Leaderboard Top Ranks!\nHere is your ${label}: ${code.trim()}`;
 
-            // 1. Send code to Mailbox
             db.collection("users").doc(userUid).collection("mailbox").add({
                 title: `🏆 Leaderboard ${label} Winner!`,
                 message: msgText,
@@ -292,14 +289,12 @@
                 read: false,
                 type: "payout"
             }).then(() => {
-                // 2. Mark rewardClaimed = true so user hides from leaderboard winners queue
                 return db.collection("users").doc(userUid).update({
                     rewardClaimed: true,
                     lastRewardClaimedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }).then(() => {
                 alert("✅ Redeem code delivered to winner's Mailbox!");
-                // 3. Refresh list instantly
                 loadAdminLeaderboardWinners();
             }).catch(err => {
                 console.error("Error sending code:", err);
@@ -331,7 +326,6 @@
                     const points = parseInt(user.leaderPoints || 0);
                     const userRef = db.collection("users").doc(user.uid);
 
-                    // Auto Coin Rewards for Top 4 to 50
                     if (points >= 10000) {
                         let rewardCoins = 0;
                         if (rank >= 4 && rank <= 10) {
@@ -344,7 +338,6 @@
                             const currentCoins = parseInt(user.coins || 0);
                             batch.update(userRef, { coins: currentCoins + rewardCoins });
 
-                            // Mailbox Entry
                             const mailRef = userRef.collection("mailbox").doc();
                             batch.set(mailRef, {
                                 title: "🎉 Monthly Leaderboard Reward!",
@@ -356,17 +349,16 @@
                         }
                     }
 
-                    // Reset Leader Points to 0 and reset rewardClaimed status for the new month
                     batch.update(userRef, { 
                         leaderPoints: 0,
                         rewardClaimed: false
                     });
                 });
 
-                // Update Season Rule Banner Config
                 batch.set(db.collection("app_admin").doc("leaderboard_config"), {
                     claimRuleText: newSeasonRule.trim(),
-                    lastResetDate: new Date().toLocaleDateString()
+                    lastResetDate: new Date().toLocaleDateString(),
+                    frozen: false
                 }, { merge: true });
 
                 batch.commit().then(() => {
@@ -799,13 +791,76 @@
             });
         }
 
-        function toggleLeaderboardFreeze() {
+        // Freeze Toggle WITH Winner Snapshot & Rewards Processing
+        async function toggleLeaderboardFreeze() {
             const targetState = !isLeaderboardFrozenState;
-            db.collection("app_admin").doc("leaderboard_config").set({
-                frozen: targetState
-            }, { merge: true }).then(() => {
-                alert(`Leaderboard status updated!`);
-            });
+            
+            try {
+                // 1. Update Freeze Status in Config
+                await db.collection("app_admin").doc("leaderboard_config").set({
+                    frozen: targetState,
+                    freezeMessage: targetState ? "Sometimes Leaderboard Freezed" : "",
+                    freezedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                if (targetState) {
+                    // 2. Fetch Top Users for Winner Snapshot
+                    const snap = await db.collection("users").orderBy("leaderPoints", "desc").get();
+                    let usersArr = [];
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        d.uid = doc.id;
+                        usersArr.push(d);
+                    });
+
+                    let batch = db.batch();
+
+                    // Push Top 3 to 'winners' Collection
+                    usersArr.slice(0, 3).forEach((u, idx) => {
+                        const rankNum = idx + 1;
+                        const winnerRef = db.collection("winners").doc(`top_${rankNum}`);
+                        batch.set(winnerRef, {
+                            uid: u.uid,
+                            name: u.name || u.username || "User",
+                            email: u.email || "",
+                            rank: rankNum,
+                            points: parseInt(u.leaderPoints || 0),
+                            freezedDate: new Date().toLocaleDateString(),
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    });
+
+                    // Distribute Auto Rewards for Top 10, Top 50, and >= 10,000 Points Users
+                    usersArr.forEach((u, idx) => {
+                        const rank = idx + 1;
+                        const points = parseInt(u.leaderPoints || 0);
+                        let bonusCoins = 0;
+
+                        if (rank <= 10) bonusCoins += 500;
+                        else if (rank <= 50) bonusCoins += 200;
+
+                        if (points >= 10000) bonusCoins += 1000;
+
+                        if (bonusCoins > 0) {
+                            const userRef = db.collection("users").doc(u.uid);
+                            const currentCoins = parseInt(u.coins || 0);
+                            batch.update(userRef, {
+                                coins: currentCoins + bonusCoins
+                            });
+                        }
+                    });
+
+                    await batch.commit();
+                    alert("❄️ Leaderboard FREEZED successfully!\n🏆 Top 1, 2, 3 snapshot saved to Winners section.\n🎁 Rewards assigned to Top 10/50 & 10k+ points users!");
+                } else {
+                    alert("🔥 Leaderboard UNFREEZED! Live points accumulation resumed.");
+                }
+
+                loadAdminLeaderboardWinners();
+            } catch (err) {
+                console.error("Error freezing leaderboard:", err);
+                alert("❌ Failed to update freeze status.");
+            }
         }
 
         function executeClientSearchFilter() {
