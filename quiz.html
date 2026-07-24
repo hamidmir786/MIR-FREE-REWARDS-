@@ -224,32 +224,44 @@
             loadQuestion();
         }
 
-        function finishQuiz() {
+        async function finishQuiz() {
             clearInterval(timer);
             const todayStr = getTodayDateString();
 
-            // Sahi answers ke coins calculation (e.g. 2 Coins per correct answer)
             const coinsEarned = score * 2;
-            
-            // AGAR SCORE EXACT 5/5 HOGA, TOH HI 30 RANK POINTS MILENGE
-            const rankPointsEarned = (score === 5) ? 30 : 0;
+            let defaultPoints = (score === 5) ? 30 : 0;
 
-            // Database update
-            db.collection("users").doc(uid).update({
-                coins: firebase.firestore.FieldValue.increment(coinsEarned),
-                leaderPoints: firebase.firestore.FieldValue.increment(rankPointsEarned),
-                quizCount: 1,
-                lastQuizDate: todayStr
-            }).then(() => {
+            try {
+                // 1. Check if Leaderboard is Freezed
+                const settingsDoc = await db.collection("settings").doc("leaderboard").get();
+                const isFreezed = settingsDoc.exists && settingsDoc.data().isFreezed;
+
+                // 2. If Freezed, add 0 Points; otherwise add default points
+                const pointsToAdd = isFreezed ? 0 : defaultPoints;
+
+                // 3. Database update
+                await db.collection("users").doc(uid).update({
+                    coins: firebase.firestore.FieldValue.increment(coinsEarned),
+                    leaderPoints: firebase.firestore.FieldValue.increment(pointsToAdd),
+                    quizCount: 1,
+                    lastQuizDate: todayStr
+                });
+
                 document.getElementById("quizBox").classList.add("hidden");
                 document.getElementById("resultScreen").classList.remove("hidden");
 
                 if (score === 5) {
-                    document.getElementById("resultText").innerText = `🎯 PERFECT SCORE! You answered 5/5 correctly and won ${coinsEarned} Coins & +30 Rank Points!`;
+                    if (isFreezed) {
+                        document.getElementById("resultText").innerText = `🎯 PERFECT SCORE! You answered 5/5 correctly and won ${coinsEarned} Coins. (Leaderboard Freezed: 0 Rank Points)`;
+                    } else {
+                        document.getElementById("resultText").innerText = `🎯 PERFECT SCORE! You answered 5/5 correctly and won ${coinsEarned} Coins & +30 Rank Points!`;
+                    }
                 } else {
                     document.getElementById("resultText").innerText = `You answered ${score}/5 correctly and earned ${coinsEarned} Coins. (Score 5/5 to earn +30 Rank Points!)`;
                 }
-            });
+            } catch (err) {
+                console.error("Error updating quiz rewards/points:", err);
+            }
         }
     </script>
 </body>
