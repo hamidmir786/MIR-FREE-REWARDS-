@@ -101,7 +101,7 @@
             { label: "10 Coins", value: 10, type: "coins", color: "#581c87", chance: 150 },
             { label: "2 Vouchers", value: 2, type: "vouchers", color: "#312e81", chance: 139.99 },
             { label: "25 Coins", value: 25, type: "coins", color: "#6b21a8", chance: 10 },
-            { label: "1500 Coins", value: 1500, type: "coins", color: "#7e22ce", chance: 0.01 } // 0.001% chance
+            { label: "1500 Coins", value: 1500, type: "coins", color: "#7e22ce", chance: 0.01 }
         ];
 
         function getTodayDateString() {
@@ -187,6 +187,50 @@
             return 1; // Fallback to Retry
         }
 
+        // INTEGRATED FREEZE-CHECKING REWARD & POINTS FUNCTION
+        async function addRewardAndPoints(winningReward, todaySpins, todayStr, defaultPoints = 15) {
+            try {
+                // 1. Check if Leaderboard is Freezed
+                const settingsDoc = await db.collection("settings").doc("leaderboard").get();
+                const isFreezed = settingsDoc.exists && settingsDoc.data().isFreezed;
+
+                // 2. If Freezed, add 0 Points; otherwise add 15 Points
+                const pointsToAdd = isFreezed ? 0 : defaultPoints;
+
+                let coinInc = winningReward.type === "coins" ? winningReward.value : 0;
+                let voucherInc = winningReward.type === "vouchers" ? winningReward.value : 0;
+
+                // 3. Update User Document
+                await db.collection("users").doc(uid).update({
+                    coins: firebase.firestore.FieldValue.increment(coinInc),
+                    vouchers: firebase.firestore.FieldValue.increment(voucherInc),
+                    leaderPoints: firebase.firestore.FieldValue.increment(pointsToAdd),
+                    spinCount: todaySpins + 1,
+                    lastSpinDate: todayStr
+                });
+
+                if (isFreezed) {
+                    console.log("Leaderboard is freezed. Rewards added, but Rank Points skipped.");
+                    if (winningReward.type === "none") {
+                        alert("🔁 Retry try again! (Leaderboard is Freezed: 0 Rank Points)");
+                    } else {
+                        alert(`🎉 Congratulations! You won ${winningReward.label}! (Leaderboard Freezed: 0 Rank Points)`);
+                    }
+                } else {
+                    if (winningReward.type === "none") {
+                        alert(`🔁 Retry try again! (+${defaultPoints} Rank Points Earned!)`);
+                    } else {
+                        alert(`🎉 Congratulations! You won ${winningReward.label} & +${defaultPoints} Rank Points!`);
+                    }
+                }
+            } catch (err) {
+                console.error("Error updating reward/points:", err);
+            } finally {
+                isSpinning = false;
+                document.getElementById("spinBtn").disabled = false;
+            }
+        }
+
         function executeSpin() {
             if (isSpinning) return;
 
@@ -211,7 +255,6 @@
             db.collection("users").doc(uid).update({
                 vouchers: firebase.firestore.FieldValue.increment(-1)
             }).then(() => {
-                // Calculate outcome based on STRICT percentages
                 const winningIndex = getWeightedRandomIndex();
                 
                 const sliceAngle = 360 / rewards.length;
@@ -225,28 +268,8 @@
 
                 setTimeout(() => {
                     const winningReward = rewards[winningIndex];
-                    let coinInc = 0;
-                    let voucherInc = 0;
-
-                    if (winningReward.type === "coins") coinInc = winningReward.value;
-                    if (winningReward.type === "vouchers") voucherInc = winningReward.value;
-
-                    // Sync Reward, Daily Count & ADD +15 LEADERBOARD RANK POINTS IN DATABASE
-                    db.collection("users").doc(uid).update({
-                        coins: firebase.firestore.FieldValue.increment(coinInc),
-                        vouchers: firebase.firestore.FieldValue.increment(voucherInc),
-                        leaderPoints: firebase.firestore.FieldValue.increment(15), // +15 Rank Points added on every spin
-                        spinCount: todaySpins + 1,
-                        lastSpinDate: todayStr
-                    }).then(() => {
-                        if (winningReward.type === "none") {
-                            alert("🔁 Retry try again! (+15 Rank Points Earned!)");
-                        } else {
-                            alert(`🎉 Congratulations! You won ${winningReward.label} & +15 Rank Points!`);
-                        }
-                        isSpinning = false;
-                        document.getElementById("spinBtn").disabled = false;
-                    });
+                    // Call the Freeze-checking Reward and Points function
+                    addRewardAndPoints(winningReward, todaySpins, todayStr, 15);
                 }, 4000);
             });
         }
