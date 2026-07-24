@@ -51,11 +51,11 @@
 
         <!-- USER PROFILE CARD -->
         <div class="p-6 rounded-3xl premium-panel text-center space-y-3 shadow-2xl relative overflow-hidden">
-            <!-- Gmail / Google Logo Ring -->
+            <!-- Dynamic Email First Letter Avatar Ring -->
             <div class="relative w-20 h-20 mx-auto">
-                <div class="w-full h-full rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 p-1 flex items-center justify-center shadow-lg shadow-purple-900/40">
+                <div class="w-full h-full rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-pink-500 p-1 flex items-center justify-center shadow-lg shadow-purple-900/50">
                     <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center border border-purple-500/30">
-                        <i class="fa-brands fa-google text-3xl text-red-500"></i>
+                        <span id="userInitial" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 uppercase">U</span>
                     </div>
                 </div>
             </div>
@@ -197,29 +197,38 @@
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUid = user.uid;
-                document.getElementById("userEmail").innerText = user.email || "No Email";
+                const emailStr = user.email || "";
+                document.getElementById("userEmail").innerText = emailStr || "No Email";
                 document.getElementById("userUid").innerText = user.uid;
 
                 // Load Name from Firestore Database
                 db.collection("users").doc(user.uid).get().then((doc) => {
+                    let displayName = "User";
                     if (doc.exists && doc.data().name) {
-                        document.getElementById("userName").innerText = doc.data().name;
+                        displayName = doc.data().name;
                     } else if (user.displayName) {
-                        document.getElementById("userName").innerText = user.displayName;
-                    } else {
-                        document.getElementById("userName").innerText = "User";
+                        displayName = user.displayName;
                     }
+                    
+                    document.getElementById("userName").innerText = displayName;
+
+                    // Set First Letter Logo (Name/Email Initial)
+                    const initial = (displayName.charAt(0) || emailStr.charAt(0) || "U").toUpperCase();
+                    document.getElementById("userInitial").innerText = initial;
+
                 }).catch((err) => {
                     console.error("Error fetching profile name:", err);
+                    const initial = (emailStr.charAt(0) || "U").toUpperCase();
+                    document.getElementById("userInitial").innerText = initial;
                     document.getElementById("userName").innerText = user.displayName || "User";
                 });
             } else {
-                // Not logged in -> Redirect to login/index
+                // Not logged in -> Redirect to login
                 window.location.href = "login.html";
             }
         });
 
-        // Copy UID to Clipboard
+        // Copy UID Function
         function copyUid() {
             if (!currentUid) return;
             navigator.clipboard.writeText(currentUid).then(() => {
@@ -229,7 +238,7 @@
             });
         }
 
-        // Logout User Function
+        // Logout Function
         function logoutUser() {
             if (confirm("Are you sure you want to log out?")) {
                 auth.signOut().then(() => {
