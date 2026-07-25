@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIR FREE REWARDS - Contact Us</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase Core Modules -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        body {
+            background-color: #0c0c14;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glass-panel {
+            background: rgba(15, 15, 27, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .neon-focus:focus {
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
+            border-color: #a855f7;
+        }
+        .responsive-container {
+            width: 100%;
+            max-width: 440px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body class="p-4 relative selection:bg-purple-600 selection:text-white">
+
+    <div class="responsive-container p-6 rounded-3xl glass-panel shadow-2xl relative overflow-hidden">
+        
+        <!-- HEADER BAR -->
+        <div class="flex items-center justify-between mb-6 border-b border-gray-800/80 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-900/40 border border-purple-500/30 rounded-2xl flex items-center justify-center text-purple-400">
+                    <i class="fa-solid fa-envelope text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-black text-white tracking-wide">Contact Us</h1>
+                    <p class="text-[10px] text-gray-400 font-medium">We'd love to hear from you</p>
+                </div>
+            </div>
+            <button onclick="window.history.back()" class="w-8 h-8 rounded-full bg-gray-900/80 border border-gray-800 flex items-center justify-center text-gray-400 hover:text-white active:scale-95 transition-all">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- AUTO USER CARD -->
+        <div class="p-3.5 mb-5 rounded-2xl bg-black/40 border border-purple-900/30 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs" id="userAvatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="overflow-hidden">
+                <h2 class="text-xs font-bold text-white truncate" id="userName">Loading User...</h2>
+                <p class="text-[10px] text-gray-400 truncate" id="userEmail">loading...</p>
+            </div>
+        </div>
+
+        <!-- CONTACT FORM -->
+        <form id="contactForm" onsubmit="handleSupportSubmission(event)" class="space-y-4">
+            
+            <!-- SUBJECT INPUT -->
+            <div>
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Subject</label>
+                <div class="relative">
+                    <i class="fa-solid fa-file-lines absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                    <input type="text" id="msgSubject" required placeholder="What's this about?" class="w-full pl-10 pr-4 py-2.5 text-xs bg-black/50 border border-gray-800 rounded-xl outline-none text-white placeholder-gray-600 neon-focus transition-all">
+                </div>
+            </div>
+
+            <!-- MESSAGE TEXTAREA -->
+            <div>
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1.5">Message</label>
+                <textarea id="msgBody" required maxlength="1000" rows="5" oninput="updateCharCounter(this)" placeholder="Describe your issue or feedback..." class="w-full p-3.5 text-xs bg-black/50 border border-gray-800 rounded-xl outline-none text-white placeholder-gray-600 neon-focus transition-all resize-none"></textarea>
+                <div class="text-right text-[9px] text-gray-500 font-mono mt-1" id="charCount">0/1000</div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit" id="submitBtn" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs uppercase tracking-wider rounded-xl active:scale-[0.98] transition-all shadow-lg shadow-purple-950/50 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane text-xs"></i> Submit Request
+            </button>
+            
+            <p class="text-[9px] text-gray-500 text-center font-medium">
+                <i class="fa-solid fa-shield-halved text-[8px] text-purple-400 mr-1"></i> Your query will be directly sent to our support team.
+            </p>
+        </form>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
+          authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
+          databaseURL: "https://mir-free-rewards-log-and-earn-default-rtdb.firebaseio.com",
+          projectId: "mir-free-rewards-log-and-earn",
+          storageBucket: "mir-free-rewards-log-and-earn.firebasestorage.app",
+          messagingSenderId: "1055267295995",
+          appId: "1:1055267295995:web:35ebcfaa35a650a832165e",
+          measurementId: "G-V5CGH67MPE"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUserData = null;
+
+        // Auto Fetch Logged in User Information
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUserData = user;
+                document.getElementById('userName').innerText = user.displayName || "Valued Member";
+                document.getElementById('userEmail').innerText = user.email || "No email available";
+                if(user.photoURL) {
+                    document.getElementById('userAvatar').innerHTML = `<img src="${user.photoURL}" class="w-full h-full rounded-full object-cover">`;
+                }
+            } else {
+                alert("Please log in to access Support Center.");
+                window.location.href = "login.html";
+            }
+        });
+
+        function updateCharCounter(element) {
+            document.getElementById('charCount').innerText = `${element.value.length}/1000`;
+        }
+
+        // Direct Submit to Firestore Database (Admin Panel Entry)
+        async function handleSupportSubmission(e) {
+            e.preventDefault();
+            
+            if(!currentUserData) return;
+
+            const subject = document.getElementById('msgSubject').value.trim();
+            const message = document.getElementById('msgBody').value.trim();
+            const btn = document.getElementById('submitBtn');
+
+            if(!subject || !message) {
+                alert("Please fill in both subject and message!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Submitting...`;
+
+            try {
+                await db.collection("support_tickets").add({
+                    uid: currentUserData.uid,
+                    userName: currentUserData.displayName || "Unknown",
+                    userEmail: currentUserData.email,
+                    subject: subject,
+                    message: message,
+                    status: "PENDING", // PENDING, RESOLVED
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert("✅ Message sent successfully! Our Admin team will inspect it soon.");
+                document.getElementById('contactForm').reset();
+                document.getElementById('charCount').innerText = "0/1000";
+
+            } catch (err) {
+                alert("Submission Failed: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-paper-plane text-xs"></i> Submit Request`;
+            }
+        }
+    </script>
+</body>
+</html>
