@@ -58,7 +58,7 @@
                     <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
                     <span id="coinCounter" class="text-xs font-black text-amber-300">0</span>
                 </div>
-                <!-- FIXED: Dynamic Leaderboard Points Badge -->
+                <!-- Dynamic Leaderboard Points Badge -->
                 <div class="px-2 py-1 rounded-xl bg-black/50 border border-purple-500/30 flex items-center gap-1">
                     <i class="fa-solid fa-trophy text-purple-400 text-xs"></i>
                     <span id="rankPointsCounter" class="text-xs font-black text-purple-300">0</span>
@@ -70,11 +70,16 @@
             </div>
         </div>
 
-        <!-- 2. SYSTEM MAILBOX DRAWER -->
-        <div class="w-full p-3 rounded-2xl bg-black/40 border border-purple-950/60 shadow-lg">
+        <!-- 2. SYSTEM MAILBOX DRAWER WITH UNREAD RED BADGE -->
+        <div class="w-full p-3 rounded-2xl bg-black/40 border border-purple-950/60 shadow-lg relative">
             <div class="flex justify-between items-center cursor-pointer" onclick="toggleMailboxDrawer()">
-                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-300">
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-300 relative">
                     <i class="fa-solid fa-envelope-open-text text-purple-400"></i> System Connected Mailbox
+                    <!-- RED NOTIFICATION BADGE -->
+                    <span id="mailboxBadge" class="hidden relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                    </span>
                 </div>
                 <i id="mailboxChevron" class="fa-solid fa-chevron-down text-gray-400 text-[10px]"></i>
             </div>
@@ -231,7 +236,7 @@
             document.getElementById("userName").innerText = userState.name || "User";
             document.getElementById("userEmail").innerText = userState.email || "Google Account";
             document.getElementById("coinCounter").innerText = userState.coins || 0;
-            document.getElementById("rankPointsCounter").innerText = userState.leaderPoints || 0; // Fixed key sync
+            document.getElementById("rankPointsCounter").innerText = userState.leaderPoints || 0;
             document.getElementById("voucherCounter").innerText = userState.vouchers || 0;
             if (userState.photo) document.getElementById("userAvatar").src = userState.photo;
 
@@ -283,7 +288,6 @@
             });
         }
 
-        // FIXED: Updated leaderPoints field increment logic
         function mineAdBroadcastSession() {
             let activeAds = userState.dailyAdCount || 0;
             if (activeAds >= 10) {
@@ -295,39 +299,88 @@
             loadAd(() => {
                 db.collection("users").doc(uid).update({
                     coins: firebase.firestore.FieldValue.increment(10),
-                    leaderPoints: firebase.firestore.FieldValue.increment(20), // Correct field name
+                    leaderPoints: firebase.firestore.FieldValue.increment(20),
                     dailyAdCount: firebase.firestore.FieldValue.increment(1),
                     lastAdWatchDate: todayStr
                 }).then(() => alert("🎉 Earned +10 Coins & +20 Rank Points!"));
             });
         }
 
+        // TOGGLE MAILBOX & CLEAR UNREAD NOTIFICATION BADGE
         function toggleMailboxDrawer() {
             const d = document.getElementById("mailboxContentDrawer"), c = document.getElementById("mailboxChevron");
+            const badge = document.getElementById("mailboxBadge");
+
             if(d.classList.contains("hidden")) {
-                d.classList.remove("hidden"); c.className = "fa-solid fa-chevron-up text-purple-400 text-[10px]";
+                d.classList.remove("hidden"); 
+                c.className = "fa-solid fa-chevron-up text-purple-400 text-[10px]";
+                
+                // Hide badge on open
+                badge.classList.add("hidden");
+
+                // Mark unread messages as read in Firestore
+                if (uid) {
+                    db.collection("users").doc(uid).collection("mailbox").where("read", "==", false).get().then(snap => {
+                        let batch = db.batch();
+                        snap.forEach(doc => {
+                            batch.update(doc.ref, { read: true });
+                        });
+                        batch.commit().catch(err => console.log("Batch read error:", err));
+                    });
+                }
             } else {
-                d.classList.add("hidden"); c.className = "fa-solid fa-chevron-down text-gray-400 text-[10px]";
+                d.classList.add("hidden"); 
+                c.className = "fa-solid fa-chevron-down text-gray-400 text-[10px]";
             }
         }
 
+        // LIVE MAILBOX SYNC & UNREAD BADGE TRIGGER
         function syncLiveMailboxFeed() {
             db.collection("users").doc(uid).collection("mailbox").orderBy("timestamp", "desc").onSnapshot((snap) => {
                 const cont = document.getElementById("mailItemsContainer"), prompt = document.getElementById("emptyMailPrompt");
+                const badge = document.getElementById("mailboxBadge");
+                
                 cont.innerHTML = "";
-                if(snap.empty) { prompt.classList.remove("hidden"); return; }
+                
+                if(snap.empty) { 
+                    prompt.classList.remove("hidden"); 
+                    badge.classList.add("hidden");
+                    return; 
+                }
+                
                 prompt.classList.add("hidden");
+
+                let hasUnread = false;
 
                 snap.forEach((doc) => {
                     const m = doc.data();
                     const mailText = m.message || m.msg || m.body || m.text || "No details provided";
                     const mailTitle = m.title || "Notification";
 
+                    // Check if any message is unread
+                    if (m.read === false) {
+                        hasUnread = true;
+                    }
+
                     const block = document.createElement("div");
-                    block.className = "p-2 rounded-xl text-[9px] font-mono bg-black/50 border border-purple-900/40 text-gray-300";
-                    block.innerHTML = `<div class="font-bold text-purple-400 mb-0.5">${mailTitle}</div><p class="text-gray-400 whitespace-pre-line">${mailText}</p>`;
+                    block.className = `p-2 rounded-xl text-[9px] font-mono bg-black/50 border ${m.read === false ? 'border-red-500/60 shadow-[0_0_8px_rgba(239,68,68,0.2)]' : 'border-purple-900/40'} text-gray-300`;
+                    
+                    block.innerHTML = `
+                        <div class="font-bold text-purple-400 mb-0.5 flex justify-between items-center">
+                            <span>${mailTitle}</span>
+                            ${m.read === false ? '<span class="bg-red-500 text-white text-[7px] font-bold px-1 rounded">NEW</span>' : ''}
+                        </div>
+                        <p class="text-gray-400 whitespace-pre-line">${mailText}</p>
+                    `;
                     cont.appendChild(block);
                 });
+
+                // Show Red Dot if there are unread notifications
+                if (hasUnread) {
+                    badge.classList.remove("hidden");
+                } else {
+                    badge.classList.add("hidden");
+                }
             });
         }
     </script>
