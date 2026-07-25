@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIR FREE REWARDS - FAQs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #09070f;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+        .premium-panel {
+            background: rgba(19, 15, 36, 0.85);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+        .faq-card {
+            background: linear-gradient(135deg, #130f26 0%, #0d0a1a 100%);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            transition: all 0.3s ease;
+        }
+        .faq-card:hover {
+            border-color: rgba(168, 85, 247, 0.5);
+        }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding-bottom: 90px;
+        }
+    </style>
+</head>
+<body class="p-3 select-none">
+
+    <div class="app-container space-y-4">
+        
+        <!-- HEADER SECTION -->
+        <div class="w-full p-4 rounded-2xl premium-panel flex items-center justify-between shadow-2xl border-b border-purple-500/30">
+            <div class="flex items-center gap-3">
+                <a href="homepage.html" class="w-8 h-8 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-300 hover:bg-purple-800 transition-all">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                </a>
+                <div>
+                    <h1 class="text-sm font-black tracking-wider uppercase text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-question text-purple-400"></i> Help & FAQs
+                    </h1>
+                    <p class="text-[9px] text-purple-400">Frequently Asked Questions</p>
+                </div>
+            </div>
+            <div class="px-2.5 py-1 rounded-xl bg-purple-950/60 border border-purple-500/30 text-[9px] font-mono font-bold text-purple-300">
+                Support 24/7
+            </div>
+        </div>
+
+        <!-- SEARCH BAR (VISUAL) -->
+        <div class="relative">
+            <input type="text" id="faqSearch" onkeyup="filterFAQs()" placeholder="Search your question here..." class="w-full py-2.5 pl-9 pr-4 rounded-xl bg-black/50 border border-purple-900/50 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-all">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-xs text-purple-400"></i>
+        </div>
+
+        <!-- FAQ ACCORDION LIST -->
+        <div class="space-y-3" id="faqContainer">
+
+            <!-- Q1 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-purple-400 text-xs"></i>
+                        Can I use a VPN in MIR FREE REWARDS?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    No, using a VPN is strictly prohibited in MIR FREE REWARDS. If you use a VPN or proxy service, your account will be permanently suspended.
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-gift text-purple-400 text-xs"></i>
+                        Is MIR FREE REWARDS completely free to use?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    Yes! MIR FREE REWARDS is 100% free to download and use. You just need to watch video ads and play quizzes to earn coins and claim rewards.
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus text-purple-400 text-xs"></i>
+                        Does MIR FREE REWARDS have a Referral Program?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    Yes, we have a full-featured Referral Program! You can invite your friends through our dedicated Refer page and earn bonus rewards for every active referral.
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-lock text-purple-400 text-xs"></i>
+                        Are my coins and personal information secure?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    Absolutely! Your coins and personal details are encrypted and safe with us. However, if any user engages in scamming, fraud, or unnatural activity, their coins will be reset to 0 and their account will be permanently banned. <br><span class="text-amber-400 font-bold">SO PLAY SAFE & FAIR!</span>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-headset text-purple-400 text-xs"></i>
+                        How can I get help if I face account or reward issues?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    If you face any issues, you can directly submit your query via the "Contact Us" or "Recovery" option in the app. Our support team will resolve your issue within 48 hours.
+                </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-earth-americas text-purple-400 text-xs"></i>
+                        Is this app available worldwide or only for India?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    Currently, the app primarily targets users in India. However, we are launching global payment gateways like PayPal very soon so users from anywhere in the world can watch ads and redeem direct rewards.
+                </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-wallet text-purple-400 text-xs"></i>
+                        What payment options are available for withdrawal?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    MIR FREE REWARDS currently supports 4 convenient payout options:
+                    <ul class="list-disc pl-4 mt-1 space-y-0.5 text-purple-300 font-mono">
+                        <li>Google Play Redeem Code</li>
+                        <li>UPI Direct Transfer</li>
+                        <li>Amazon Gift Voucher</li>
+                        <li>Flipkart Gift Voucher</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Q8 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-purple-400 text-xs"></i>
+                        How long does it take to receive payouts?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    All payout requests and reward distributions are processed within 48 hours guaranteed.
+                </div>
+            </div>
+
+            <!-- Q9 -->
+            <div class="faq-item rounded-2xl faq-card overflow-hidden shadow-md">
+                <button onclick="toggleFAQ(this)" class="w-full p-3.5 text-left flex justify-between items-center gap-2 focus:outline-none">
+                    <span class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-coins text-purple-400 text-xs"></i>
+                        How can I earn coins in MIR FREE REWARDS?
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-purple-400 text-[10px] transition-transform duration-300"></i>
+                </button>
+                <div class="hidden px-3.5 pb-3.5 text-[10px] text-gray-300 border-t border-purple-900/30 pt-2 font-sans leading-relaxed">
+                    You can easily earn coins through multiple fun activities: watching video ads, taking quizzes, climbing rank points on the leaderboard, playing Quantum Spin, and scratching lucky cards.
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM FIXED NAV BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
+        <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-house text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Home</span></a>
+        <a href="refer.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
+        <a href="withdrawal.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span></a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-trophy text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Ranks</span></a>
+        <a href="profile.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold"><i class="fa-solid fa-gears text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Profile</span></a>
+    </nav>
+
+    <!-- FAQ INTERACTIVE SCRIPT -->
+    <script>
+        function toggleFAQ(button) {
+            const content = button.nextElementSibling;
+            const chevron = button.querySelector('.fa-chevron-down');
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+                button.parentElement.classList.add('border-purple-500/60');
+            } else {
+                content.classList.add('hidden');
+                chevron.style.transform = 'rotate(0deg)';
+                button.parentElement.classList.remove('border-purple-500/60');
+            }
+        }
+
+        // LIVE SEARCH FILTER
+        function filterFAQs() {
+            const query = document.getElementById('faqSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.faq-item');
+
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
