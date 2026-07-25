@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIR FREE REWARDS - History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #09070f;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+        .premium-panel {
+            background: rgba(19, 15, 36, 0.85);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+        .history-card {
+            background: linear-gradient(135deg, #130f26 0%, #0d0a1a 100%);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding-bottom: 90px;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+            color: #ffffff;
+            font-weight: 800;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+    </style>
+</head>
+<body class="p-3 select-none">
+
+    <div class="app-container space-y-4">
+        
+        <!-- HEADER SECTION -->
+        <div class="w-full p-4 rounded-2xl premium-panel flex items-center justify-between shadow-2xl border-b border-purple-500/30">
+            <div class="flex items-center gap-3">
+                <a href="profile.html" class="w-8 h-8 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-300 hover:bg-purple-800 transition-all">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                </a>
+                <div>
+                    <h1 class="text-sm font-black tracking-wider uppercase text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-purple-400"></i> History Log
+                    </h1>
+                    <p class="text-[9px] text-purple-400">Track earnings & referrals</p>
+                </div>
+            </div>
+            <!-- USER COINS BADGE -->
+            <div class="px-3 py-1.5 rounded-xl bg-purple-950/80 border border-purple-500/40 flex items-center gap-1.5 shadow-inner">
+                <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                <span class="text-xs font-black text-amber-300 font-mono" id="userTotalCoins">7,526</span>
+            </div>
+        </div>
+
+        <!-- TWO TABS (COINS HISTORY & REFER HISTORY) -->
+        <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/60 border border-purple-900/40">
+            <button onclick="switchTab('coins')" id="coinsTabBtn" class="tab-btn active py-2.5 text-center text-xs text-gray-400 rounded-xl transition-all duration-300 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-coins text-xs"></i>
+                <span>Coins History</span>
+            </button>
+            <button onclick="switchTab('refer')" id="referTabBtn" class="tab-btn py-2.5 text-center text-xs text-gray-400 rounded-xl transition-all duration-300 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-users text-xs"></i>
+                <span>Refer History</span>
+            </button>
+        </div>
+
+        <!-- 1. COINS HISTORY TAB CONTENT -->
+        <div id="coinsHistorySection" class="space-y-3">
+
+            <!-- Item 1: Quantum Spin Reward -->
+            <div class="history-card p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                        <i class="fa-solid fa-rotate text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">Quantum Spin</h4>
+                        <p class="text-[9px] text-gray-400">Jul 25, 2026 • 09:30 PM</p>
+                        <span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-purple-950 border border-purple-500/30 text-[8px] font-mono text-purple-300">
+                            +15 Leader Points
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-black text-emerald-400 font-mono">+10 Coins</span>
+                    <p class="text-[9px] text-gray-400 font-mono">Total: 7,526</p>
+                </div>
+            </div>
+
+            <!-- Item 2: Voucher Purchased (Deducted) -->
+            <div class="history-card p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-950/40 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                        <i class="fa-solid fa-ticket text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">Voucher Purchased</h4>
+                        <p class="text-[9px] text-gray-400">Jul 25, 2026 • 09:10 PM</p>
+                        <span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-rose-950/60 border border-rose-500/30 text-[8px] font-mono text-rose-300">
+                            Item Redeemed
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-black text-rose-400 font-mono">-3 Coins</span>
+                    <p class="text-[9px] text-gray-400 font-mono">Total: 7,516</p>
+                </div>
+            </div>
+
+            <!-- Item 3: Daily Check-In -->
+            <div class="history-card p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-950/40 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-calendar-check text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">Daily Check-In Day 2</h4>
+                        <p class="text-[9px] text-gray-400">Jul 25, 2026 • 09:05 PM</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-black text-emerald-400 font-mono">+10 Coins</span>
+                    <p class="text-[9px] text-gray-400 font-mono">Total: 7,519</p>
+                </div>
+            </div>
+
+            <!-- Item 4: Quiz Winner -->
+            <div class="history-card p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-950/40 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                        <i class="fa-solid fa-brain text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">Maths Quiz Bonus</h4>
+                        <p class="text-[9px] text-gray-400">Jul 24, 2026 • 08:45 PM</p>
+                        <span class="inline-block mt-1 px-2 py-0.5 rounded-md bg-blue-950 border border-blue-500/30 text-[8px] font-mono text-blue-300">
+                            +30 Leader Points
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-black text-emerald-400 font-mono">+25 Coins</span>
+                    <p class="text-[9px] text-gray-400 font-mono">Total: 7,509</p>
+                </div>
+            </div>
+
+            <!-- Item 5: Lucky Scratch Card -->
+            <div class="history-card p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                        <i class="fa-solid fa-hand-sparkles text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">Lucky Scratch Card</h4>
+                        <p class="text-[9px] text-gray-400">Jul 24, 2026 • 06:15 PM</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-black text-emerald-400 font-mono">+15 Coins</span>
+                    <p class="text-[9px] text-gray-400 font-mono">Total: 7,484</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 2. REFER HISTORY TAB CONTENT -->
+        <div id="referHistorySection" class="space-y-3 hidden">
+
+            <!-- TOTAL REFER SUMMARY BANNER -->
+            <div class="p-4 rounded-2xl bg-gradient-to-r from-purple-900/60 via-indigo-950/80 to-purple-900/60 border border-purple-500/40 text-center shadow-xl">
+                <p class="text-xs text-purple-300 font-medium">You Earned Total</p>
+                <h3 class="text-2xl font-black text-amber-300 font-mono my-0.5 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-coins text-lg text-amber-400"></i> 260 Coins
+                </h3>
+                <p class="text-[10px] text-gray-300">By Inviting <span class="font-bold text-white">2 Friends</span></p>
+            </div>
+
+            <!-- REFER USER 1 (FULL 3-DAY CHECKIN) -->
+            <div class="history-card p-4 rounded-2xl space-y-3 shadow-md">
+                <!-- User Header -->
+                <div class="flex items-center justify-between border-b border-purple-900/40 pb-2.5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-purple-600 flex items-center justify-center text-white font-black text-xs shadow-lg">
+                            M
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Mohd Shahbaz Mir</h4>
+                            <p class="text-[9px] text-gray-400">Joined: Jun 18, 2026</p>
+                        </div>
+                    </div>
+                    <div class="px-2.5 py-1 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-black font-mono">
+                        +160 Coins
+                    </div>
+                </div>
+
+                <!-- Breakdown Steps Grid -->
+                <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div class="p-2 rounded-xl bg-black/40 border border-purple-900/30 flex justify-between items-center">
+                        <span class="text-gray-300">Signed Up:</span>
+                        <span class="font-bold font-mono text-amber-400">+40 Coins</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-black/40 border border-purple-900/30 flex justify-between items-center">
+                        <span class="text-gray-300">Day 1 Check-In:</span>
+                        <span class="font-bold font-mono text-amber-400">+20 Coins</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-black/40 border border-purple-900/30 flex justify-between items-center">
+                        <span class="text-gray-300">Day 2 Check-In:</span>
+                        <span class="font-bold font-mono text-amber-400">+20 Coins</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-black/40 border border-purple-900/30 flex flex-col items-end justify-center">
+                        <div class="w-full flex justify-between items-center">
+                            <span class="text-gray-300">Day 3 Check-In:</span>
+                            <span class="font-bold font-mono text-amber-400">+80 Coins</span>
+                        </div>
+                        <span class="text-[8px] text-purple-300 font-mono">+50 Leader Pts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REFER USER 2 (PARTIAL CHECKIN) -->
+            <div class="history-card p-4 rounded-2xl space-y-3 shadow-md">
+                <!-- User Header -->
+                <div class="flex items-center justify-between border-b border-purple-900/40 pb-2.5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black text-xs shadow-lg">
+                            A
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Abdul Hadii</h4>
+                            <p class="text-[9px] text-gray-400">Joined: Jul 05, 2026</p>
+                        </div>
+                    </div>
+                    <div class="px-2.5 py-1 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-black font-mono">
+                        +60 Coins
+                    </div>
+                </div>
+
+                <!-- Breakdown Steps Grid -->
+                <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div class="p-2 rounded-xl bg-black/40 border border-purple-900/30 flex justify-between items-center">
+                        <span class="text-gray-300">Signed Up:</span>
+                        <span class="font-bold font-mono text-amber-400">+40 Coins</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-black/40 border border-purple-900/30 flex justify-between items-center">
+                        <span class="text-gray-300">Day 1 Check-In:</span>
+                        <span class="font-bold font-mono text-amber-400">+20 Coins</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-black/20 border border-purple-900/10 flex justify-between items-center text-gray-500 opacity-60">
+                        <span>Day 2 Check-In:</span>
+                        <span class="font-mono">Pending</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-black/20 border border-purple-900/10 flex justify-between items-center text-gray-500 opacity-60">
+                        <span>Day 3 Check-In:</span>
+                        <span class="font-mono">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM FIXED NAV BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
+        <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-house text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Home</span></a>
+        <a href="refer.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
+        <a href="withdrawal.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span></a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-trophy text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Ranks</span></a>
+        <a href="profile.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold"><i class="fa-solid fa-gears text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Profile</span></a>
+    </nav>
+
+    <!-- TAB SWITCHING SCRIPT -->
+    <script>
+        function switchTab(tab) {
+            const coinsSection = document.getElementById('coinsHistorySection');
+            const referSection = document.getElementById('referHistorySection');
+            const coinsBtn = document.getElementById('coinsTabBtn');
+            const referBtn = document.getElementById('referTabBtn');
+
+            if (tab === 'coins') {
+                coinsSection.classList.remove('hidden');
+                referSection.classList.add('hidden');
+                coinsBtn.classList.add('active');
+                referBtn.classList.remove('active');
+            } else if (tab === 'refer') {
+                referSection.classList.remove('hidden');
+                coinsSection.classList.add('hidden');
+                referBtn.classList.add('active');
+                coinsBtn.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
