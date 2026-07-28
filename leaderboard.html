@@ -2,146 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIR REWARDS - Leaderboard & Ranks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIR FREE REWARDS - Global Ranks</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        body {
+            background-color: #05050a;
+            color: #e5e7eb;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+        .premium-card {
+            background: linear-gradient(135deg, #0f0a1e 0%, #080511 100%);
+            border: 1px solid rgba(147, 51, 234, 0.25);
+        }
+    </style>
 </head>
-<body class="bg-[#05050a] text-gray-200 min-h-screen font-sans pb-24">
+<body class="pb-36 select-none">
 
     <!-- FREEZE STATUS WARNING NOTICE BANNER -->
     <div id="leaderboardFreezeBanner" class="hidden bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-700/60 p-2.5 text-center text-xs font-bold text-red-200 tracking-wide flex items-center justify-center gap-2 sticky top-0 z-50 shadow-lg">
         <i class="fa-solid fa-snowflake text-cyan-300 animate-spin"></i>
-        <span id="freezeBannerText">Sometimes Leaderboard Freezed</span>
+        <span id="freezeBannerText">Leaderboard Freezed</span>
         <i class="fa-solid fa-lock text-red-400"></i>
     </div>
 
     <!-- Header Section -->
-    <header class="bg-[#0b0b14] border-b border-purple-900/40 p-4 sticky top-0 z-40 flex justify-between items-center">
+    <header class="bg-[#0b0b14] border-b border-purple-900/40 p-4 sticky top-0 z-40 flex justify-between items-center shadow-lg">
         <div class="flex items-center gap-3">
-            <a href="homepage.html" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-purple-400">
-                <i class="fa-solid fa-arrow-left"></i>
+            <a href="homepage.html" class="w-8 h-8 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-300 hover:bg-purple-800 transition-all">
+                <i class="fa-solid fa-arrow-left text-xs"></i>
             </a>
-            <h1 class="text-sm font-black tracking-wider text-white uppercase"><i class="fa-solid fa-trophy text-yellow-500 mr-1"></i> Global Ranks</h1>
+            <div>
+                <h1 class="text-xs font-black tracking-wider text-white uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-trophy text-amber-400"></i> Global Leaderboard
+                </h1>
+                <p class="text-[9px] text-purple-400">Top Rankers Season</p>
+            </div>
         </div>
-        <div class="text-[10px] font-mono text-amber-400 bg-amber-950/40 border border-amber-800/40 px-2.5 py-1 rounded-full flex items-center gap-1">
-            <i class="fa-solid fa-fire animate-bounce"></i> Monthly Season
+        <div class="text-[9px] font-mono font-bold text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1">
+            <i class="fa-solid fa-fire text-amber-400 animate-pulse"></i> Season Live
         </div>
     </header>
 
-    <main class="max-w-md mx-auto p-4 space-y-5">
+    <main class="max-w-md mx-auto p-3.5 space-y-4">
 
-        <!-- TOP WINNERS CLAIM BOX (FOR TOP 3 RANKERS) -->
-        <div id="winnerClaimBoxContainer" class="hidden bg-gradient-to-br from-amber-950/40 via-purple-950/30 to-[#0b0b14] border border-amber-500/40 p-4 rounded-2xl space-y-3 relative overflow-hidden shadow-[0_0_20px_rgba(245,158,11,0.15)]">
-            <div class="flex justify-between items-center border-b border-amber-500/20 pb-2">
+        <!-- WINNER CLAIM CODE BOX -->
+        <div id="winnerClaimBoxContainer" class="hidden bg-gradient-to-br from-amber-950/50 via-purple-950/40 to-[#0b0b14] border border-amber-500/50 p-4 rounded-2xl space-y-3 relative overflow-hidden shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+            <div class="flex justify-between items-center border-b border-amber-500/30 pb-2">
                 <h3 class="text-xs font-black text-amber-300 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-crown text-yellow-400"></i> Season Champion Reward
+                    <i class="fa-solid fa-crown text-yellow-400"></i> Winner Reward Unlocked
                 </h3>
-                <span class="text-[9px] font-bold bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full">Winner Unlocked</span>
+                <span class="text-[8px] font-bold bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full">Prizes Distributed</span>
             </div>
             <div id="winnerClaimContent" class="space-y-2 text-xs">
-                <!-- Winner code claim dynamically loaded -->
+                <!-- Winner claim code will load dynamically -->
             </div>
         </div>
 
-        <!-- NOTICE & RULES CARD -->
-        <div class="bg-gradient-to-br from-purple-950/40 to-[#0b0b14] border border-purple-800/40 p-4 rounded-2xl space-y-3 relative overflow-hidden">
-            <div class="flex justify-between items-center border-b border-purple-900/30 pb-2">
+        <!-- NEW REVISED RULES & QUALIFICATION NOTICE -->
+        <div class="premium-card p-4 rounded-2xl space-y-3 shadow-xl">
+            <div class="flex justify-between items-center border-b border-purple-900/40 pb-2">
                 <h2 class="text-xs font-black text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-scroll text-yellow-400"></i> Season Rules & Rewards
+                    <i class="fa-solid fa-shield-halved text-amber-400"></i> Qualification & Rewards
                 </h2>
-                <span id="targetClaimDate" class="text-[9px] font-bold bg-purple-900/50 text-purple-200 px-2 py-0.5 rounded-md">1 September Claim</span>
+                <span id="targetClaimDate" class="text-[9px] font-mono font-bold bg-purple-900/60 text-purple-200 border border-purple-500/30 px-2 py-0.5 rounded-lg">Month End Claim</span>
             </div>
 
-            <div class="space-y-1.5 text-[11px] text-gray-300">
-                <p class="text-amber-400 font-semibold text-[10px]"><i class="fa-solid fa-triangle-exclamation"></i> Min. 10,000 Leader Points required to qualify!</p>
-                <div class="grid grid-cols-3 gap-2 text-center pt-1">
-                    <div class="bg-black/40 border border-yellow-500/30 p-2 rounded-xl">
-                        <p class="text-[9px] text-gray-400 font-bold">🥇 1st Rank</p>
-                        <p class="text-xs font-black text-yellow-400">₹30 Code</p>
+            <div class="space-y-2 text-[10px]">
+                <div class="bg-amber-950/40 border border-amber-500/40 p-2 rounded-xl flex items-center gap-2 text-amber-300 font-bold">
+                    <i class="fa-solid fa-circle-exclamation text-amber-400 text-sm"></i>
+                    <span>Minimum 10,000 Points required in all ranks to qualify for rewards!</span>
+                </div>
+
+                <!-- Prize Matrix -->
+                <div class="grid grid-cols-3 gap-1.5 text-center pt-1">
+                    <div class="bg-black/50 border border-amber-500/40 p-2 rounded-xl">
+                        <p class="text-[9px] text-amber-400 font-bold">🥇 1st Rank</p>
+                        <p class="text-xs font-black text-amber-300">₹50 Code</p>
+                        <span class="text-[8px] text-gray-400 font-mono">Min 10k Pts</span>
                     </div>
-                    <div class="bg-black/40 border border-gray-400/30 p-2 rounded-xl">
-                        <p class="text-[9px] text-gray-400 font-bold">🥈 2nd Rank</p>
-                        <p class="text-xs font-black text-gray-300">₹20 Code</p>
+                    <div class="bg-black/50 border border-gray-400/30 p-2 rounded-xl">
+                        <p class="text-[9px] text-gray-300 font-bold">🥈 2nd Rank</p>
+                        <p class="text-xs font-black text-gray-200">₹30 Code</p>
+                        <span class="text-[8px] text-gray-400 font-mono">Min 10k Pts</span>
                     </div>
-                    <div class="bg-black/40 border border-amber-700/30 p-2 rounded-xl">
-                        <p class="text-[9px] text-gray-400 font-bold">🥉 3rd Rank</p>
-                        <p class="text-xs font-black text-amber-500">₹10 Code</p>
+                    <div class="bg-black/50 border border-amber-800/40 p-2 rounded-xl">
+                        <p class="text-[9px] text-amber-600 font-bold">🥉 3rd Rank</p>
+                        <p class="text-xs font-black text-amber-500">₹20 Code</p>
+                        <span class="text-[8px] text-gray-400 font-mono">Min 10k Pts</span>
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-2 text-center pt-1">
-                    <div class="bg-black/30 border border-purple-900/40 p-2 rounded-xl">
-                        <p class="text-[9px] text-gray-400">Top 4 to 10 (7 Users)</p>
-                        <p class="text-xs font-bold text-purple-400">+1000 Coins 🪙</p>
+                    <div class="bg-black/40 border border-purple-800/40 p-2 rounded-xl">
+                        <p class="text-[9px] text-purple-300 font-bold">Ranks 4 to 50</p>
+                        <p class="text-xs font-black text-purple-400">₹10 Code Each</p>
+                        <span class="text-[8px] text-gray-400 font-mono">Min 10,000 Points</span>
                     </div>
-                    <div class="bg-black/30 border border-purple-900/40 p-2 rounded-xl">
-                        <p class="text-[9px] text-gray-400">Top 11 to 50 (40 Users)</p>
-                        <p class="text-xs font-bold text-purple-400">+300 Coins 🪙</p>
+                    <div class="bg-black/40 border border-gray-800 p-2 rounded-xl">
+                        <p class="text-[9px] text-gray-400 font-bold">Ranks 51 to 100+</p>
+                        <p class="text-xs font-bold text-gray-500">No Reward</p>
+                        <span class="text-[8px] text-gray-600 font-mono">Participation Zone</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- TOP 3 PODIUM DISPLAY -->
-        <div class="pt-2">
-            <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center mb-3">🔥 Current Champions</h3>
+        <div class="pt-1">
+            <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest text-center mb-3">🔥 Top Champions</h3>
             
             <div id="podiumContainer" class="grid grid-cols-3 gap-2 items-end">
                 <!-- 2nd Rank -->
-                <div id="podium2" class="bg-[#0b0b14] border border-gray-800 p-2.5 rounded-2xl text-center space-y-1">
-                    <div class="w-8 h-8 rounded-full bg-gray-800 border border-gray-500 mx-auto flex items-center justify-center text-xs font-bold text-gray-300">2</div>
+                <div id="podium2" class="bg-[#0b0b14] border border-gray-800 p-2.5 rounded-2xl text-center space-y-1 shadow-md">
+                    <div class="w-8 h-8 rounded-full bg-gray-800 border border-gray-400 mx-auto flex items-center justify-center text-xs font-bold text-gray-200">2</div>
                     <p id="p2Name" class="text-[10px] font-bold text-white truncate">Loading...</p>
                     <p id="p2Points" class="text-[9px] font-mono text-gray-400">0 Pts</p>
+                    <span id="p2Badge" class="inline-block text-[7px] px-1.5 py-0.5 rounded font-mono bg-gray-900 text-gray-500">Evaluating</span>
                 </div>
 
                 <!-- 1st Rank -->
-                <div id="podium1" class="bg-gradient-to-b from-yellow-950/30 to-[#0b0b14] border border-yellow-500/50 p-3 rounded-2xl text-center space-y-1 relative -top-3 shadow-[0_0_20px_rgba(234,179,8,0.15)]">
+                <div id="podium1" class="bg-gradient-to-b from-amber-950/40 via-[#0b0b14] to-[#0b0b14] border border-amber-500/60 p-3 rounded-2xl text-center space-y-1 relative -top-2 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
                     <i class="fa-solid fa-crown text-yellow-400 text-xs absolute -top-2.5 left-1/2 -translate-x-1/2 animate-bounce"></i>
-                    <div class="w-10 h-10 rounded-full bg-yellow-500/20 border border-yellow-400 mx-auto flex items-center justify-center text-sm font-black text-yellow-400">1</div>
-                    <p id="p1Name" class="text-[11px] font-black text-yellow-300 truncate">Loading...</p>
-                    <p id="p1Points" class="text-[10px] font-mono text-yellow-400 font-bold">0 Pts</p>
+                    <div class="w-10 h-10 rounded-full bg-amber-500/20 border-2 border-amber-400 mx-auto flex items-center justify-center text-sm font-black text-amber-300">1</div>
+                    <p id="p1Name" class="text-[11px] font-black text-amber-300 truncate">Loading...</p>
+                    <p id="p1Points" class="text-[10px] font-mono text-amber-400 font-bold">0 Pts</p>
+                    <span id="p1Badge" class="inline-block text-[7px] px-1.5 py-0.5 rounded font-mono bg-gray-900 text-gray-500">Evaluating</span>
                 </div>
 
                 <!-- 3rd Rank -->
-                <div id="podium3" class="bg-[#0b0b14] border border-gray-800 p-2.5 rounded-2xl text-center space-y-1">
+                <div id="podium3" class="bg-[#0b0b14] border border-gray-800 p-2.5 rounded-2xl text-center space-y-1 shadow-md">
                     <div class="w-8 h-8 rounded-full bg-amber-950/40 border border-amber-700 mx-auto flex items-center justify-center text-xs font-bold text-amber-500">3</div>
                     <p id="p3Name" class="text-[10px] font-bold text-white truncate">Loading...</p>
                     <p id="p3Points" class="text-[9px] font-mono text-gray-400">0 Pts</p>
+                    <span id="p3Badge" class="inline-block text-[7px] px-1.5 py-0.5 rounded font-mono bg-gray-900 text-gray-500">Evaluating</span>
                 </div>
             </div>
         </div>
 
-        <!-- LIST SECTIONS (TOP 10, TOP 50, TOP 100) -->
+        <!-- LIST SECTIONS (TOP 50 REWARD ZONE & 51-100 PARTICIPATION) -->
         <div class="space-y-4 pt-2">
             
-            <!-- TOP 10 LIST -->
+            <!-- RANK 4 TO 50 REWARD ZONE -->
             <div class="space-y-2">
                 <div class="flex justify-between items-center px-1">
-                    <h4 class="text-[10px] font-black text-yellow-400 uppercase tracking-widest"><i class="fa-solid fa-award"></i> Top 10 Elite (1000 Coins Reward Zone)</h4>
-                </div>
-                <div id="top10ListContainer" class="space-y-1.5">
-                    <!-- Ranks 4 to 10 render here -->
-                </div>
-            </div>
-
-            <!-- TOP 50 LIST -->
-            <div class="space-y-2">
-                <div class="flex justify-between items-center px-1">
-                    <h4 class="text-[10px] font-black text-purple-400 uppercase tracking-widest"><i class="fa-solid fa-medal"></i> Top 50 Challengers (300 Coins Reward Zone)</h4>
+                    <h4 class="text-[10px] font-black text-purple-300 uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="fa-solid fa-award text-amber-400"></i> Ranks 4 to 50 (₹10 Code Zone)
+                    </h4>
                 </div>
                 <div id="top50ListContainer" class="space-y-1.5">
-                    <!-- Ranks 11 to 50 render here -->
+                    <!-- Ranks 4 to 50 render here -->
                 </div>
             </div>
 
-            <!-- TOP 100 LIST -->
+            <!-- RANK 51 TO 100 PARTICIPATION ZONE -->
             <div class="space-y-2">
                 <div class="flex justify-between items-center px-1">
-                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest"><i class="fa-solid fa-list-ol"></i> Top 100 Leaderboard</h4>
+                    <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-ol text-gray-500"></i> Ranks 51 to 100 (No Rewards)
+                    </h4>
                 </div>
                 <div id="top100ListContainer" class="space-y-1.5">
                     <!-- Ranks 51 to 100 render here -->
@@ -152,43 +178,57 @@
 
     </main>
 
+    <!-- STICKY BOTTOM USER PERSONAL POSITION CARD -->
+    <div id="userRankBottomCard" class="fixed bottom-[60px] left-0 right-0 z-40 bg-[#0d091a]/95 backdrop-blur-md border-t border-purple-500/40 p-2.5 px-4">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-purple-900/60 border border-purple-500/40 flex items-center justify-center font-mono font-black text-xs text-amber-300 shadow-inner" id="myRankDisplay">
+                    #--
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-white flex items-center gap-1" id="myNameDisplay">Your Rank</h4>
+                    <p class="text-[9px] text-gray-400 font-mono" id="myPointsDisplay">0 Leader Points</p>
+                </div>
+            </div>
+            <div class="text-right" id="myStatusBadgeContainer">
+                <span class="text-[9px] font-bold px-2 py-1 rounded-lg bg-gray-900 border border-gray-800 text-gray-500">Loading...</span>
+            </div>
+        </div>
+    </div>
+
     <!-- FIXED BOTTOM NAVIGATION BAR -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#09070f]/95 backdrop-blur-md border-t border-purple-900/30 px-4 py-2 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#06040a]/95 backdrop-blur-md border-t border-purple-900/30 px-4 py-2 z-50">
         <div class="max-w-md mx-auto flex justify-between items-center">
             
-            <!-- 1. HOME -->
-            <a href="homepage.html" class="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-400 transition-colors">
-                <i class="fa-solid fa-house text-base"></i>
-                <span class="text-[9px] font-bold uppercase tracking-wider">Home</span>
+            <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors">
+                <i class="fa-solid fa-house text-sm"></i>
+                <span class="text-[8px] font-black uppercase tracking-wider">Home</span>
             </a>
 
-            <!-- 2. REFER -->
-            <a href="refer.html" class="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-400 transition-colors">
-                <i class="fa-solid fa-users text-base"></i>
-                <span class="text-[9px] font-bold uppercase tracking-wider">Refer</span>
+            <a href="refer.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors">
+                <i class="fa-solid fa-users text-sm"></i>
+                <span class="text-[8px] font-black uppercase tracking-wider">Refer</span>
             </a>
 
-            <!-- 3. WITHDRAW -->
-            <a href="withdraw.html" class="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-400 transition-colors">
-                <i class="fa-solid fa-wallet text-base"></i>
-                <span class="text-[9px] font-bold uppercase tracking-wider">Withdraw</span>
+            <a href="withdraw.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors">
+                <i class="fa-solid fa-wallet text-sm"></i>
+                <span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span>
             </a>
 
-            <!-- 4. RANKS (ACTIVE) -->
-            <a href="leaderboard.html" class="flex flex-col items-center gap-1 text-purple-400 font-bold">
-                <i class="fa-solid fa-trophy text-base"></i>
-                <span class="text-[9px] font-bold uppercase tracking-wider">Ranks</span>
+            <a href="leaderboard.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold">
+                <i class="fa-solid fa-trophy text-sm"></i>
+                <span class="text-[8px] font-black uppercase tracking-wider">Ranks</span>
             </a>
 
-            <!-- 5. PROFILE -->
-            <a href="profile.html" class="flex flex-col items-center gap-1 text-gray-500 hover:text-purple-400 transition-colors">
-                <i class="fa-solid fa-user text-base"></i>
-                <span class="text-[9px] font-bold uppercase tracking-wider">Profile</span>
+            <a href="profile.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors">
+                <i class="fa-solid fa-user text-sm"></i>
+                <span class="text-[8px] font-black uppercase tracking-wider">Profile</span>
             </a>
 
         </div>
     </nav>
 
+    <!-- FIREBASE & LOGIC SCRIPT -->
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
@@ -213,21 +253,17 @@
             fetchLeaderboardData();
         };
 
-        // REALTIME LEADERBOARD CONFIG & FREEZE BANNER LISTENER
         function listenToLeaderboardConfigAndFreeze() {
             db.collection("app_admin").doc("leaderboard_config").onSnapshot(doc => {
                 if (doc.exists) {
                     const data = doc.data();
-                    
-                    // Update Season Banner Rule Text
                     if (data.claimRuleText) {
                         document.getElementById("targetClaimDate").innerText = data.claimRuleText;
                     }
 
-                    // Check Freeze Status
                     const freezeBanner = document.getElementById("leaderboardFreezeBanner");
                     if (data.frozen === true) {
-                        const msgText = data.freezeMessage || "Sometimes Leaderboard Freezed";
+                        const msgText = data.freezeMessage || "Leaderboard Freezed";
                         document.getElementById("freezeBannerText").innerText = msgText;
                         freezeBanner.classList.remove("hidden");
                     } else {
@@ -237,7 +273,6 @@
             });
         }
 
-        // CHECK IF CURRENT LOGGED IN USER IS IN TOP WINNERS & SHOW REDEEM CODE CLAIM BOX
         function checkAndRenderWinnerRewardBox() {
             if (!currentActiveUserUid) return;
 
@@ -263,7 +298,7 @@
                               <p class="text-gray-300 text-[10px]">${latestRewardMsg.message || latestRewardMsg.msg || ""}</p>
                               ${latestRewardMsg.systemCode ? `
                               <div class="bg-black/60 p-2.5 rounded-xl border border-yellow-500/30 flex justify-between items-center mt-2">
-                                  <span class="font-mono text-yellow-400 font-black text-sm select-all">${latestRewardMsg.systemCode}</span>
+                                  <span class="font-mono text-amber-300 font-black text-sm select-all">${latestRewardMsg.systemCode}</span>
                                   <button onclick="copyWinnerVoucherCode('${latestRewardMsg.systemCode}')" class="px-3 py-1 bg-amber-500 text-black font-black text-[9px] rounded-lg uppercase">
                                       <i class="fa-solid fa-copy"></i> Copy Code
                                   </button>
@@ -279,12 +314,12 @@
 
         function copyWinnerVoucherCode(code) {
             navigator.clipboard.writeText(code).then(() => {
-                alert("📋 Voucher code copied to clipboard!");
+                alert("📋 Redeem Code copied to clipboard!");
             });
         }
 
         function fetchLeaderboardData() {
-            db.collection("users").orderBy("leaderPoints", "desc").limit(100).get().then(snap => {
+            db.collection("users").orderBy("leaderPoints", "desc").get().then(snap => {
                 let users = [];
                 snap.forEach(doc => {
                     const d = doc.data();
@@ -295,9 +330,9 @@
                     });
                 });
 
-                renderPodiumAndLists(users);
+                renderLeaderboardAndMyPosition(users);
             }).catch(err => {
-                // Fallback sorting if leaderPoints index is not built
+                // Fallback manual sort
                 db.collection("users").get().then(snap => {
                     let users = [];
                     snap.forEach(doc => {
@@ -309,64 +344,125 @@
                         });
                     });
                     users.sort((a, b) => b.points - a.points);
-                    renderPodiumAndLists(users.slice(0, 100));
+                    renderLeaderboardAndMyPosition(users);
                 });
             });
         }
 
-        function renderPodiumAndLists(users) {
-            // Fill Podium 1st, 2nd, 3rd
-            if (users[0]) {
-                document.getElementById("p1Name").innerText = users[0].name;
-                document.getElementById("p1Points").innerText = users[0].points.toLocaleString() + " Pts";
-            }
-            if (users[1]) {
-                document.getElementById("p2Name").innerText = users[1].name;
-                document.getElementById("p2Points").innerText = users[1].points.toLocaleString() + " Pts";
-            }
-            if (users[2]) {
-                document.getElementById("p3Name").innerText = users[2].name;
-                document.getElementById("p3Points").innerText = users[2].points.toLocaleString() + " Pts";
-            }
+        function renderLeaderboardAndMyPosition(allUsers) {
+            const top100 = allUsers.slice(0, 100);
 
-            const container10 = document.getElementById("top10ListContainer");
+            // 1. RENDER TOP 3 PODIUM
+            renderPodiumUser(top100[0], "p1Name", "p1Points", "p1Badge", "₹50 Reward");
+            renderPodiumUser(top100[1], "p2Name", "p2Points", "p2Badge", "₹30 Reward");
+            renderPodiumUser(top100[2], "p3Name", "p3Points", "p3Badge", "₹20 Reward");
+
+            // 2. RENDER LISTS
             const container50 = document.getElementById("top50ListContainer");
             const container100 = document.getElementById("top100ListContainer");
 
-            container10.innerHTML = "";
             container50.innerHTML = "";
             container100.innerHTML = "";
 
-            users.forEach((u, index) => {
+            top100.forEach((u, index) => {
                 const rank = index + 1;
-                if (rank <= 3) return; // Top 3 are on podium
+                if (rank <= 3) return; // Skip Top 3 podium
 
                 const isQualified = u.points >= 10000;
                 const row = document.createElement("div");
-                row.className = `p-2.5 bg-[#0b0b14] border ${isQualified ? 'border-purple-900/30' : 'border-gray-900'} rounded-xl flex justify-between items-center text-xs`;
 
-                row.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <span class="w-6 text-center font-mono font-bold text-gray-500 text-[11px]">#${rank}</span>
-                        <div>
-                            <p class="font-bold text-white text-xs">${u.name}</p>
-                            ${isQualified ? '<span class="text-[8px] bg-emerald-950 text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-800/40">Qualified</span>' : '<span class="text-[8px] text-gray-600 font-mono">< 10k Pts</span>'}
+                if (rank <= 50) {
+                    row.className = `p-2.5 bg-[#0b0b14] border ${isQualified ? 'border-purple-500/30' : 'border-gray-900'} rounded-xl flex justify-between items-center text-xs shadow-sm`;
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 text-center font-mono font-bold text-gray-400 text-[11px]">#${rank}</span>
+                            <div>
+                                <p class="font-bold text-white text-xs">${u.name}</p>
+                                ${isQualified ? 
+                                    '<span class="text-[8px] bg-emerald-950/80 text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-800/40">Qualified (₹10)</span>' : 
+                                    '<span class="text-[8px] text-amber-500/80 font-mono">Need 10k Pts</span>'}
+                            </div>
                         </div>
-                    </div>
-                    <div class="text-right font-mono">
-                        <span class="font-bold ${isQualified ? 'text-amber-400' : 'text-gray-400'} text-xs">${u.points.toLocaleString()}</span>
-                        <span class="text-[9px] text-gray-500 block">Pts</span>
-                    </div>
-                `;
-
-                if (rank >= 4 && rank <= 10) {
-                    container10.appendChild(row);
-                } else if (rank >= 11 && rank <= 50) {
+                        <div class="text-right font-mono">
+                            <span class="font-bold ${isQualified ? 'text-amber-300' : 'text-gray-400'} text-xs">${u.points.toLocaleString()}</span>
+                            <span class="text-[8px] text-gray-500 block">Pts</span>
+                        </div>
+                    `;
                     container50.appendChild(row);
                 } else {
+                    row.className = "p-2.5 bg-[#080610] border border-gray-900/60 rounded-xl flex justify-between items-center text-xs opacity-75";
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 text-center font-mono font-bold text-gray-600 text-[11px]">#${rank}</span>
+                            <div>
+                                <p class="font-medium text-gray-300 text-xs">${u.name}</p>
+                                <span class="text-[8px] text-gray-600 font-mono">No Reward</span>
+                            </div>
+                        </div>
+                        <div class="text-right font-mono">
+                            <span class="font-bold text-gray-500 text-xs">${u.points.toLocaleString()}</span>
+                            <span class="text-[8px] text-gray-600 block">Pts</span>
+                        </div>
+                    `;
                     container100.appendChild(row);
                 }
             });
+
+            // 3. RENDER CURRENT USER'S BOTTOM STICKY POSITION
+            const myIndex = allUsers.findIndex(u => u.uid === currentActiveUserUid);
+            const myRankDisplay = document.getElementById("myRankDisplay");
+            const myNameDisplay = document.getElementById("myNameDisplay");
+            const myPointsDisplay = document.getElementById("myPointsDisplay");
+            const myStatusContainer = document.getElementById("myStatusBadgeContainer");
+
+            if (myIndex !== -1) {
+                const myData = allUsers[myIndex];
+                const myRank = myIndex + 1;
+                const isMyQualified = myData.points >= 10000;
+
+                myRankDisplay.innerText = `#${myRank}`;
+                myNameDisplay.innerText = myData.name;
+                myPointsDisplay.innerText = `${myData.points.toLocaleString()} Leader Points`;
+
+                if (myRank <= 3 && isMyQualified) {
+                    myStatusContainer.innerHTML = `<span class="text-[9px] font-bold px-2 py-1 rounded-lg bg-amber-950 text-amber-300 border border-amber-500/40">Top Champion</span>`;
+                } else if (myRank <= 50 && isMyQualified) {
+                    myStatusContainer.innerHTML = `<span class="text-[9px] font-bold px-2 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-500/40">Qualified (₹10 Code)</span>`;
+                } else if (myRank <= 50 && !isMyQualified) {
+                    myStatusContainer.innerHTML = `<span class="text-[9px] font-bold px-2 py-1 rounded-lg bg-amber-950/60 text-amber-400 border border-amber-500/30">Reach 10k Pts</span>`;
+                } else {
+                    myStatusContainer.innerHTML = `<span class="text-[9px] font-bold px-2 py-1 rounded-lg bg-gray-900 text-gray-500 border border-gray-800">No Reward Zone</span>`;
+                }
+            } else {
+                myRankDisplay.innerText = "#--";
+                myNameDisplay.innerText = "Logged In User";
+                myPointsDisplay.innerText = "Not Ranked Yet";
+                myStatusContainer.innerHTML = `<span class="text-[9px] font-bold px-2 py-1 rounded-lg bg-gray-900 text-gray-500">Play Games To Rank</span>`;
+            }
+        }
+
+        function renderPodiumUser(userObj, nameId, pointsId, badgeId, prizeText) {
+            const nameEl = document.getElementById(nameId);
+            const pointsEl = document.getElementById(pointsId);
+            const badgeEl = document.getElementById(badgeId);
+
+            if (userObj) {
+                nameEl.innerText = userObj.name;
+                pointsEl.innerText = userObj.points.toLocaleString() + " Pts";
+
+                if (userObj.points >= 10000) {
+                    badgeEl.innerText = prizeText;
+                    badgeEl.className = "inline-block text-[7px] px-1.5 py-0.5 rounded font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40";
+                } else {
+                    badgeEl.innerText = "Need 10k Pts";
+                    badgeEl.className = "inline-block text-[7px] px-1.5 py-0.5 rounded font-mono font-bold bg-amber-950 text-amber-400 border border-amber-800/40";
+                }
+            } else {
+                nameEl.innerText = "No User";
+                pointsEl.innerText = "0 Pts";
+                badgeEl.innerText = "Vacant";
+                badgeEl.className = "inline-block text-[7px] px-1.5 py-0.5 rounded font-mono bg-gray-900 text-gray-600";
+            }
         }
     </script>
 </body>
