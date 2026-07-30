@@ -203,20 +203,64 @@
                 if (doc.exists) {
                     userState = doc.data();
 
-                    // 🚫 REAL-TIME SUSPENSION LOCK SYSTEM
+                    // 🚫 ADVANCED SUSPENSION LOCK ENGINE
                     if (userState.isSuspended === true || userState.status === "suspended") {
-                        alert("🚫 ACCOUNT SUSPENDED!\n\nAapka account suspend kar diya gaya hai. Aap application use nahi kar sakte.");
-                        auth.signOut().then(() => {
-                            window.location.href = "login.html";
-                        });
-                        return;
+                        const now = new Date().getTime();
+                        let suspensionMsg = "Your account is temporarily suspended.";
+
+                        if (userState.suspensionDuration === "permanent" || userState.suspensionType === "permanent") {
+                            suspensionMsg = "Your account has been permanently suspended.";
+                        } 
+                        else if (userState.suspendedUntil) {
+                            const expiryTime = userState.suspendedUntil.toDate ? userState.suspendedUntil.toDate().getTime() : new Date(userState.suspendedUntil).getTime();
+                            
+                            if (now < expiryTime) {
+                                const diffHours = Math.ceil((expiryTime - now) / (1000 * 60 * 60));
+                                const diffDays = Math.ceil(diffHours / 24);
+
+                                if (diffHours <= 24) {
+                                    suspensionMsg = `Your account is suspended for 24 hours. (Remaining: ~${diffHours} hours)`;
+                                } else if (diffDays <= 7) {
+                                    suspensionMsg = `Your account is suspended for 7 days. (Remaining: ~${diffDays} days)`;
+                                } else if (diffDays <= 30) {
+                                    suspensionMsg = `Your account is suspended for 30 days. (Remaining: ~${diffDays} days)`;
+                                } else {
+                                    suspensionMsg = `Your account is suspended for ${diffDays} days.`;
+                                }
+                            } else {
+                                // Auto Unblock User if time completed
+                                db.collection("users").doc(uid).update({
+                                    isSuspended: false,
+                                    status: "active",
+                                    suspendedUntil: firebase.firestore.FieldValue.delete(),
+                                    suspensionDuration: firebase.firestore.FieldValue.delete()
+                                });
+                                suspensionMsg = null;
+                            }
+                        } else if (userState.suspensionDuration) {
+                            const duration = userState.suspensionDuration.toString().toLowerCase();
+                            if (duration.includes("24")) {
+                                suspensionMsg = "Your account is suspended for 24 hours.";
+                            } else if (duration.includes("7")) {
+                                suspensionMsg = "Your account is suspended for 7 days.";
+                            } else if (duration.includes("30")) {
+                                suspensionMsg = "Your account is suspended for 30 days.";
+                            }
+                        }
+
+                        if (suspensionMsg) {
+                            alert(`🚫 ACCOUNT SUSPENDED!\n\n${suspensionMsg}`);
+                            auth.signOut().then(() => {
+                                window.location.href = "login.html";
+                            });
+                            return;
+                        }
                     }
 
                     checkAndResetDailyAds();
                     renderApplicationCounters();
                     syncLiveMailboxFeed();
                 } else {
-                    // Account not found in database
                     auth.signOut().then(() => {
                         window.location.href = "login.html";
                     });
@@ -266,7 +310,6 @@
         function loadAd(cb) { setTimeout(cb, 800); }
 
         function claimDailyStreakNode() {
-            // Guard clause to block if suspended
             if (userState.isSuspended === true || userState.status === "suspended") return;
 
             const today = new Date().toDateString();
@@ -298,7 +341,6 @@
         }
 
         function mineAdBroadcastSession() {
-            // Guard clause to block if suspended
             if (userState.isSuspended === true || userState.status === "suspended") return;
 
             let activeAds = userState.dailyAdCount || 0;
@@ -318,7 +360,6 @@
             });
         }
 
-        // TOGGLE MAILBOX & CLEAR UNREAD NOTIFICATION BADGE
         function toggleMailboxDrawer() {
             const d = document.getElementById("mailboxContentDrawer"), c = document.getElementById("mailboxChevron");
             const badge = document.getElementById("mailboxBadge");
@@ -327,10 +368,8 @@
                 d.classList.remove("hidden"); 
                 c.className = "fa-solid fa-chevron-up text-purple-400 text-[10px]";
                 
-                // Hide badge on open
                 badge.classList.add("hidden");
 
-                // Mark unread messages as read in Firestore
                 if (uid) {
                     db.collection("users").doc(uid).collection("mailbox").where("read", "==", false).get().then(snap => {
                         let batch = db.batch();
@@ -346,7 +385,6 @@
             }
         }
 
-        // LIVE MAILBOX SYNC & UNREAD BADGE TRIGGER
         function syncLiveMailboxFeed() {
             db.collection("users").doc(uid).collection("mailbox").orderBy("timestamp", "desc").onSnapshot((snap) => {
                 const cont = document.getElementById("mailItemsContainer"), prompt = document.getElementById("emptyMailPrompt");
@@ -369,7 +407,6 @@
                     const mailText = m.message || m.msg || m.body || m.text || "No details provided";
                     const mailTitle = m.title || "Notification";
 
-                    // Check if any message is unread
                     if (m.read === false) {
                         hasUnread = true;
                     }
@@ -387,7 +424,6 @@
                     cont.appendChild(block);
                 });
 
-                // Show Red Dot if there are unread notifications
                 if (hasUnread) {
                     badge.classList.remove("hidden");
                 } else {
