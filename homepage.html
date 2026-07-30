@@ -203,13 +203,21 @@
             }
         });
 
+        function isUserCurrentlySuspended() {
+            if (!userState) return false;
+            return userState.isSuspended === true || 
+                   userState.status === "suspended" || 
+                   userState.suspensionDuration === "permanent" || 
+                   userState.suspensionType === "permanent";
+        }
+
         function syncSystemRealtimeData() {
             db.collection("users").doc(uid).onSnapshot((doc) => {
                 if (doc.exists) {
                     userState = doc.data();
 
-                    // 🚫 ADVANCED SUSPENSION LOCK ENGINE
-                    if (userState.isSuspended === true || userState.status === "suspended") {
+                    // 🚫 STRICT SUSPENSION LOCK ENGINE
+                    if (isUserCurrentlySuspended()) {
                         const now = new Date().getTime();
                         let suspensionMsg = "Your account is temporarily suspended.";
 
@@ -233,7 +241,7 @@
                                     suspensionMsg = `Your account is suspended for ${diffDays} days.`;
                                 }
                             } else {
-                                // Auto Unblock User if suspension duration complete
+                                // Auto Unblock User if time completed
                                 db.collection("users").doc(uid).update({
                                     isSuspended: false,
                                     status: "active",
@@ -315,7 +323,7 @@
         function loadAd(cb) { setTimeout(cb, 800); }
 
         function claimDailyStreakNode() {
-            if (userState.isSuspended === true || userState.status === "suspended") {
+            if (isUserCurrentlySuspended()) {
                 alert("🚫 Your account is suspended!");
                 return;
             }
@@ -349,7 +357,7 @@
         }
 
         function mineAdBroadcastSession() {
-            if (userState.isSuspended === true || userState.status === "suspended") {
+            if (isUserCurrentlySuspended()) {
                 alert("🚫 Your account is suspended!");
                 return;
             }
