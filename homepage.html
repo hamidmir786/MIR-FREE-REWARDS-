@@ -42,6 +42,7 @@
 
     <div class="app-container space-y-4">
         
+        <!-- User Details Panel -->
         <div class="w-full p-3 rounded-2xl premium-panel flex justify-between items-center shadow-2xl">
             <div class="flex items-center gap-2.5 max-w-[45%]">
                 <img id="userAvatar" src="https://via.placeholder.com/40" alt="Avatar" class="w-10 h-10 rounded-full border border-purple-500/40 object-cover">
@@ -67,6 +68,7 @@
             </div>
         </div>
 
+        <!-- System Connected Mailbox Drawer -->
         <div class="w-full p-3 rounded-2xl bg-black/40 border border-purple-950/60 shadow-lg relative">
             <div class="flex justify-between items-center cursor-pointer" onclick="toggleMailboxDrawer()">
                 <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-300 relative">
@@ -84,6 +86,7 @@
             </div>
         </div>
 
+        <!-- Task & Daily Mining Section -->
         <div class="space-y-3">
             <div class="px-1 text-[10px] text-gray-400 flex justify-between font-bold border-b border-gray-900 pb-1">
                 <span class="text-purple-400 uppercase tracking-wider"><i class="fa-solid fa-calendar-check"></i> Daily Check-in & Mining</span>
@@ -109,6 +112,7 @@
             </div>
         </div>
 
+        <!-- Navigation Hub -->
         <div class="space-y-2 pt-2">
             <div class="px-1 text-[10px] font-bold uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-1">
                 <i class="fa-solid fa-gamepad"></i> Game & Utility Modules
@@ -159,6 +163,7 @@
 
     </div>
 
+    <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
         <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold"><i class="fa-solid fa-house text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Home</span></a>
         <a href="refer.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
@@ -228,7 +233,7 @@
                                     suspensionMsg = `Your account is suspended for ${diffDays} days.`;
                                 }
                             } else {
-                                // Auto Unblock User if time completed
+                                // Auto Unblock User if suspension duration complete
                                 db.collection("users").doc(uid).update({
                                     isSuspended: false,
                                     status: "active",
@@ -310,7 +315,10 @@
         function loadAd(cb) { setTimeout(cb, 800); }
 
         function claimDailyStreakNode() {
-            if (userState.isSuspended === true || userState.status === "suspended") return;
+            if (userState.isSuspended === true || userState.status === "suspended") {
+                alert("🚫 Your account is suspended!");
+                return;
+            }
 
             const today = new Date().toDateString();
             if (userState.lastCheckInTimestamp === today) {
@@ -341,7 +349,10 @@
         }
 
         function mineAdBroadcastSession() {
-            if (userState.isSuspended === true || userState.status === "suspended") return;
+            if (userState.isSuspended === true || userState.status === "suspended") {
+                alert("🚫 Your account is suspended!");
+                return;
+            }
 
             let activeAds = userState.dailyAdCount || 0;
             if (activeAds >= 10) {
