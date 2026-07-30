@@ -114,7 +114,6 @@
         </div>
     </div>
 
-    <!-- COMPLIANCE MODAL -->
     <div id="complianceOverlay" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-xs p-6 bg-[#11111b] border border-white/5 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-200">
             <div class="w-12 h-12 bg-purple-950/40 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 text-lg mx-auto mb-3">
@@ -136,7 +135,6 @@
         </div>
     </div>
 
-    <!-- REGISTRATION MODAL -->
     <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0a0a12] border border-purple-900/30 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-xl text-white text-xl mb-3">
@@ -220,7 +218,6 @@
             setTimeout(() => { modal.firstElementChild.style.transform = "scale(1)"; }, 20);
         }
 
-        // FIXED SYNTAX ERROR HERE
         function closeComplianceModalOverlay() {
             const modal = document.getElementById("complianceOverlay");
             modal.style.display = "none";
@@ -291,12 +288,61 @@
                     if (userDoc.exists) {
                         const userData = userDoc.data();
                         
+                        // --- ENHANCED DYNAMIC SUSPENSION CHECK ---
                         if (userData.isSuspended === true || userData.status === "suspended") {
-                            alert("🚫 ACCOUNT SUSPENDED!\n\nAapka account suspend kar diya gaya hai.");
-                            auth.signOut();
-                            liveSessionUserCache = null;
-                            return;
+                            const now = new Date().getTime();
+                            let suspensionMsg = "Your account is temporarily suspended.";
+
+                            // Check permanent
+                            if (userData.suspensionDuration === "permanent" || userData.suspensionType === "permanent") {
+                                suspensionMsg = "Your account has been permanently suspended.";
+                            } 
+                            // Check timestamp expiry
+                            else if (userData.suspendedUntil) {
+                                const expiryTime = userData.suspendedUntil.toDate ? userData.suspendedUntil.toDate().getTime() : new Date(userData.suspendedUntil).getTime();
+                                
+                                if (now < expiryTime) {
+                                    const diffHours = Math.ceil((expiryTime - now) / (1000 * 60 * 60));
+                                    const diffDays = Math.ceil(diffHours / 24);
+
+                                    if (diffHours <= 24) {
+                                        suspensionMsg = `Your account is suspended for 24 hours. (Remaining: ~${diffHours} hours)`;
+                                    } else if (diffDays <= 7) {
+                                        suspensionMsg = `Your account is suspended for 7 days. (Remaining: ~${diffDays} days)`;
+                                    } else if (diffDays <= 30) {
+                                        suspensionMsg = `Your account is suspended for 30 days. (Remaining: ~${diffDays} days)`;
+                                    } else {
+                                        suspensionMsg = `Your account is suspended for ${diffDays} days.`;
+                                    }
+                                } else {
+                                    // Time poora ho chuka hai, auto unblock user
+                                    db.collection("users").doc(user.uid).update({
+                                        isSuspended: false,
+                                        status: "active",
+                                        suspendedUntil: firebase.firestore.FieldValue.delete(),
+                                        suspensionDuration: firebase.firestore.FieldValue.delete()
+                                    });
+                                    suspensionMsg = null; // Unblocked, proceed to login
+                                }
+                            } else if (userData.suspensionDuration) {
+                                const duration = userData.suspensionDuration.toString().toLowerCase();
+                                if (duration.includes("24")) {
+                                    suspensionMsg = "Your account is suspended for 24 hours.";
+                                } else if (duration.includes("7")) {
+                                    suspensionMsg = "Your account is suspended for 7 days.";
+                                } else if (duration.includes("30")) {
+                                    suspensionMsg = "Your account is suspended for 30 days.";
+                                }
+                            }
+
+                            if (suspensionMsg) {
+                                alert(`🚫 ACCOUNT SUSPENDED!\n\n${suspensionMsg}`);
+                                auth.signOut();
+                                liveSessionUserCache = null;
+                                return;
+                            }
                         }
+                        // --- END SUSPENSION CHECK ---
 
                         if (userData.deviceToken && userData.deviceToken !== currentDeviceID) {
                             alert(`⛔ ACCOUNT LOCKOUT!\n\nYour account is registered on another device.`);
