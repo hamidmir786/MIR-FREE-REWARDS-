@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase core module drivers -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -43,7 +42,6 @@
 
     <div class="app-container space-y-4">
         
-        <!-- 1. TOP PROFILE & BALANCE HEADER -->
         <div class="w-full p-3 rounded-2xl premium-panel flex justify-between items-center shadow-2xl">
             <div class="flex items-center gap-2.5 max-w-[45%]">
                 <img id="userAvatar" src="https://via.placeholder.com/40" alt="Avatar" class="w-10 h-10 rounded-full border border-purple-500/40 object-cover">
@@ -58,7 +56,6 @@
                     <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
                     <span id="coinCounter" class="text-xs font-black text-amber-300">0</span>
                 </div>
-                <!-- Dynamic Leaderboard Points Badge -->
                 <div class="px-2 py-1 rounded-xl bg-black/50 border border-purple-500/30 flex items-center gap-1">
                     <i class="fa-solid fa-trophy text-purple-400 text-xs"></i>
                     <span id="rankPointsCounter" class="text-xs font-black text-purple-300">0</span>
@@ -70,12 +67,10 @@
             </div>
         </div>
 
-        <!-- 2. SYSTEM MAILBOX DRAWER WITH UNREAD RED BADGE -->
         <div class="w-full p-3 rounded-2xl bg-black/40 border border-purple-950/60 shadow-lg relative">
             <div class="flex justify-between items-center cursor-pointer" onclick="toggleMailboxDrawer()">
                 <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-300 relative">
                     <i class="fa-solid fa-envelope-open-text text-purple-400"></i> System Connected Mailbox
-                    <!-- RED NOTIFICATION BADGE -->
                     <span id="mailboxBadge" class="hidden relative flex h-2.5 w-2.5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
@@ -89,14 +84,12 @@
             </div>
         </div>
 
-        <!-- 3. DAILY TASKS SECTION -->
         <div class="space-y-3">
             <div class="px-1 text-[10px] text-gray-400 flex justify-between font-bold border-b border-gray-900 pb-1">
                 <span class="text-purple-400 uppercase tracking-wider"><i class="fa-solid fa-calendar-check"></i> Daily Check-in & Mining</span>
                 <span id="resetCountdown" class="font-mono text-purple-300">00:00:00</span>
             </div>
 
-            <!-- TASK A: DAILY CHECK-IN -->
             <div class="w-full p-3 rounded-2xl task-card flex justify-between items-center gap-3 shadow-md">
                 <div class="space-y-0.5">
                     <h4 class="text-xs font-black uppercase text-white">1. Daily Check-In Pipeline</h4>
@@ -106,7 +99,6 @@
                 <button onclick="claimDailyStreakNode()" class="px-3 py-2 bg-purple-700 hover:bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow active:scale-95 transition-all whitespace-nowrap">Claim (Ad)</button>
             </div>
 
-            <!-- TASK B: DAILY COINS BROADCASTER -->
             <div class="w-full p-3 rounded-2xl task-card flex justify-between items-center gap-3 shadow-md">
                 <div class="space-y-0.5">
                     <h4 class="text-xs font-black uppercase text-white">2. Daily Coins Broadcaster</h4>
@@ -117,7 +109,6 @@
             </div>
         </div>
 
-        <!-- 4. MODULE NAVIGATION CARDS GRID -->
         <div class="space-y-2 pt-2">
             <div class="px-1 text-[10px] font-bold uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-1">
                 <i class="fa-solid fa-gamepad"></i> Game & Utility Modules
@@ -168,7 +159,6 @@
 
     </div>
 
-    <!-- BOTTOM FIXED NAV BAR -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
         <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold"><i class="fa-solid fa-house text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Home</span></a>
         <a href="refer.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
@@ -177,7 +167,6 @@
         <a href="profile.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-gears text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Profile</span></a>
     </nav>
 
-    <!-- FIREBASE AND SYSTEM SCRIPT -->
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
@@ -205,7 +194,7 @@
                 syncSystemRealtimeData();
                 bindCountdownEngineClock();
             } else {
-                window.location.href = "index.html";
+                window.location.href = "login.html";
             }
         });
 
@@ -213,10 +202,27 @@
             db.collection("users").doc(uid).onSnapshot((doc) => {
                 if (doc.exists) {
                     userState = doc.data();
+
+                    // 🚫 REAL-TIME SUSPENSION LOCK SYSTEM
+                    if (userState.isSuspended === true || userState.status === "suspended") {
+                        alert("🚫 ACCOUNT SUSPENDED!\n\nAapka account suspend kar diya gaya hai. Aap application use nahi kar sakte.");
+                        auth.signOut().then(() => {
+                            window.location.href = "login.html";
+                        });
+                        return;
+                    }
+
                     checkAndResetDailyAds();
                     renderApplicationCounters();
                     syncLiveMailboxFeed();
+                } else {
+                    // Account not found in database
+                    auth.signOut().then(() => {
+                        window.location.href = "login.html";
+                    });
                 }
+            }, (error) => {
+                console.error("Realtime sync fault:", error);
             });
         }
 
@@ -260,6 +266,9 @@
         function loadAd(cb) { setTimeout(cb, 800); }
 
         function claimDailyStreakNode() {
+            // Guard clause to block if suspended
+            if (userState.isSuspended === true || userState.status === "suspended") return;
+
             const today = new Date().toDateString();
             if (userState.lastCheckInTimestamp === today) {
                 alert("🔒 Already claimed for today!");
@@ -289,6 +298,9 @@
         }
 
         function mineAdBroadcastSession() {
+            // Guard clause to block if suspended
+            if (userState.isSuspended === true || userState.status === "suspended") return;
+
             let activeAds = userState.dailyAdCount || 0;
             if (activeAds >= 10) {
                 alert("⛔ Daily broadcast limit (10/10) reached.");
