@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Core Modules -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -60,7 +59,6 @@
     <div class="absolute top-[-20%] left-[-15%] w-[60%] h-[60%] rounded-full bg-purple-900/15 blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-[-20%] right-[-15%] w-[60%] h-[60%] rounded-full bg-indigo-900/15 blur-[140px] pointer-events-none"></div>
 
-    <!-- MAIN UI WRAPPER -->
     <div class="responsive-container p-5 sm:p-7 rounded-3xl glass-panel shadow-2xl relative overflow-hidden border border-white/5">
         
         <div class="flex justify-center mb-6 select-none">
@@ -70,7 +68,6 @@
         </div>
 
         <div class="text-center mb-6 select-none">
-            <!-- REWARD PHOTO BOX (FIXED DISPLAY) -->
             <div class="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border-2 border-purple-500/50 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(139,92,246,0.6)] animate-core-pulse overflow-hidden p-1">
                 <img src="https://i.ibb.co/CKqn3sHx/1769873244900.png" alt="Reward Box" class="w-full h-full object-cover rounded-xl">
             </div>
@@ -78,7 +75,6 @@
             <p class="text-[10px] sm:text-[11px] text-gray-400 mt-1 font-medium tracking-wide">Watch Ads & Win Daily Rewards</p>
         </div>
 
-        <!-- ADMIN PANEL LOGIN -->
         <div class="mb-6 p-4 rounded-2xl bg-black/40 border border-purple-950/40 shadow-inner">
             <h2 class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2 select-none">
                 <i class="fa-solid fa-user-shield text-[10px] sm:text-[11px]"></i> Admin Dashboard Login
@@ -104,7 +100,6 @@
             <div class="flex-grow border-t border-gray-900"></div>
         </div>
 
-        <!-- GOOGLE OAUTH BUTTON -->
         <div class="my-6">
             <button onclick="displayComplianceModalOverlay()" class="w-full py-3.5 bg-white text-gray-900 font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-3 active:scale-[0.97] transition-all shadow-xl hover:bg-gray-50 border border-white">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4" alt="Google Logo">
@@ -119,7 +114,6 @@
         </div>
     </div>
 
-    <!-- COMPLIANCE MODAL OVERLAY -->
     <div id="complianceOverlay" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-xs p-6 bg-[#11111b] border border-white/5 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-200">
             <div class="w-12 h-12 bg-purple-950/40 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 text-lg mx-auto mb-3">
@@ -141,7 +135,6 @@
         </div>
     </div>
 
-    <!-- REGISTRATION MODAL OVERLAY -->
     <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0a0a12] border border-purple-900/30 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-xl text-white text-xl mb-3">
@@ -171,7 +164,6 @@
         </div>
     </div>
 
-    <!-- CORE JAVASCRIPT CONTROLLER -->
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
@@ -227,9 +219,7 @@
         }
 
         function closeComplianceModalOverlay() {
-            const modal = document.getElementById("complianceOverlay");
-            modal.firstElementChild.style.transform = "scale(0.95)";
-            setTimeout(() => { modal.style.display = "none"; }, 100);
+            const modal.style.display = "none";
         }
 
         function grantComplianceConsentAndAuth() {
@@ -279,6 +269,14 @@
                         if (userDoc.exists) {
                             const userData = userDoc.data();
                             
+                            // ⛔ CRITICAL SUSPENSION CHECK INTEGRATION
+                            if (userData.isSuspended === true || userData.status === "suspended") {
+                                alert("🚫 ACCOUNT SUSPENDED!\n\nAapka account Admin dwara suspend kar diya gaya hai.\nAap iss app ko access nahi kar sakte.");
+                                auth.signOut();
+                                liveSessionUserCache = null;
+                                return;
+                            }
+
                             if (userData.deviceToken && userData.deviceToken !== currentDeviceID) {
                                 alert(`⛔ ACCOUNT LOCKOUT!\n\nYour account is registered on another device.\nYou cannot access this account from multiple devices.`);
                                 auth.signOut();
@@ -359,6 +357,8 @@
                 deviceToken: currentDeviceID,
                 myReferCode: newShortReferCode,
                 referredBy: referrerUID || null,
+                isSuspended: false, // Default Active State
+                status: "active",
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
 
