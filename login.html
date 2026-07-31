@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MIR FREE REWARDS - Secure Authorization Terminal</title>
+    
+    <!-- External CSS Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -23,50 +26,70 @@
             align-items: center;
             justify-content: center;
         }
+
         .neon-focus:focus {
             box-shadow: 0 0 20px rgba(147, 51, 234, 0.55);
             border-color: #a855f7;
         }
+
         .glass-panel {
             background: rgba(15, 15, 27, 0.65);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.06);
         }
+
         .animate-core-pulse {
             animation: pulse-glow 2.5s infinite ease-in-out;
         }
+
         @keyframes pulse-glow {
             0%, 100% { box-shadow: 0 0 15px rgba(147, 51, 234, 0.2); }
             50% { box-shadow: 0 0 30px rgba(147, 51, 234, 0.5); }
         }
+
         .responsive-container {
             width: 100%;
             max-width: 440px;
             margin: auto;
             transition: all 0.3s ease-in-out;
         }
+
         @media (min-width: 768px) {
             .responsive-container { max-width: 480px; transform: scale(1.02); }
         }
+
         @media (min-width: 1024px) {
             .responsive-container { max-width: 520px; transform: scale(1.05); }
+        }
+
+        /* Custom Scrollbar for Overlay Modals */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.3);
+            border-radius: 10px;
         }
     </style>
 </head>
 <body class="p-4 relative selection:bg-purple-600 selection:text-white">
 
+    <!-- Ambient Glowing Orbs -->
     <div class="absolute top-[-20%] left-[-15%] w-[60%] h-[60%] rounded-full bg-purple-900/15 blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-[-20%] right-[-15%] w-[60%] h-[60%] rounded-full bg-indigo-900/15 blur-[140px] pointer-events-none"></div>
 
+    <!-- Main Container -->
     <div class="responsive-container p-5 sm:p-7 rounded-3xl glass-panel shadow-2xl relative overflow-hidden border border-white/5">
         
+        <!-- Authorization Header Badge -->
         <div class="flex justify-center mb-6 select-none">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-purple-950/60 border border-purple-500/30 text-purple-300 shadow-sm animate-pulse">
                 <i class="fa-solid fa-circle-check text-[8px] sm:text-[9px]"></i> Authorised by MIR•MASTER'S
             </span>
         </div>
 
+        <!-- Branding Section -->
         <div class="text-center mb-6 select-none">
             <div class="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border-2 border-purple-500/50 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-[0_0_30px_rgba(139,92,246,0.6)] animate-core-pulse overflow-hidden p-1">
                 <img src="https://i.ibb.co/CKqn3sHx/1769873244900.png" alt="Reward Box" class="w-full h-full object-cover rounded-xl">
@@ -75,38 +98,42 @@
             <p class="text-[10px] sm:text-[11px] text-gray-400 mt-1 font-medium tracking-wide">Watch Ads & Win Daily Rewards</p>
         </div>
 
+        <!-- Admin Login Section -->
         <div class="mb-6 p-4 rounded-2xl bg-black/40 border border-purple-950/40 shadow-inner">
             <h2 class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-2 select-none">
                 <i class="fa-solid fa-user-shield text-[10px] sm:text-[11px]"></i> Admin Dashboard Login
             </h2>
-            <div class="space-y-3">
+            <form onsubmit="event.preventDefault(); executeAdminAuthentication();" class="space-y-3">
                 <div class="relative">
                     <i class="fa-solid fa-user text-gray-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs"></i>
-                    <input type="text" id="adminUser" placeholder="Username" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 text-xs bg-gray-950/70 border border-gray-800 rounded-xl outline-none text-white placeholder-gray-600 neon-focus transition-all font-mono">
+                    <input type="text" id="adminUser" placeholder="Username" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 text-xs bg-gray-950/70 border border-gray-800 rounded-xl outline-none text-white placeholder-gray-600 neon-focus transition-all font-mono" required>
                 </div>
                 <div class="relative">
                     <i class="fa-solid fa-lock text-gray-600 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs"></i>
-                    <input type="password" id="adminPass" placeholder="Password" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 text-xs bg-gray-950/70 border border-gray-800 rounded-xl outline-none text-white placeholder-gray-600 neon-focus transition-all font-mono">
+                    <input type="password" id="adminPass" placeholder="Password" autocomplete="off" class="w-full pl-10 pr-4 py-2.5 text-xs bg-gray-950/70 border border-gray-800 rounded-xl outline-none text-white placeholder-gray-600 neon-focus transition-all font-mono" required>
                 </div>
-                <button type="button" onclick="executeAdminAuthentication()" class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-xs font-black text-white rounded-xl active:scale-[0.97] transition-all shadow-lg tracking-wider uppercase select-none">
+                <button type="submit" class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-xs font-black text-white rounded-xl active:scale-[0.97] transition-all shadow-lg tracking-wider uppercase select-none">
                     Admin Login
                 </button>
-            </div>
+            </form>
         </div>
 
+        <!-- Divider -->
         <div class="relative flex py-2 items-center select-none">
             <div class="flex-grow border-t border-gray-900"></div>
             <span class="flex-shrink mx-4 text-[9px] uppercase tracking-[0.25em] text-gray-600 font-black">User Account Zone</span>
             <div class="flex-grow border-t border-gray-900"></div>
         </div>
 
+        <!-- Google OAuth Button -->
         <div class="my-6">
-            <button type="button" onclick="displayComplianceModalOverlay()" class="w-full py-3.5 bg-white text-gray-900 font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-3 active:scale-[0.97] transition-all shadow-xl hover:bg-gray-50 border border-white">
+            <button type="button" onclick="displayComplianceModalOverlay()" class="w-full py-3.5 bg-white text-gray-900 font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-3 active:scale-[0.97] hover:bg-gray-100 transition-all shadow-xl border border-white">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" class="w-4 h-4" alt="Google Logo">
                 Sign in with Google
             </button>
         </div>
 
+        <!-- Footer Links -->
         <div class="flex justify-center gap-5 text-[9px] sm:text-[10px] text-gray-600 mt-6 pt-4 border-t border-gray-900/50 font-semibold select-none">
             <a href="privacy.html" target="_blank" class="hover:text-purple-400 transition-colors duration-200 flex items-center gap-1"><i class="fa-solid fa-user-lock text-[9px]"></i> Privacy Policy</a>
             <span class="text-gray-800">•</span>
@@ -114,8 +141,9 @@
         </div>
     </div>
 
+    <!-- Compliance Consent Modal Overlay -->
     <div id="complianceOverlay" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="w-full max-w-xs p-6 bg-[#11111b] border border-white/5 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-200">
+        <div id="complianceCard" class="w-full max-w-xs p-6 bg-[#11111b] border border-white/5 rounded-2xl shadow-2xl text-center transform scale-95 transition-transform duration-200">
             <div class="w-12 h-12 bg-purple-950/40 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 text-lg mx-auto mb-3">
                 <i class="fa-solid fa-scale-balanced"></i>
             </div>
@@ -135,6 +163,7 @@
         </div>
     </div>
 
+    <!-- User Registration Modal Overlay -->
     <div id="registrationOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="w-full max-w-sm p-6 rounded-2xl bg-[#0a0a12] border border-purple-900/30 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="w-16 h-16 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-xl text-white text-xl mb-3">
@@ -146,25 +175,27 @@
             </div>
             <div class="space-y-4 text-left">
                 <div>
-                    <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Referral Code (Optional)</label>
+                    <label for="refCode" class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Referral Code (Optional)</label>
                     <input type="text" id="refCode" placeholder="e.g. MIR-A1234" autocomplete="off" class="w-full px-3 py-2 text-xs bg-black/50 border border-gray-800 rounded-lg outline-none text-white neon-focus transition-all uppercase font-mono">
                 </div>
                 <div>
-                    <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Set 4-Digit Secure PIN</label>
+                    <label for="securePin" class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Set 4-Digit Secure PIN</label>
                     <input type="password" id="securePin" maxlength="4" placeholder="••••" class="w-full px-3 py-2 text-center text-lg font-black tracking-widest bg-black/50 border border-gray-800 rounded-lg outline-none text-white neon-focus transition-all font-mono" inputmode="numeric">
                 </div>
                 <div>
-                    <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Security Question: What is your Date of birth?</label>
+                    <label for="recoveryDob" class="block text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Security Question: What is your Date of birth?</label>
                     <input type="date" id="recoveryDob" class="w-full px-3 py-2 text-xs bg-black/50 border border-gray-800 rounded-lg outline-none text-gray-400 neon-focus transition-all font-mono">
                 </div>
-                <button type="button" onclick="commitSecureUserRegistration()" class="w-full py-3 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-xs uppercase tracking-wider rounded-xl active:scale-95 transition-all shadow-lg">
+                <button type="button" onclick="commitSecureUserRegistration()" class="w-full py-3 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs uppercase tracking-wider rounded-xl active:scale-95 transition-all shadow-lg">
                     Submit & Start Earning
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Application JavaScript Logic -->
     <script>
+        // 1. FIREBASE INITIALIZATION
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
           authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
@@ -185,6 +216,7 @@
 
         let liveSessionUserCache = null;
 
+        // 2. UTILITY & HELPER FUNCTIONS
         function getDevicePersistentUID() {
             let deviceId = localStorage.getItem("mir_permanent_hardware_hash");
             if (!deviceId) {
@@ -212,15 +244,19 @@
             return finalCode;
         }
 
+        // 3. UI OVERLAY CONTROLLERS
         function displayComplianceModalOverlay() {
             const modal = document.getElementById("complianceOverlay");
+            const card = document.getElementById("complianceCard");
             modal.style.display = "flex";
-            setTimeout(() => { modal.firstElementChild.style.transform = "scale(1)"; }, 20);
+            setTimeout(() => { card.style.transform = "scale(1)"; }, 20);
         }
 
         function closeComplianceModalOverlay() {
             const modal = document.getElementById("complianceOverlay");
-            modal.style.display = "none";
+            const card = document.getElementById("complianceCard");
+            card.style.transform = "scale(0.95)";
+            setTimeout(() => { modal.style.display = "none"; }, 150);
         }
 
         function grantComplianceConsentAndAuth() {
@@ -228,6 +264,7 @@
             triggerGoogleOAuthIdentityVerification();
         }
 
+        // 4. ADMIN AUTHENTICATION
         function executeAdminAuthentication() {
             const inputUser = document.getElementById('adminUser').value.trim();
             const inputPass = document.getElementById('adminPass').value.trim();
@@ -239,14 +276,13 @@
             }
         }
 
-        // AUTO AUTH LISTEN FOR EXTREME ACCURACY
+        // 5. USER AUTHENTICATION LISTENERS & FLOW
         auth.onAuthStateChanged((user) => {
             if (user && !liveSessionUserCache) {
                 handlePostAuthFlow(user);
             }
         });
 
-        // REDIRECT / POPUP HYBRID HANDLER FOR MOBILE STABILITY
         auth.getRedirectResult().then((result) => {
             if (result.user) {
                 handlePostAuthFlow(result.user);
@@ -270,11 +306,12 @@
             });
         }
 
-        function handlePostAuthFlow(user) {
+        async function handlePostAuthFlow(user) {
             liveSessionUserCache = user;
             const currentDeviceID = getDevicePersistentUID();
 
-            db.collection("users").where("deviceToken", "==", currentDeviceID).get().then((querySnapshot) => {
+            try {
+                const querySnapshot = await db.collection("users").where("deviceToken", "==", currentDeviceID).get();
                 let activeDeviceOwnerUID = null;
                 let activeDeviceOwnerEmail = "";
 
@@ -291,89 +328,84 @@
                     return;
                 }
 
-                db.collection("users").doc(user.uid).get().then((userDoc) => {
-                    if (userDoc.exists) {
-                        const userData = userDoc.data();
-                        
-                        // --- ENHANCED HARDCORE SUSPENSION CHECK ---
-                        const isSuspendedFlag = userData.isSuspended === true || 
-                                               userData.status === "suspended" || 
-                                               (userData.suspensionDuration && userData.suspensionDuration.toString().toLowerCase().includes("suspended")) ||
-                                               (userData.suspensionType && userData.suspensionType.toString().toLowerCase().includes("suspended"));
+                const userDoc = await db.collection("users").doc(user.uid).get();
 
-                        if (isSuspendedFlag) {
-                            const now = new Date().getTime();
-                            let suspensionMsg = null;
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    
+                    // --- ENHANCED HARDCORE SUSPENSION CHECK ---
+                    const isSuspendedFlag = userData.isSuspended === true || 
+                                           userData.status === "suspended" || 
+                                           (userData.suspensionDuration && userData.suspensionDuration.toString().toLowerCase().includes("suspended")) ||
+                                           (userData.suspensionType && userData.suspensionType.toString().toLowerCase().includes("suspended"));
 
-                            const durationStr = (userData.suspensionDuration || userData.suspensionType || userData.status || "").toString().toLowerCase();
+                    if (isSuspendedFlag) {
+                        const now = new Date().getTime();
+                        let suspensionMsg = null;
+                        const durationStr = (userData.suspensionDuration || userData.suspensionType || userData.status || "").toString().toLowerCase();
 
-                            // 1. Permanent Check
-                            if (durationStr.includes("permanent") || durationStr.includes("permanently")) {
-                                suspensionMsg = "Your account has been permanently suspended.";
-                            } 
-                            // 2. Dynamic Expiry Check (24h, 7d, 30d)
-                            else if (userData.suspendedUntil) {
-                                const expiryTime = userData.suspendedUntil.toDate ? userData.suspendedUntil.toDate().getTime() : new Date(userData.suspendedUntil).getTime();
-                                
-                                if (now < expiryTime) {
-                                    const diffHours = Math.ceil((expiryTime - now) / (1000 * 60 * 60));
-                                    const diffDays = Math.ceil(diffHours / 24);
+                        if (durationStr.includes("permanent") || durationStr.includes("permanently")) {
+                            suspensionMsg = "Your account has been permanently suspended.";
+                        } 
+                        else if (userData.suspendedUntil) {
+                            const expiryTime = userData.suspendedUntil.toDate ? userData.suspendedUntil.toDate().getTime() : new Date(userData.suspendedUntil).getTime();
+                            
+                            if (now < expiryTime) {
+                                const diffHours = Math.ceil((expiryTime - now) / (1000 * 60 * 60));
+                                const diffDays = Math.ceil(diffHours / 24);
 
-                                    if (diffHours <= 24) {
-                                        suspensionMsg = `Your account is suspended for 24 hours. (Remaining: ~${diffHours} hours)`;
-                                    } else if (diffDays <= 7) {
-                                        suspensionMsg = `Your account is suspended for 7 days. (Remaining: ~${diffDays} days)`;
-                                    } else if (diffDays <= 30) {
-                                        suspensionMsg = `Your account is suspended for 30 days. (Remaining: ~${diffDays} days)`;
-                                    } else {
-                                        suspensionMsg = `Your account is suspended for ${diffDays} days.`;
-                                    }
+                                if (diffHours <= 24) {
+                                    suspensionMsg = `Your account is suspended for 24 hours. (Remaining: ~${diffHours} hours)`;
+                                } else if (diffDays <= 7) {
+                                    suspensionMsg = `Your account is suspended for 7 days. (Remaining: ~${diffDays} days)`;
+                                } else if (diffDays <= 30) {
+                                    suspensionMsg = `Your account is suspended for 30 days. (Remaining: ~${diffDays} days)`;
                                 } else {
-                                    // Time expired, auto-unblock user
-                                    db.collection("users").doc(user.uid).update({
-                                        isSuspended: false,
-                                        status: "active",
-                                        suspendedUntil: firebase.firestore.FieldValue.delete(),
-                                        suspensionDuration: firebase.firestore.FieldValue.delete()
-                                    });
-                                    suspensionMsg = null;
+                                    suspensionMsg = `Your account is suspended for ${diffDays} days.`;
                                 }
-                            } 
-                            // 3. Absolute Fallback for Any Suspended State
-                            else {
-                                suspensionMsg = "Your account has been permanently suspended.";
-                            }
-
-                            if (suspensionMsg) {
-                                alert(`🚫 ACCOUNT SUSPENDED!\n\n${suspensionMsg}`);
-                                auth.signOut().then(() => {
-                                    liveSessionUserCache = null;
-                                    window.location.reload();
+                            } else {
+                                // Expiry clean-up logic
+                                await db.collection("users").doc(user.uid).update({
+                                    isSuspended: false,
+                                    status: "active",
+                                    suspendedUntil: firebase.firestore.FieldValue.delete(),
+                                    suspensionDuration: firebase.firestore.FieldValue.delete()
                                 });
-                                return;
+                                suspensionMsg = null;
                             }
+                        } 
+                        else {
+                            suspensionMsg = "Your account has been permanently suspended.";
                         }
-                        // --- END SUSPENSION CHECK ---
 
-                        if (userData.deviceToken && userData.deviceToken !== currentDeviceID) {
-                            alert(`⛔ ACCOUNT LOCKOUT!\n\nYour account is registered on another device.`);
-                            auth.signOut();
+                        if (suspensionMsg) {
+                            alert(`🚫 ACCOUNT SUSPENDED!\n\n${suspensionMsg}`);
+                            await auth.signOut();
                             liveSessionUserCache = null;
+                            window.location.reload();
                             return;
                         }
-
-                        alert(`Authorized Entry: ${user.displayName}`);
-                        window.location.href = "homepage.html";
-                    } else {
-                        document.getElementById('registrationOverlay').style.display = 'flex';
                     }
-                });
 
-            }).catch((error) => {
+                    if (userData.deviceToken && userData.deviceToken !== currentDeviceID) {
+                        alert(`⛔ ACCOUNT LOCKOUT!\n\nYour account is registered on another device.`);
+                        auth.signOut();
+                        liveSessionUserCache = null;
+                        return;
+                    }
+
+                    alert(`Authorized Entry: ${user.displayName}`);
+                    window.location.href = "homepage.html";
+                } else {
+                    document.getElementById('registrationOverlay').style.display = 'flex';
+                }
+
+            } catch (error) {
                 alert("Security Check Failed: " + error.message);
-            });
+            }
         }
 
+        // 6. COMMIT REGISTRATION DATA
         async function commitSecureUserRegistration() {
             if(!liveSessionUserCache) return;
 
@@ -418,30 +450,31 @@
                 }
             }
 
-            const newShortReferCode = await generateUniqueReferralCode();
+            try {
+                const newShortReferCode = await generateUniqueReferralCode();
 
-            db.collection("users").doc(liveSessionUserCache.uid).set({
-                uid: liveSessionUserCache.uid,
-                name: liveSessionUserCache.displayName,
-                email: liveSessionUserCache.email,
-                photo: liveSessionUserCache.photoURL,
-                coins: initialBonusCoins,
-                securePin: rawPinField,
-                recoveryDob: rawDobField,
-                deviceToken: currentDeviceID,
-                myReferCode: newShortReferCode,
-                referredBy: referrerUID || null,
-                isSuspended: false,
-                status: "active",
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
+                await db.collection("users").doc(liveSessionUserCache.uid).set({
+                    uid: liveSessionUserCache.uid,
+                    name: liveSessionUserCache.displayName,
+                    email: liveSessionUserCache.email,
+                    photo: liveSessionUserCache.photoURL,
+                    coins: initialBonusCoins,
+                    securePin: rawPinField,
+                    recoveryDob: rawDobField,
+                    deviceToken: currentDeviceID,
+                    myReferCode: newShortReferCode,
+                    referredBy: referrerUID || null,
+                    isSuspended: false,
+                    status: "active",
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
                 if (referrerUID) {
-                    db.collection("users").doc(referrerUID).update({
+                    await db.collection("users").doc(referrerUID).update({
                         coins: firebase.firestore.FieldValue.increment(40)
                     });
 
-                    db.collection("users").doc(referrerUID).collection("referredFriends").doc(liveSessionUserCache.uid).set({
+                    await db.collection("users").doc(referrerUID).collection("referredFriends").doc(liveSessionUserCache.uid).set({
                         friendUid: liveSessionUserCache.uid,
                         day1Claimed: false,
                         day2Claimed: false,
@@ -453,11 +486,10 @@
                 alert("🚀 Account Created Successfully!" + (initialBonusCoins > 0 ? " You got 50 Bonus Coins!" : ""));
                 window.location.href = "homepage.html";
 
-            }).catch(err => {
+            } catch(err) {
                 alert("Registry Error: " + err.message);
-            });
+            }
         }
     </script>
 </body>
 </html>
-p
