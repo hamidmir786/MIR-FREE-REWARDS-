@@ -119,7 +119,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <a href="spin.html" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-purple-500 transition-all active:scale-95">
+                <a href="spin.html" onclick="return verifyNavigationAccess(event)" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-purple-500 transition-all active:scale-95">
                     <div class="w-8 h-8 rounded-xl bg-purple-900/50 border border-purple-500/30 flex items-center justify-center text-purple-300">
                         <i class="fa-solid fa-arrows-spin text-base"></i>
                     </div>
@@ -129,7 +129,7 @@
                     </div>
                 </a>
 
-                <a href="scratch.html" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-amber-500/50 transition-all active:scale-95">
+                <a href="scratch.html" onclick="return verifyNavigationAccess(event)" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-amber-500/50 transition-all active:scale-95">
                     <div class="w-8 h-8 rounded-xl bg-amber-900/40 border border-amber-500/30 flex items-center justify-center text-amber-300">
                         <i class="fa-solid fa-sparkles text-base"></i>
                     </div>
@@ -139,7 +139,7 @@
                     </div>
                 </a>
 
-                <a href="quiz.html" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-emerald-500/50 transition-all active:scale-95">
+                <a href="quiz.html" onclick="return verifyNavigationAccess(event)" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-emerald-500/50 transition-all active:scale-95">
                     <div class="w-8 h-8 rounded-xl bg-emerald-900/40 border border-emerald-500/30 flex items-center justify-center text-emerald-300">
                         <i class="fa-solid fa-brain text-base"></i>
                     </div>
@@ -149,7 +149,7 @@
                     </div>
                 </a>
 
-                <a href="recovery.html" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-red-500/50 transition-all active:scale-95">
+                <a href="recovery.html" onclick="return verifyNavigationAccess(event)" class="p-3.5 rounded-2xl nav-card flex flex-col justify-between items-start gap-3 shadow-lg hover:border-red-500/50 transition-all active:scale-95">
                     <div class="w-8 h-8 rounded-xl bg-red-900/40 border border-red-500/30 flex items-center justify-center text-red-300">
                         <i class="fa-solid fa-key text-base"></i>
                     </div>
@@ -166,10 +166,10 @@
     <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
         <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold"><i class="fa-solid fa-house text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Home</span></a>
-        <a href="refer.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
-        <a href="withdrawal.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span></a>
-        <a href="leaderboard.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-trophy text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Ranks</span></a>
-        <a href="profile.html" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-gears text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Profile</span></a>
+        <a href="refer.html" onclick="return verifyNavigationAccess(event)" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
+        <a href="withdrawal.html" onclick="return verifyNavigationAccess(event)" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span></a>
+        <a href="leaderboard.html" onclick="return verifyNavigationAccess(event)" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-trophy text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Ranks</span></a>
+        <a href="profile.html" onclick="return verifyNavigationAccess(event)" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-gears text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Profile</span></a>
     </nav>
 
     <script>
@@ -203,12 +203,39 @@
             }
         });
 
+        // 🔒 HARDCORE SUSPENSION DETECTOR
         function isUserCurrentlySuspended() {
             if (!userState) return false;
-            return userState.isSuspended === true || 
-                   userState.status === "suspended" || 
-                   userState.suspensionDuration === "permanent" || 
-                   userState.suspensionType === "permanent";
+            
+            const isFlagged = userState.isSuspended === true || 
+                              userState.status === "suspended" || 
+                              (userState.suspensionDuration && userState.suspensionDuration.toString().toLowerCase().includes("suspended")) ||
+                              (userState.suspensionType && userState.suspensionType.toString().toLowerCase().includes("suspended"));
+
+            if (isFlagged) {
+                // Verify if dynamic suspension timing is still valid
+                if (userState.suspendedUntil) {
+                    const now = new Date().getTime();
+                    const expiryTime = userState.suspendedUntil.toDate ? userState.suspendedUntil.toDate().getTime() : new Date(userState.suspendedUntil).getTime();
+                    if (now >= expiryTime) {
+                        return false; // Time expired
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        function verifyNavigationAccess(event) {
+            if (isUserCurrentlySuspended()) {
+                if (event) event.preventDefault();
+                alert("🚫 ACCESS DENIED!\n\nYour account has been suspended.");
+                auth.signOut().then(() => {
+                    window.location.href = "login.html";
+                });
+                return false;
+            }
+            return true;
         }
 
         function syncSystemRealtimeData() {
@@ -219,9 +246,11 @@
                     // 🚫 STRICT SUSPENSION LOCK ENGINE
                     if (isUserCurrentlySuspended()) {
                         const now = new Date().getTime();
-                        let suspensionMsg = "Your account is temporarily suspended.";
+                        let suspensionMsg = "Your account has been suspended.";
 
-                        if (userState.suspensionDuration === "permanent" || userState.suspensionType === "permanent") {
+                        const durationStr = (userState.suspensionDuration || userState.suspensionType || userState.status || "").toString().toLowerCase();
+
+                        if (durationStr.includes("permanent") || durationStr.includes("permanently")) {
                             suspensionMsg = "Your account has been permanently suspended.";
                         } 
                         else if (userState.suspendedUntil) {
@@ -249,15 +278,6 @@
                                     suspensionDuration: firebase.firestore.FieldValue.delete()
                                 });
                                 suspensionMsg = null;
-                            }
-                        } else if (userState.suspensionDuration) {
-                            const duration = userState.suspensionDuration.toString().toLowerCase();
-                            if (duration.includes("24")) {
-                                suspensionMsg = "Your account is suspended for 24 hours.";
-                            } else if (duration.includes("7")) {
-                                suspensionMsg = "Your account is suspended for 7 days.";
-                            } else if (duration.includes("30")) {
-                                suspensionMsg = "Your account is suspended for 30 days.";
                             }
                         }
 
@@ -325,6 +345,7 @@
         function claimDailyStreakNode() {
             if (isUserCurrentlySuspended()) {
                 alert("🚫 Your account is suspended!");
+                auth.signOut().then(() => { window.location.href = "login.html"; });
                 return;
             }
 
@@ -333,7 +354,15 @@
                 alert("🔒 Already claimed for today!");
                 return;
             }
+            
             loadAd(() => {
+                // 🛑 RE-CHECK SUSPENSION AFTER AD IS WATCHED
+                if (isUserCurrentlySuspended()) {
+                    alert("🚫 Action Blocked! Account is suspended.");
+                    auth.signOut().then(() => { window.location.href = "login.html"; });
+                    return;
+                }
+
                 let currentStreak = userState.checkInStreak || 0;
                 let payloadReward = 15;
                 const yesterday = new Date(Date.now() - 86400000).toDateString();
@@ -359,6 +388,7 @@
         function mineAdBroadcastSession() {
             if (isUserCurrentlySuspended()) {
                 alert("🚫 Your account is suspended!");
+                auth.signOut().then(() => { window.location.href = "login.html"; });
                 return;
             }
 
@@ -370,6 +400,13 @@
             const todayStr = getTodayDateString();
 
             loadAd(() => {
+                // 🛑 RE-CHECK SUSPENSION AFTER AD IS WATCHED BEFORE ADDING COINS
+                if (isUserCurrentlySuspended()) {
+                    alert("🚫 Action Blocked! Account is suspended.");
+                    auth.signOut().then(() => { window.location.href = "login.html"; });
+                    return;
+                }
+
                 db.collection("users").doc(uid).update({
                     coins: firebase.firestore.FieldValue.increment(10),
                     leaderPoints: firebase.firestore.FieldValue.increment(20),
