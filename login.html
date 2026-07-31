@@ -239,6 +239,13 @@
             }
         }
 
+        // AUTO AUTH LISTEN FOR EXTREME ACCURACY
+        auth.onAuthStateChanged((user) => {
+            if (user && !liveSessionUserCache) {
+                handlePostAuthFlow(user);
+            }
+        });
+
         // REDIRECT / POPUP HYBRID HANDLER FOR MOBILE STABILITY
         auth.getRedirectResult().then((result) => {
             if (result.user) {
@@ -288,14 +295,19 @@
                     if (userDoc.exists) {
                         const userData = userDoc.data();
                         
-                        // --- ENHANCED DYNAMIC SUSPENSION CHECK ---
-                        if (userData.isSuspended === true || userData.status === "suspended") {
+                        // --- ENHANCED HARDCORE SUSPENSION CHECK ---
+                        const isSuspendedFlag = userData.isSuspended === true || 
+                                               userData.status === "suspended" || 
+                                               (userData.suspensionDuration && userData.suspensionDuration.toString().toLowerCase().includes("suspended")) ||
+                                               (userData.suspensionType && userData.suspensionType.toString().toLowerCase().includes("suspended"));
+
+                        if (isSuspendedFlag) {
                             const now = new Date().getTime();
                             let suspensionMsg = null;
 
-                            const durationStr = (userData.suspensionDuration || userData.suspensionType || "").toString().toLowerCase();
+                            const durationStr = (userData.suspensionDuration || userData.suspensionType || userData.status || "").toString().toLowerCase();
 
-                            // 1. Permanent Suspension Check First
+                            // 1. Permanent Check
                             if (durationStr.includes("permanent") || durationStr.includes("permanently")) {
                                 suspensionMsg = "Your account has been permanently suspended.";
                             } 
@@ -327,15 +339,17 @@
                                     suspensionMsg = null;
                                 }
                             } 
-                            // 3. Fallback for untimed suspensions
+                            // 3. Absolute Fallback for Any Suspended State
                             else {
                                 suspensionMsg = "Your account has been permanently suspended.";
                             }
 
                             if (suspensionMsg) {
                                 alert(`🚫 ACCOUNT SUSPENDED!\n\n${suspensionMsg}`);
-                                auth.signOut();
-                                liveSessionUserCache = null;
+                                auth.signOut().then(() => {
+                                    liveSessionUserCache = null;
+                                    window.location.reload();
+                                });
                                 return;
                             }
                         }
@@ -446,3 +460,4 @@
     </script>
 </body>
 </html>
+p
