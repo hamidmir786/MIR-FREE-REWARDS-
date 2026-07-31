@@ -89,7 +89,7 @@
                 <button onclick="fetchLatestAdminData()" class="text-[9px] text-purple-400 hover:text-purple-300 font-bold"><i class="fa-solid fa-arrows-rotate"></i> Reload Table</button>
             </div>
             <div id="usersDataContainer" class="space-y-2.5">
-                </div>
+            </div>
         </section>
 
         <section id="supportTicketsSection" class="space-y-3 hidden">
@@ -98,7 +98,7 @@
                 <p class="text-[9px] text-gray-500 font-mono">support_tickets Collection</p>
             </div>
             <div id="supportTicketsContainer" class="space-y-2.5">
-                </div>
+            </div>
         </section>
 
         <section id="userRequestsSection" class="space-y-3 hidden">
@@ -107,7 +107,7 @@
                 <p class="text-[9px] text-gray-500 font-mono">adminRequests Collection</p>
             </div>
             <div id="userRequestsContainer" class="space-y-2.5">
-                </div>
+            </div>
         </section>
 
         <section id="redeemRequestsSection" class="space-y-3 hidden">
@@ -116,7 +116,7 @@
                 <p class="text-[9px] text-gray-500 font-mono">withdrawals Collection</p>
             </div>
             <div id="redeemRequestsContainer" class="space-y-2.5">
-                </div>
+            </div>
         </section>
 
         <section id="leaderboardAdminSection" class="space-y-3 hidden">
@@ -159,7 +159,7 @@
 
     <div id="adminPortalModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div id="adminModalBody" class="w-full max-w-sm bg-[#0b0b14] border border-gray-900 p-5 rounded-2xl space-y-4 max-h-[85vh] overflow-y-auto">
-            </div>
+        </div>
     </div>
 
     <script>
@@ -892,7 +892,7 @@
             alert("Ticket rejected.");
         }
 
-        // RENDER USERS LIST (WITH EDIT LEADER POINTS & SUSPENSION OPTIONS)
+        // RENDER USERS LIST (ROBUST SUSPENSION STATUS DETECTION)
         function renderUsersListMarkup(list) {
             const container = document.getElementById("usersDataContainer");
             container.innerHTML = "";
@@ -915,22 +915,26 @@
                 const securePin = user.pin || user.securePin || "Not Setup";
                 const recoveryDob = user.dob || user.recoveryDob || "Not Setup";
 
-                // Check Suspension Status
-                let isSuspended = false;
-                let suspensionLabel = "";
+                // Robust Suspension Detection
+                let isSuspended = (user.isSuspended === true || user.isSuspended === "true");
+                let suspensionLabel = "ACTIVE";
 
-                if (user.isSuspended) {
-                    if (user.suspendedUntil === -1) {
+                if (isSuspended) {
+                    const suspendedUntil = parseInt(user.suspendedUntil);
+                    if (user.suspendedUntil === -1 || user.suspendedUntil === "-1" || isNaN(suspendedUntil)) {
                         isSuspended = true;
                         suspensionLabel = "PERMANENT";
-                    } else if (user.suspendedUntil && user.suspendedUntil > now) {
+                    } else if (suspendedUntil > now) {
                         isSuspended = true;
-                        const remainingHours = Math.ceil((user.suspendedUntil - now) / (1000 * 60 * 60));
+                        const remainingHours = Math.ceil((suspendedUntil - now) / (1000 * 60 * 60));
                         if (remainingHours > 24) {
                             suspensionLabel = `${Math.ceil(remainingHours / 24)} Days`;
                         } else {
                             suspensionLabel = `${remainingHours} Hours`;
                         }
+                    } else {
+                        // Expiry hogaya hai suspension time
+                        isSuspended = false;
                     }
                 }
 
