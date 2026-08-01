@@ -225,18 +225,16 @@
             }
         });
 
-        // 💰 CENTRALIZED COIN TRANSACTION LOGGER ENGINE
         function recordCoinTransaction(amount, type, title) {
             if (!uid) return;
             db.collection("users").doc(uid).collection("coin_history").add({
                 amount: amount,
-                type: type, // 'credit' or 'debit'
+                type: type,
                 title: title,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).catch(err => console.error("Coin history record failure:", err));
         }
 
-        // 🔒 HARDCORE SUSPENSION DETECTOR
         function isUserCurrentlySuspended() {
             if (!userState) return false;
             
@@ -522,7 +520,6 @@
             });
         }
 
-        // --- 📜 COIN HISTORY UI MODAL LISTENERS ---
         function openCoinHistoryModal() {
             document.getElementById("coinHistoryModal").classList.remove("hidden");
         }
