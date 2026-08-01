@@ -114,6 +114,15 @@
             db.collection("users").doc(uid).update({
                 coins: firebase.firestore.FieldValue.increment(-500)
             }).then(() => {
+                // Save Transaction to History (coin_history)
+                db.collection("users").doc(uid).collection("coin_history").add({
+                    title: "Account Recovery Request",
+                    amount: 500,
+                    type: "debit",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Add to Recovery Requests for Admin
                 db.collection("recovery_requests").add({
                     userId: uid,
                     userEmail: userState.email || "N/A",
@@ -126,7 +135,8 @@
                     alert("✅ Request Submitted Successfully! 500 Coins Deducted. Check your System Mailbox within 48 Hours.");
                     window.location.href = "homepage.html";
                 });
-            }).catch(() => {
+            }).catch((err) => {
+                console.error("Recovery request error: ", err);
                 alert("⚠️ Request failed. Try again.");
                 document.getElementById("submitReqBtn").disabled = false;
             });
