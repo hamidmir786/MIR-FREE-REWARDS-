@@ -14,7 +14,7 @@
     <style>
         body { background-color: #09070f; color: #f3f4f6; font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
         .premium-panel { background: rgba(19, 15, 36, 0.85); border: 1px solid rgba(147, 51, 234, 0.15); }
-        .tab-btn-active { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; border: 1px solid rgba(167, 139, 250, 0.4); shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
+        .tab-btn-active { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff; border: 1px solid rgba(167, 139, 250, 0.4); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
         .tab-btn-inactive { background: rgba(19, 15, 36, 0.6); color: #9ca3af; border: 1px solid rgba(255, 255, 255, 0.05); }
         .app-container { width: 100%; max-width: 480px; margin: 0 auto; padding-bottom: 90px; }
         .badge-active { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
@@ -60,10 +60,9 @@
             <!-- COINS HISTORY SECTION -->
             <div id="coinsHistorySection" class="space-y-3">
                 <div id="coinsList" class="space-y-2">
-                    <!-- Dynamic Coins Transactions or Empty State -->
                     <div class="flex flex-col items-center justify-center py-16 text-center text-gray-500 space-y-2">
-                        <i class="fa-solid fa-receipt text-3xl opacity-30"></i>
-                        <p class="text-xs font-bold">No Transaction History Found</p>
+                        <i class="fa-solid fa-spinner fa-spin text-2xl text-purple-500"></i>
+                        <p class="text-xs font-bold">Loading history...</p>
                     </div>
                 </div>
             </div>
@@ -76,7 +75,6 @@
                 </div>
                 
                 <div id="referralsList" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
-                    <!-- Dynamic Referral Items or Empty State -->
                     <div class="flex flex-col items-center justify-center py-16 text-center text-gray-500 space-y-2">
                         <i class="fa-solid fa-users-slash text-3xl opacity-30"></i>
                         <p class="text-xs font-bold">No Referral History Found</p>
@@ -152,11 +150,11 @@
             }
         }
 
-        // Fetch Coins & Tasks History
+        // Fetch Coins History (Using the correct collection: coins_history)
         function loadCoinsHistory() {
             const coinsList = document.getElementById("coinsList");
             
-            db.collection("users").doc(uid).collection("history")
+            db.collection("users").doc(uid).collection("coins_history")
               .orderBy("timestamp", "desc")
               .onSnapshot((snapshot) => {
                   if (snapshot.empty) {
@@ -171,7 +169,21 @@
                   let html = "";
                   snapshot.forEach((doc) => {
                       const item = doc.data();
-                      const dateStr = item.timestamp ? new Date(item.timestamp.toDate()).toLocaleDateString() : 'Recent';
+                      
+                      let formattedTime = "Recent";
+                      if (item.timestamp) {
+                          const dateObj = item.timestamp.toDate ? item.timestamp.toDate() : new Date(item.timestamp);
+                          formattedTime = dateObj.toLocaleString('en-GB', {
+                              day: '2-digit', month: '2-digit', year: 'numeric',
+                              hour: '2-digit', minute: '2-digit', hour12: false
+                          });
+                      } else if (item.date) {
+                          formattedTime = item.date;
+                      }
+
+                      const amountVal = item.amount || item.coins || 0;
+                      const isPositive = amountVal >= 0;
+                      const titleText = item.title || item.reason || item.type || 'Coins Activity';
 
                       html += `
                           <div class="p-3 rounded-xl bg-black/60 border border-purple-900/30 flex justify-between items-center">
@@ -180,21 +192,28 @@
                                       <i class="${item.icon || 'fa-solid fa-coins'} text-xs"></i>
                                   </div>
                                   <div>
-                                      <p class="text-xs font-bold text-white">${item.title || 'Reward Received'}</p>
-                                      <p class="text-[9px] text-gray-500 font-mono">${dateStr}</p>
+                                      <p class="text-xs font-bold text-white">${titleText}</p>
+                                      <p class="text-[9px] text-gray-500 font-mono">${formattedTime}</p>
                                   </div>
                               </div>
-                              <span class="text-xs font-black ${item.amount >= 0 ? 'text-emerald-400' : 'text-red-400'} font-mono">
-                                  ${item.amount >= 0 ? '+' : ''}${item.amount || 0}
+                              <span class="text-xs font-black ${isPositive ? 'text-emerald-400' : 'text-red-400'} font-mono">
+                                  ${isPositive ? '+' : ''}${amountVal} Coins
                               </span>
                           </div>
                       `;
                   });
                   coinsList.innerHTML = html;
+              }, (error) => {
+                  console.error("History fetch error: ", error);
+                  coinsList.innerHTML = `
+                      <div class="flex flex-col items-center justify-center py-16 text-center text-gray-500 space-y-2">
+                          <i class="fa-solid fa-receipt text-3xl opacity-30"></i>
+                          <p class="text-xs font-bold">No Transaction History Found</p>
+                      </div>`;
               });
         }
 
-        // Fetch Referral History & Daily Check-In Tracking
+        // Fetch Referral History & Check-In Tracking
         function loadReferralHistory() {
             const referralsList = document.getElementById("referralsList");
 
