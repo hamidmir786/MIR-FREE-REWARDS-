@@ -94,7 +94,6 @@
         let isSpinning = false;
         let currentRotation = 0;
 
-        // Wheel visual display configuration
         const rewards = [
             { label: "5 Coins", value: 5, type: "coins", color: "#4c1d95", chance: 400 },
             { label: "Retry", value: 0, type: "none", color: "#1e1b4b", chance: 300 },
@@ -107,6 +106,17 @@
         function getTodayDateString() {
             const today = new Date();
             return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        }
+
+        // Coins History Logger
+        function recordCoinTransaction(amount, type, title) {
+            if (!uid) return;
+            db.collection("users").doc(uid).collection("coin_history").add({
+                amount: amount,
+                type: type,
+                title: title,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(err => console.error("Coin history log error:", err));
         }
 
         auth.onAuthStateChanged((user) => {
@@ -169,11 +179,11 @@
                 coins: firebase.firestore.FieldValue.increment(-3),
                 vouchers: firebase.firestore.FieldValue.increment(1)
             }).then(() => {
+                recordCoinTransaction(3, "debit", "Exchanged for 1 Voucher");
                 alert("✅ Successfully Purchased 1 Voucher for 3 Coins!");
             });
         }
 
-        // Weighted Probability Algorithm
         function getWeightedRandomIndex() {
             const totalWeight = rewards.reduce((sum, r) => sum + r.chance, 0);
             let randomNum = Math.floor(Math.random() * totalWeight);
@@ -184,23 +194,19 @@
                 }
                 randomNum -= rewards[i].chance;
             }
-            return 1; // Fallback to Retry
+            return 1;
         }
 
-        // INTEGRATED FREEZE-CHECKING REWARD & POINTS FUNCTION
         async function addRewardAndPoints(winningReward, todaySpins, todayStr, defaultPoints = 15) {
             try {
-                // 1. Check if Leaderboard is Freezed
                 const settingsDoc = await db.collection("settings").doc("leaderboard").get();
                 const isFreezed = settingsDoc.exists && settingsDoc.data().isFreezed;
 
-                // 2. If Freezed, add 0 Points; otherwise add 15 Points
                 const pointsToAdd = isFreezed ? 0 : defaultPoints;
 
                 let coinInc = winningReward.type === "coins" ? winningReward.value : 0;
                 let voucherInc = winningReward.type === "vouchers" ? winningReward.value : 0;
 
-                // 3. Update User Document
                 await db.collection("users").doc(uid).update({
                     coins: firebase.firestore.FieldValue.increment(coinInc),
                     vouchers: firebase.firestore.FieldValue.increment(voucherInc),
@@ -209,8 +215,11 @@
                     lastSpinDate: todayStr
                 });
 
+                if (coinInc > 0) {
+                    recordCoinTransaction(coinInc, "credit", `Quantum Spin Prize (${winningReward.label})`);
+                }
+
                 if (isFreezed) {
-                    console.log("Leaderboard is freezed. Rewards added, but Rank Points skipped.");
                     if (winningReward.type === "none") {
                         alert("🔁 Retry try again! (Leaderboard is Freezed: 0 Rank Points)");
                     } else {
@@ -251,7 +260,6 @@
             isSpinning = true;
             document.getElementById("spinBtn").disabled = true;
 
-            // DEDUCT 1 VOUCHER IMMEDIATELY
             db.collection("users").doc(uid).update({
                 vouchers: firebase.firestore.FieldValue.increment(-1)
             }).then(() => {
@@ -268,7 +276,6 @@
 
                 setTimeout(() => {
                     const winningReward = rewards[winningIndex];
-                    // Call the Freeze-checking Reward and Points function
                     addRewardAndPoints(winningReward, todaySpins, todayStr, 15);
                 }, 4000);
             });
