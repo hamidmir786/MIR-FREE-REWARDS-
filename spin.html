@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -24,7 +23,6 @@
 
     <div class="max-w-md mx-auto w-full space-y-4">
         
-        <!-- HEADER NAV -->
         <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
             <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> Home
@@ -41,7 +39,6 @@
             </div>
         </div>
 
-        <!-- MAIN CONTAINER -->
         <div class="p-5 rounded-3xl premium-panel text-center space-y-5 shadow-2xl">
             
             <div class="flex justify-between items-center border-b border-purple-900/30 pb-3">
@@ -51,13 +48,11 @@
                 <span id="spinLimitText" class="text-xs font-mono text-gray-400 font-bold">Limits: --/40</span>
             </div>
 
-            <!-- SPIN WHEEL CANVAS -->
             <div class="wheel-container my-4">
                 <div class="pointer"></div>
                 <svg id="wheel" viewBox="0 0 100 100"></svg>
             </div>
 
-            <!-- ACTIONS -->
             <div class="space-y-2.5">
                 <button id="spinBtn" onclick="executeSpin()" class="w-full py-3.5 bg-gradient-to-r from-purple-700 to-indigo-600 hover:from-purple-600 hover:to-indigo-500 font-black text-xs text-white uppercase tracking-widest rounded-2xl shadow-lg active:scale-95 transition-all">
                     SPIN NOW (1 Voucher)
@@ -75,7 +70,6 @@
 
     </div>
 
-    <!-- FIREBASE AND SPIN ENGINE -->
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
@@ -108,7 +102,6 @@
             return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
         }
 
-        // Coins History Logger
         function recordCoinTransaction(amount, type, title) {
             if (!uid) return;
             db.collection("users").doc(uid).collection("coin_history").add({
