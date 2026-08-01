@@ -103,7 +103,6 @@
         let timer = null;
         let timeLeft = 15;
 
-        // Question Bank with 20 Questions
         const questionBank = [
             { q: "What is the capital of France?", options: ["Berlin", "Madrid", "Paris", "Rome"], answer: 2 },
             { q: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Venus"], answer: 1 },
@@ -130,6 +129,17 @@
         function getTodayDateString() {
             const today = new Date();
             return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        }
+
+        // Coins History Logger
+        function recordCoinTransaction(amount, type, title) {
+            if (!uid) return;
+            db.collection("users").doc(uid).collection("coin_history").add({
+                amount: amount,
+                type: type,
+                title: title,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(err => console.error("Coin history log error:", err));
         }
 
         auth.onAuthStateChanged((user) => {
@@ -160,7 +170,6 @@
                 return;
             }
 
-            // Randomize and select 5 Questions from Bank
             const shuffled = [...questionBank].sort(() => 0.5 - Math.random());
             sessionQuestions = shuffled.slice(0, 5);
 
@@ -232,20 +241,21 @@
             let defaultPoints = (score === 5) ? 30 : 0;
 
             try {
-                // 1. Check if Leaderboard is Freezed
                 const settingsDoc = await db.collection("settings").doc("leaderboard").get();
                 const isFreezed = settingsDoc.exists && settingsDoc.data().isFreezed;
 
-                // 2. If Freezed, add 0 Points; otherwise add default points
                 const pointsToAdd = isFreezed ? 0 : defaultPoints;
 
-                // 3. Database update
                 await db.collection("users").doc(uid).update({
                     coins: firebase.firestore.FieldValue.increment(coinsEarned),
                     leaderPoints: firebase.firestore.FieldValue.increment(pointsToAdd),
                     quizCount: 1,
                     lastQuizDate: todayStr
                 });
+
+                if (coinsEarned > 0) {
+                    recordCoinTransaction(coinsEarned, "credit", `Core Quiz Reward (${score}/5 score)`);
+                }
 
                 document.getElementById("quizBox").classList.add("hidden");
                 document.getElementById("resultScreen").classList.remove("hidden");
