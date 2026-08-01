@@ -44,7 +44,7 @@
         
         <!-- User Details Panel -->
         <div class="w-full p-3 rounded-2xl premium-panel flex justify-between items-center shadow-2xl">
-            <div class="flex items-center gap-2.5 max-w-[45%]">
+            <div class="flex items-center gap-2.5 max-w-[40%]">
                 <img id="userAvatar" src="https://via.placeholder.com/40" alt="Avatar" class="w-10 h-10 rounded-full border border-purple-500/40 object-cover">
                 <div class="truncate">
                     <h2 id="userName" class="text-xs font-black tracking-wide truncate text-white">Loading...</h2>
@@ -53,9 +53,11 @@
             </div>
             
             <div class="flex items-center gap-1.5 font-mono">
-                <div class="px-2 py-1 rounded-xl bg-black/50 border border-amber-500/30 flex items-center gap-1">
+                <!-- Coins Container with Clickable History Trigger -->
+                <div onclick="openCoinHistoryModal()" class="px-2 py-1 rounded-xl bg-black/50 border border-amber-500/30 flex items-center gap-1 cursor-pointer active:scale-95 transition-all">
                     <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
                     <span id="coinCounter" class="text-xs font-black text-amber-300">0</span>
+                    <i class="fa-solid fa-clock-rotate-left text-[9px] text-amber-400 ml-0.5"></i>
                 </div>
                 <div class="px-2 py-1 rounded-xl bg-black/50 border border-purple-500/30 flex items-center gap-1">
                     <i class="fa-solid fa-trophy text-purple-400 text-xs"></i>
@@ -114,8 +116,9 @@
 
         <!-- Navigation Hub -->
         <div class="space-y-2 pt-2">
-            <div class="px-1 text-[10px] font-bold uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-1">
-                <i class="fa-solid fa-gamepad"></i> Game & Utility Modules
+            <div class="px-1 text-[10px] font-bold uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-1 flex justify-between items-center">
+                <span><i class="fa-solid fa-gamepad"></i> Game & Utility Modules</span>
+                <button onclick="openCoinHistoryModal()" class="text-[9px] text-amber-400 hover:underline uppercase font-bold"><i class="fa-solid fa-receipt"></i> Coins History</button>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -163,8 +166,26 @@
 
     </div>
 
+    <!-- COINS HISTORY MODAL -->
+    <div id="coinHistoryModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex justify-center items-end sm:items-center p-3">
+        <div class="w-full max-w-md bg-[#0d0a1a] border border-purple-800/40 rounded-t-3xl sm:rounded-3xl p-4 space-y-3 shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-purple-900/40 pb-2">
+                <h3 class="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Coins History
+                </h3>
+                <button onclick="closeCoinHistoryModal()" class="text-gray-400 hover:text-white text-xs px-2 py-1 rounded-lg bg-black/40">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div id="coinHistoryList" class="overflow-y-auto space-y-2 flex-1 pr-1">
+                <p id="emptyHistoryPrompt" class="text-[10px] text-gray-500 italic text-center py-6">No coins transaction history recorded yet.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 z-50 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
+    <nav class="fixed bottom-0 left-0 right-0 z-40 p-2.5 bg-[#06040a]/95 backdrop-blur-md border-t border-white/5 flex justify-around items-center">
         <a href="homepage.html" class="flex flex-col items-center gap-0.5 text-purple-400 font-bold"><i class="fa-solid fa-house text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Home</span></a>
         <a href="refer.html" onclick="return verifyNavigationAccess(event)" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-user-plus text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Refer</span></a>
         <a href="withdrawal.html" onclick="return verifyNavigationAccess(event)" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-purple-400 transition-colors"><i class="fa-solid fa-wallet text-sm"></i><span class="text-[8px] font-black uppercase tracking-wider">Withdraw</span></a>
@@ -198,10 +219,22 @@
                 uid = user.uid;
                 syncSystemRealtimeData();
                 bindCountdownEngineClock();
+                listenToCoinHistory();
             } else {
                 window.location.href = "login.html";
             }
         });
+
+        // 💰 CENTRALIZED COIN TRANSACTION LOGGER ENGINE
+        function recordCoinTransaction(amount, type, title) {
+            if (!uid) return;
+            db.collection("users").doc(uid).collection("coin_history").add({
+                amount: amount,
+                type: type, // 'credit' or 'debit'
+                title: title,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(err => console.error("Coin history record failure:", err));
+        }
 
         // 🔒 HARDCORE SUSPENSION DETECTOR
         function isUserCurrentlySuspended() {
@@ -213,12 +246,11 @@
                               (userState.suspensionType && userState.suspensionType.toString().toLowerCase().includes("suspended"));
 
             if (isFlagged) {
-                // Verify if dynamic suspension timing is still valid
                 if (userState.suspendedUntil) {
                     const now = new Date().getTime();
                     const expiryTime = userState.suspendedUntil.toDate ? userState.suspendedUntil.toDate().getTime() : new Date(userState.suspendedUntil).getTime();
                     if (now >= expiryTime) {
-                        return false; // Time expired
+                        return false;
                     }
                 }
                 return true;
@@ -243,7 +275,6 @@
                 if (doc.exists) {
                     userState = doc.data();
 
-                    // 🚫 STRICT SUSPENSION LOCK ENGINE
                     if (isUserCurrentlySuspended()) {
                         const now = new Date().getTime();
                         let suspensionMsg = "Your account has been suspended.";
@@ -270,7 +301,6 @@
                                     suspensionMsg = `Your account is suspended for ${diffDays} days.`;
                                 }
                             } else {
-                                // Auto Unblock User if time completed
                                 db.collection("users").doc(uid).update({
                                     isSuspended: false,
                                     status: "active",
@@ -356,7 +386,6 @@
             }
             
             loadAd(() => {
-                // 🛑 RE-CHECK SUSPENSION AFTER AD IS WATCHED
                 if (isUserCurrentlySuspended()) {
                     alert("🚫 Action Blocked! Account is suspended.");
                     auth.signOut().then(() => { window.location.href = "login.html"; });
@@ -381,7 +410,10 @@
                     coins: firebase.firestore.FieldValue.increment(payloadReward),
                     lastCheckInTimestamp: today,
                     checkInStreak: currentStreak
-                }).then(() => alert(`Success! Added +${payloadReward} Coins.`));
+                }).then(() => {
+                    recordCoinTransaction(payloadReward, "credit", "Daily Streak Bonus");
+                    alert(`Success! Added +${payloadReward} Coins.`);
+                });
             });
         }
 
@@ -400,7 +432,6 @@
             const todayStr = getTodayDateString();
 
             loadAd(() => {
-                // 🛑 RE-CHECK SUSPENSION AFTER AD IS WATCHED BEFORE ADDING COINS
                 if (isUserCurrentlySuspended()) {
                     alert("🚫 Action Blocked! Account is suspended.");
                     auth.signOut().then(() => { window.location.href = "login.html"; });
@@ -412,7 +443,10 @@
                     leaderPoints: firebase.firestore.FieldValue.increment(20),
                     dailyAdCount: firebase.firestore.FieldValue.increment(1),
                     lastAdWatchDate: todayStr
-                }).then(() => alert("🎉 Earned +10 Coins & +20 Rank Points!"));
+                }).then(() => {
+                    recordCoinTransaction(10, "credit", "Ad Broadcast Reward");
+                    alert("🎉 Earned +10 Coins & +20 Rank Points!");
+                });
             });
         }
 
@@ -485,6 +519,49 @@
                 } else {
                     badge.classList.add("hidden");
                 }
+            });
+        }
+
+        // --- 📜 COIN HISTORY UI MODAL LISTENERS ---
+        function openCoinHistoryModal() {
+            document.getElementById("coinHistoryModal").classList.remove("hidden");
+        }
+
+        function closeCoinHistoryModal() {
+            document.getElementById("coinHistoryModal").classList.add("hidden");
+        }
+
+        function listenToCoinHistory() {
+            db.collection("users").doc(uid).collection("coin_history").orderBy("timestamp", "desc").limit(30).onSnapshot((snap) => {
+                const container = document.getElementById("coinHistoryList");
+                const emptyPrompt = document.getElementById("emptyHistoryPrompt");
+
+                container.innerHTML = "";
+                if (snap.empty) {
+                    emptyPrompt.classList.remove("hidden");
+                    return;
+                }
+                emptyPrompt.classList.add("hidden");
+
+                snap.forEach((doc) => {
+                    const item = doc.data();
+                    const isCredit = item.type === "credit";
+                    const dateStr = item.timestamp ? new Date(item.timestamp.toDate()).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'Just now';
+
+                    const row = document.createElement("div");
+                    row.className = "p-2.5 rounded-xl bg-black/40 border border-purple-900/30 flex justify-between items-center text-xs";
+                    
+                    row.innerHTML = `
+                        <div>
+                            <div class="font-bold text-white text-[11px]">${item.title || "Coins Update"}</div>
+                            <div class="text-[8px] text-gray-500 font-mono">${dateStr}</div>
+                        </div>
+                        <div class="font-black font-mono text-xs ${isCredit ? 'text-emerald-400' : 'text-red-400'}">
+                            ${isCredit ? '+' : '-'}${item.amount} Coins
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
             });
         }
     </script>
