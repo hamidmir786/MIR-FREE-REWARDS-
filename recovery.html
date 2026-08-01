@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -21,7 +20,6 @@
 
     <div class="max-w-md mx-auto w-full space-y-4">
         
-        <!-- HEADER NAV -->
         <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
             <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> Home
@@ -32,7 +30,6 @@
             </div>
         </div>
 
-        <!-- MAIN FORM -->
         <div class="p-5 rounded-3xl premium-panel space-y-4 shadow-2xl">
             <div class="text-center space-y-1">
                 <h2 class="text-sm font-black uppercase text-white tracking-wider">PIN & DOB Manual Recovery</h2>
@@ -79,6 +76,16 @@
 
         let uid = null, userState = {};
 
+        function recordCoinTransaction(amount, type, title) {
+            if (!uid) return;
+            db.collection("users").doc(uid).collection("coin_history").add({
+                amount: amount,
+                type: type,
+                title: title,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(err => console.error("Coin history log error:", err));
+        }
+
         auth.onAuthStateChanged((user) => {
             if (user) {
                 uid = user.uid;
@@ -110,19 +117,11 @@
 
             document.getElementById("submitReqBtn").disabled = true;
 
-            // Deduct 500 Coins and Push Request to Admin
             db.collection("users").doc(uid).update({
                 coins: firebase.firestore.FieldValue.increment(-500)
             }).then(() => {
-                // Save Transaction to History (coin_history)
-                db.collection("users").doc(uid).collection("coin_history").add({
-                    title: "Account Recovery Request",
-                    amount: 500,
-                    type: "debit",
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                // Add to Recovery Requests for Admin
+                recordCoinTransaction(500, "debit", "Account Credentials Recovery Fee");
+                
                 db.collection("recovery_requests").add({
                     userId: uid,
                     userEmail: userState.email || "N/A",
@@ -135,8 +134,7 @@
                     alert("✅ Request Submitted Successfully! 500 Coins Deducted. Check your System Mailbox within 48 Hours.");
                     window.location.href = "homepage.html";
                 });
-            }).catch((err) => {
-                console.error("Recovery request error: ", err);
+            }).catch(() => {
                 alert("⚠️ Request failed. Try again.");
                 document.getElementById("submitReqBtn").disabled = false;
             });
