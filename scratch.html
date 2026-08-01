@@ -114,6 +114,17 @@
             return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
         }
 
+        // Coins History Logger
+        function recordCoinTransaction(amount, type, title) {
+            if (!uid) return;
+            db.collection("users").doc(uid).collection("coin_history").add({
+                amount: amount,
+                type: type,
+                title: title,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(err => console.error("Coin history log error:", err));
+        }
+
         auth.onAuthStateChanged((user) => {
             if (user) {
                 uid = user.uid;
@@ -134,19 +145,15 @@
             }
         });
 
-        // Exact Probability Odds System for Scratch Card
         function getRandomScratchReward() {
             const rand = Math.random() * 100;
 
-            // 80% Chance: 2 or 3 Coins
             if (rand < 80.000) {
                 return Math.random() < 0.5 ? 2 : 3;
             } 
-            // 0.003% Chance: 500 Coins (Super Rare)
             else if (rand >= 99.997) {
                 return 500;
             } 
-            // 19.997% Chance: 4 or 5 Coins
             else {
                 return Math.random() < 0.5 ? 4 : 5;
             }
@@ -158,7 +165,6 @@
             document.getElementById("unlockBtn").style.display = "block";
             document.getElementById("rewardAmount").innerText = "? Coins";
             
-            // Redraw Grey Coating Surface
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
             ctx.fillStyle = "#1e1b4b";
@@ -179,14 +185,11 @@
                 return;
             }
 
-            // Trigger Ad simulation
             document.getElementById("unlockBtn").style.display = "none";
             
-            // Calculate Reward Secretly based on exact probabilities
             currentReward = getRandomScratchReward();
             document.getElementById("rewardAmount").innerText = `+${currentReward} Coins`;
 
-            // Draw Metallic Scratch Surface
             ctx.fillStyle = "#312e81";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.font = "bold 11px sans-serif";
@@ -197,7 +200,6 @@
             isCardUnlocked = true;
         }
 
-        // Scratch Canvas Event Handlers
         let isDrawing = false;
 
         function scratch(e) {
@@ -228,9 +230,9 @@
             }
 
             const percentage = (clearedPixels / (imageData.data.length / 4)) * 100;
-            if (percentage > 45) { // Card 45% scratch hote hi complete trigger hoga
+            if (percentage > 45) {
                 isScratchedCompleted = true;
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear remaining overlay
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 claimScratchReward();
             }
         }
@@ -240,14 +242,11 @@
             const todayScratches = userState.lastScratchDate === todayStr ? (userState.scratchCount || 0) : 0;
 
             try {
-                // 1. Check if Leaderboard is Freezed
                 const settingsDoc = await db.collection("settings").doc("leaderboard").get();
                 const isFreezed = settingsDoc.exists && settingsDoc.data().isFreezed;
 
-                // 2. If Freezed, add 0 Points; otherwise add 15 Points
                 const pointsToAdd = isFreezed ? 0 : 15;
 
-                // 3. Update User Document
                 await db.collection("users").doc(uid).update({
                     coins: firebase.firestore.FieldValue.increment(currentReward),
                     leaderPoints: firebase.firestore.FieldValue.increment(pointsToAdd),
@@ -255,13 +254,17 @@
                     lastScratchDate: todayStr
                 });
 
+                if (currentReward > 0) {
+                    recordCoinTransaction(currentReward, "credit", "Lucky Scratch Reward");
+                }
+
                 setTimeout(() => {
                     if (isFreezed) {
                         alert(`🎉 Collected +${currentReward} Coins! (Leaderboard Freezed: 0 Rank Points)`);
                     } else {
                         alert(`🎉 Collected +${currentReward} Coins & +15 Rank Points!`);
                     }
-                    resetCardState(); // Reset Clean state after alert
+                    resetCardState();
                 }, 300);
             } catch (err) {
                 console.error("Error updating scratch reward/points:", err);
