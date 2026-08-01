@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -40,7 +39,6 @@
 
     <div class="max-w-md mx-auto w-full space-y-4">
         
-        <!-- HEADER NAV -->
         <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
             <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> Home
@@ -51,7 +49,6 @@
             </div>
         </div>
 
-        <!-- MAIN SCRATCH CONTAINER -->
         <div class="p-5 rounded-3xl premium-panel text-center space-y-4 shadow-2xl">
             
             <div class="flex justify-between items-center border-b border-purple-900/30 pb-3">
@@ -63,20 +60,16 @@
 
             <p class="text-[11px] text-amber-400 font-bold uppercase tracking-wide">Match your luck to win up to 500 Coins!</p>
 
-            <!-- SCRATCH CARD AREA -->
             <div class="scratch-card-container border border-purple-500/30 bg-black/60 shadow-inner flex flex-col items-center justify-center">
                 
-                <!-- UNDERLYING REWARD VALUE -->
                 <div id="rewardBox" class="text-center">
                     <span class="text-[10px] text-gray-400 uppercase font-black tracking-widest block">Your Reward</span>
                     <h3 id="rewardAmount" class="text-2xl font-black text-amber-400 font-mono mt-1">+0 Coins</h3>
                 </div>
 
-                <!-- OVERLAY CANVAS -->
                 <canvas id="scratchCanvas"></canvas>
             </div>
 
-            <!-- ACTION BUTTONS -->
             <div>
                 <button id="unlockBtn" onclick="unlockNewCard()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 font-black text-xs text-black uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
                     UNLOCK CARD (AD)
@@ -114,7 +107,6 @@
             return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
         }
 
-        // Coins History Logger
         function recordCoinTransaction(amount, type, title) {
             if (!uid) return;
             db.collection("users").doc(uid).collection("coin_history").add({
