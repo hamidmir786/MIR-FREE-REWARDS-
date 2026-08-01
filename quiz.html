@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -23,7 +22,6 @@
 
     <div class="max-w-md mx-auto w-full space-y-4">
         
-        <!-- HEADER NAV -->
         <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
             <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> Home
@@ -34,7 +32,6 @@
             </div>
         </div>
 
-        <!-- MAIN QUIZ CONTAINER -->
         <div class="p-5 rounded-3xl premium-panel text-center space-y-4 shadow-2xl">
             
             <div class="flex justify-between items-center border-b border-purple-900/30 pb-3">
@@ -44,7 +41,6 @@
                 <span id="quizLimitText" class="text-xs font-mono text-gray-400 font-bold">Limits: --/1</span>
             </div>
 
-            <!-- START SCREEN -->
             <div id="startScreen" class="space-y-4 py-4">
                 <p class="text-xs text-gray-300">Answer 5 random questions. Score <b>5/5</b> to earn <b>30 Rank Points</b>!</p>
                 <button onclick="startQuiz()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 font-black text-xs text-white uppercase tracking-wider rounded-xl shadow-lg active:scale-95 transition-all">
@@ -52,7 +48,6 @@
                 </button>
             </div>
 
-            <!-- QUIZ BOX -->
             <div id="quizBox" class="hidden space-y-4 text-left">
                 <div class="flex justify-between items-center text-xs font-mono text-purple-300">
                     <span id="questionTracker">Question 1/5</span>
@@ -64,11 +59,9 @@
                 </div>
 
                 <div id="optionsContainer" class="space-y-2">
-                    <!-- Options injected dynamically -->
                 </div>
             </div>
 
-            <!-- RESULT SCREEN -->
             <div id="resultScreen" class="hidden space-y-4 py-4">
                 <i class="fa-solid fa-trophy text-4xl text-amber-400"></i>
                 <h3 class="text-lg font-black text-white">Quiz Completed!</h3>
@@ -131,7 +124,6 @@
             return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
         }
 
-        // Coins History Logger
         function recordCoinTransaction(amount, type, title) {
             if (!uid) return;
             db.collection("users").doc(uid).collection("coin_history").add({
