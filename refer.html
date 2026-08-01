@@ -16,6 +16,8 @@
         .premium-panel { background: rgba(19, 15, 36, 0.85); border: 1px solid rgba(147, 51, 234, 0.15); }
         .task-card { background: linear-gradient(135deg, #130f26 0%, #0d0a1a 100%); border: 1px solid rgba(255, 255, 255, 0.05); }
         .app-container { width: 100%; max-width: 480px; margin: 0 auto; padding-bottom: 90px; }
+        .badge-active { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-pending { background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); }
     </style>
 </head>
 <body class="p-3 select-none">
@@ -76,8 +78,8 @@
 
         <!-- REWARD BREAKDOWN & RULES -->
         <div class="w-full p-4 rounded-2xl bg-black/40 border border-gray-900 space-y-3">
-            <h4 class="text-xs font-black uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-1">
-                <i class="fa-solid fa-circle-info"></i> How Referral Reward Works
+            <h4 class="text-xs font-black uppercase tracking-wider text-purple-400 border-b border-gray-900 pb-1 flex items-center justify-between">
+                <span><i class="fa-solid fa-circle-info"></i> How Referral Reward Works</span>
             </h4>
             <div class="space-y-2 text-[9px] text-gray-300 font-mono">
                 <div class="flex justify-between items-center p-2 rounded-lg bg-black/40 border border-white/5">
@@ -96,6 +98,21 @@
                     <span>🏆 Day 3 Check-In by Friend</span>
                     <span class="text-indigo-400 font-bold">+20 Coins & +50 Rank Points</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- REFERRAL HISTORY & CHECK-IN TRACKER -->
+        <div class="w-full p-4 rounded-2xl bg-black/40 border border-gray-900 space-y-3">
+            <div class="flex justify-between items-center border-b border-gray-900 pb-2">
+                <h4 class="text-xs font-black uppercase tracking-wider text-purple-400">
+                    <i class="fa-solid fa-users text-xs"></i> Referral History & Daily Status
+                </h4>
+                <span id="totalReferCount" class="text-[10px] bg-purple-950 text-purple-300 px-2 py-0.5 rounded-full border border-purple-800/40 font-bold">0 Users</span>
+            </div>
+
+            <!-- Referral History List Target -->
+            <div id="referralHistoryList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                <p class="text-center text-xs text-gray-500 py-4 font-mono">Loading referrals history...</p>
             </div>
         </div>
 
@@ -130,6 +147,7 @@
             if (user) {
                 uid = user.uid;
                 syncUserData();
+                loadReferralHistory();
             } else {
                 window.location.href = "login.html";
             }
@@ -144,6 +162,125 @@
                     document.getElementById("myReferCode").innerText = myReferralCode;
                 }
             });
+        }
+
+        // Referral History Loader with Check-In Trackers
+        function loadReferralHistory() {
+            const historyContainer = document.getElementById("referralHistoryList");
+
+            db.collection("users")
+              .where("referredBy", "==", uid)
+              .onSnapshot((querySnapshot) => {
+                  document.getElementById("totalReferCount").innerText = `${querySnapshot.size} Users`;
+
+                  if (querySnapshot.empty) {
+                      historyContainer.innerHTML = `
+                          <div class="text-center py-6 text-gray-500">
+                              <i class="fa-solid fa-user-slash text-xl mb-1 opacity-50"></i>
+                              <p class="text-[10px] font-semibold">No referrals yet!</p>
+                              <p class="text-[8px] text-gray-600">Share your code to earn coins and rank points.</p>
+                          </div>`;
+                      return;
+                  }
+
+                  let historyHTML = "";
+
+                  querySnapshot.forEach((doc) => {
+                      const refUser = doc.data();
+                      const refUserId = doc.id;
+                      const checkInDays = refUser.checkInStreak || 0; 
+                      const rewardedDays = refUser.rewardedDaysToReferrer || [];
+
+                      // Check-in status checks
+                      const day1Done = checkInDays >= 1;
+                      const day2Done = checkInDays >= 2;
+                      const day3Done = checkInDays >= 3;
+
+                      // Auto Distribute Bonus Rewards to Referrer if conditions match
+                      verifyAndGrantReferralRewards(refUserId, checkInDays, rewardedDays);
+
+                      historyHTML += `
+                          <div class="p-2.5 rounded-xl bg-black/60 border border-purple-900/40 space-y-2">
+                              <div class="flex justify-between items-center">
+                                  <div class="flex items-center gap-2">
+                                      <div class="w-6 h-6 rounded-full bg-purple-900/50 border border-purple-500/40 flex items-center justify-center text-[10px] text-purple-300 font-bold">
+                                          ${(refUser.name || "U").charAt(0).toUpperCase()}
+                                      </div>
+                                      <div>
+                                          <p class="text-[10px] font-bold text-white">${refUser.name || 'User'}</p>
+                                          <p class="text-[8px] text-gray-500 font-mono">${refUser.email ? refUser.email.substring(0, 4) + '***' : 'User'}</p>
+                                      </div>
+                                  </div>
+                                  <span class="text-[8px] font-mono px-2 py-0.5 rounded ${day3Done ? 'badge-active' : 'badge-pending'}">
+                                      ${day3Done ? '✓ Completed (50 Leaderboard Pts)' : 'In Progress'}
+                                  </span>
+                              </div>
+
+                              <!-- Day 1, 2, 3 Tracking Badges -->
+                              <div class="grid grid-cols-3 gap-1.5 text-center text-[8px] font-mono pt-1 border-t border-white/5">
+                                  <div class="p-1 rounded ${day1Done ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40' : 'bg-gray-900/50 text-gray-500'}">
+                                      <span>Day 1</span> ${day1Done ? '✓ (+20)' : '⏳'}
+                                  </div>
+                                  <div class="p-1 rounded ${day2Done ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40' : 'bg-gray-900/50 text-gray-500'}">
+                                      <span>Day 2</span> ${day2Done ? '✓ (+20)' : '⏳'}
+                                  </div>
+                                  <div class="p-1 rounded ${day3Done ? 'bg-indigo-950/60 text-indigo-300 border border-indigo-800/40 font-bold' : 'bg-gray-900/50 text-gray-500'}">
+                                      <span>Day 3</span> ${day3Done ? '🏆 (+50 Pts)' : '⏳'}
+                                  </div>
+                              </div>
+                          </div>
+                      `;
+                  });
+
+                  historyContainer.innerHTML = historyHTML;
+              });
+        }
+
+        // Leaderboard & Coin Sync Engine
+        async function verifyAndGrantReferralRewards(referredUid, checkInDays, rewardedDays) {
+            let coinsToAdd = 0;
+            let leaderboardPointsToAdd = 0;
+            let updatedRewardedDays = [...rewardedDays];
+
+            // Day 1 Check
+            if (checkInDays >= 1 && !updatedRewardedDays.includes(1)) {
+                coinsToAdd += 20;
+                updatedRewardedDays.push(1);
+            }
+            // Day 2 Check
+            if (checkInDays >= 2 && !updatedRewardedDays.includes(2)) {
+                coinsToAdd += 20;
+                updatedRewardedDays.push(2);
+            }
+            // Day 3 Check (Includes Leaderboard Connection)
+            if (checkInDays >= 3 && !updatedRewardedDays.includes(3)) {
+                coinsToAdd += 20;
+                leaderboardPointsToAdd += 50; // +50 Leaderboard Points added!
+                updatedRewardedDays.push(3);
+            }
+
+            if (coinsToAdd > 0 || leaderboardPointsToAdd > 0) {
+                const batch = db.batch();
+
+                // 1. Update Referrer's Coins & Leaderboard Points
+                const referrerRef = db.collection("users").doc(uid);
+                batch.update(referrerRef, {
+                    coins: firebase.firestore.FieldValue.increment(coinsToAdd),
+                    leaderboardPoints: firebase.firestore.FieldValue.increment(leaderboardPointsToAdd)
+                });
+
+                // 2. Mark days rewarded in referred user's doc so rewards aren't claimed twice
+                const referredRef = db.collection("users").doc(referredUid);
+                batch.update(referredRef, {
+                    rewardedDaysToReferrer: updatedRewardedDays
+                });
+
+                try {
+                    await batch.commit();
+                } catch (err) {
+                    console.error("Error updating referral leaderboard rewards:", err);
+                }
+            }
         }
 
         function copyReferCode() {
