@@ -107,7 +107,7 @@
         <section id="userRequestsSection" class="space-y-3 hidden">
             <div class="flex justify-between items-center px-1">
                 <h4 class="text-[10px] font-black text-amber-400 uppercase tracking-widest"><i class="fa-solid fa-headset text-amber-500"></i> PIN/DOB Recovery Requests</h4>
-                <p class="text-[9px] text-gray-500 font-mono">adminRequests Collection</p>
+                <p class="text-[9px] text-gray-500 font-mono">recovery_requests Collection</p>
             </div>
             <div id="userRequestsContainer" class="space-y-2.5">
             </div>
@@ -349,7 +349,7 @@
             });
         }
 
-        // RENDER TOP 50 WINNERS LIST WITH APPROVED STATUS & REDEEM CAPABILITY
+        // RENDER TOP 50 WINNERS LIST
         function renderTop50WinnersBoard(list) {
             const container = document.getElementById("top50WinnersContainer");
             container.innerHTML = "";
@@ -423,7 +423,7 @@
             });
         }
 
-        // HANDLE INDIVIDUAL WINNER REDEEM CODE OR UNQUALIFIED MAILBOX NOTIFICATION
+        // HANDLE INDIVIDUAL WINNER REDEEM CODE
         function handleWinnerRedeemProcess(userUid, rank, points) {
             if (points < 10000) {
                 const msgText = "Apke 10000 se kam hai Isliye apko radeem code nhi milega";
@@ -441,7 +441,7 @@
                         leaderboardApproved: true
                     });
                 }).then(() => {
-                    alert("⚠️ User has less than 10,000 points!\nSent notification to Mailbox: 'Apke 10000 se kam hai Isliye apko radeem code nhi milega'");
+                    alert("⚠️ User has less than 10,000 points!\nSent notification to Mailbox.");
                     executeCheckWinnersLoad();
                 });
                 return;
@@ -515,7 +515,7 @@
         function triggerSeasonResetAndNewMonth() {
             if (!confirm("Are you sure? This will RESET all user Leaderboard Points to 0 and CLEAR the winners section!")) return;
 
-            const monthName = prompt("Enter New Month Name for Leaderboard (e.g., 'November Season'):", "November Season");
+            const monthName = prompt("Enter New Month Name for Leaderboard:", "November Season");
             if (monthName === null || monthName.trim() === "") return;
 
             db.collection("users").get().then(snap => {
@@ -539,7 +539,7 @@
 
                 return batch.commit();
             }).then(() => {
-                alert(`✅ Season Reset Successfully!\nAll points set to 0. New Month: "${monthName.trim()}". Leaderboard section is now clean until you click "Check Winners" again.`);
+                alert(`✅ Season Reset Successfully!\nAll points set to 0. New Month: "${monthName.trim()}".`);
                 
                 document.getElementById("currentSeasonBadge").innerText = `Month: ${monthName.trim()}`;
                 
@@ -555,12 +555,14 @@
             });
         }
 
-        // RECOVERY REQUESTS
+        // FIXED: RECOVERY REQUESTS REAL-TIME LISTENER
         function fetchUserRecoveryRequests() {
-            db.collection("adminRequests").onSnapshot(snap => {
+            // Check recovery_requests collection in realtime
+            db.collection("recovery_requests").onSnapshot(snap => {
                 renderRecoveryData(snap);
             }, err => {
-                db.collection("recovery_requests").onSnapshot(snap2 => {
+                // Fallback check admin_requests
+                db.collection("admin_requests").onSnapshot(snap2 => {
                     renderRecoveryData(snap2);
                 });
             });
@@ -617,18 +619,18 @@
 
                 card.innerHTML = `
                     <div class="flex justify-between items-center">
-                        <span class="text-[9px] font-mono text-gray-400">User: <strong class="text-white">${req.userName || req.username || 'User'}</strong></span>
+                        <span class="text-[9px] font-mono text-gray-400">User: <strong class="text-white">${req.username || req.userEmail || 'User'}</strong></span>
                         <span class="px-2 py-0.5 rounded text-[8px] font-black tracking-wider ${isPending ? 'bg-amber-950/50 text-amber-400 border border-amber-800/40' : 'bg-emerald-950/50 text-emerald-400 border border-emerald-800/40'}">${st}</span>
                     </div>
                     <div class="space-y-1 bg-black/30 p-2 rounded-xl text-[10px] text-gray-300">
-                        <p><strong>Type:</strong> ${req.requestType || 'RECOVERY_PIN_AND_DOB'}</p>
-                        <p><strong>Email:</strong> ${req.userEmail || 'N/A'}</p>
+                        <p><strong>Input/Email:</strong> ${req.providedInput || req.userEmail || 'N/A'}</p>
+                        <p><strong>Issue/Note:</strong> ${req.issueNote || 'N/A'}</p>
                         <p class="text-amber-400 font-mono text-[9px]">Requested On: ${formattedTime}</p>
                     </div>
                     ${isPending ? `
                     <div class="flex gap-2 pt-1">
                         <button onclick="resolveUserRequest('${req.id}', '${targetUid}')" class="w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-[9px] uppercase tracking-wider rounded-lg transition-all">
-                            <i class="fa-solid fa-paper-plane"></i> Resolve & Send PIN to Mailbox
+                            <i class="fa-solid fa-paper-plane"></i> Resolve & Send PIN/DOB to Mailbox
                         </button>
                     </div>
                     ` : ''}
@@ -815,17 +817,16 @@
             });
         }
 
-        // RESOLVE RECOVERY
+        // RESOLVE RECOVERY (UPDATED)
         function resolveUserRequest(requestId, userUid) {
             const message = prompt("Enter PIN / DOB Details or Recovery Code for user's Mailbox:");
             if (message === null || message.trim() === "") return;
 
             const fullMessageText = `Admin Response: ${message.trim()}`;
 
-            db.collection("adminRequests").doc(requestId).update({
-                status: "RESOLVED"
-            }).catch(() => {
-                db.collection("recovery_requests").doc(requestId).update({ status: "RESOLVED" });
+            // Update in both potential collections
+            db.collection("recovery_requests").doc(requestId).update({ status: "RESOLVED" }).catch(() => {
+                db.collection("admin_requests").doc(requestId).update({ status: "RESOLVED" });
             }).then(() => {
                 if (userUid && userUid !== "" && userUid !== "undefined") {
                     db.collection("users").doc(userUid).collection("mailbox").add({
