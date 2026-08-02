@@ -24,6 +24,9 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
+            <button onclick="triggerBroadcastModal()" class="px-2.5 py-1.5 bg-purple-900/40 border border-purple-700/50 hover:bg-purple-800/60 text-purple-200 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1">
+                <i class="fa-solid fa-bullhorn text-yellow-400"></i> Broadcast
+            </button>
             <button onclick="triggerKeyConfigModal()" class="px-2.5 py-1.5 bg-white/5 border border-gray-800 hover:border-purple-900 text-gray-300 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1">
                 <i class="fa-solid fa-key text-purple-400"></i> Key Config
             </button>
@@ -892,7 +895,7 @@
             alert("Ticket rejected.");
         }
 
-        // RENDER USERS LIST (ROBUST SUSPENSION STATUS DETECTION)
+        // RENDER USERS LIST
         function renderUsersListMarkup(list) {
             const container = document.getElementById("usersDataContainer");
             container.innerHTML = "";
@@ -915,7 +918,6 @@
                 const securePin = user.pin || user.securePin || "Not Setup";
                 const recoveryDob = user.dob || user.recoveryDob || "Not Setup";
 
-                // Robust Suspension Detection
                 let isSuspended = (user.isSuspended === true || user.isSuspended === "true");
                 let suspensionLabel = "ACTIVE";
 
@@ -933,7 +935,6 @@
                             suspensionLabel = `${remainingHours} Hours`;
                         }
                     } else {
-                        // Expiry hogaya hai suspension time
                         isSuspended = false;
                     }
                 }
@@ -1050,7 +1051,7 @@
         // APPLY SUSPENSION TO FIRESTORE
         function applyUserSuspension(userUid, hours) {
             const now = Date.now();
-            let suspendedUntil = -1; // -1 means Permanent
+            let suspendedUntil = -1;
 
             if (hours !== -1) {
                 suspendedUntil = now + (hours * 60 * 60 * 1000);
@@ -1190,6 +1191,65 @@
             db.collection("users").doc(userUid).delete().then(() => {
                 alert("User record cleared!");
                 fetchLatestAdminData();
+            });
+        }
+
+        // BROADCAST MODAL TRIGGER
+        function triggerBroadcastModal() {
+            const modal = document.getElementById("adminPortalModal");
+            const body = document.getElementById("adminModalBody");
+            modal.style.display = "flex";
+
+            body.innerHTML = `
+                <div class="flex justify-between items-center pb-2 border-b border-gray-800">
+                    <h3 class="text-xs font-bold text-white uppercase"><i class="fa-solid fa-bullhorn text-yellow-400"></i> Global Broadcast</h3>
+                    <button onclick="closeAdminPortalModal()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-3 pt-2 text-xs">
+                    <div>
+                        <label class="block text-[9px] text-gray-500 font-bold uppercase mb-1">Notice Title</label>
+                        <input type="text" id="broadcastTitle" placeholder="e.g. System Update / Special Gift" class="w-full px-3 py-2 bg-black/40 border border-gray-900 rounded-lg text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] text-gray-500 font-bold uppercase mb-1">Message Body</label>
+                        <textarea id="broadcastMessage" rows="3" placeholder="Enter notification message..." class="w-full px-3 py-2 bg-black/40 border border-gray-900 rounded-lg text-white"></textarea>
+                    </div>
+                    <button onclick="sendGlobalBroadcast()" class="w-full py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-lg uppercase">Send To All Users</button>
+                </div>
+            `;
+        }
+
+        // BROADCAST SENDER
+        function sendGlobalBroadcast() {
+            const title = document.getElementById("broadcastTitle").value.trim();
+            const msg = document.getElementById("broadcastMessage").value.trim();
+
+            if (!title || !msg) {
+                alert("Title and Message cannot be empty!");
+                return;
+            }
+
+            if (!confirm(`Send message to all ${cachedUsersList.length} users?`)) return;
+
+            let batch = db.batch();
+            cachedUsersList.forEach(user => {
+                const mailRef = db.collection("users").doc(user.uid).collection("mailbox").doc();
+                batch.set(mailRef, {
+                    title: title,
+                    message: msg,
+                    msg: msg,
+                    date: new Date().toLocaleDateString(),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false,
+                    type: "announcement"
+                });
+            });
+
+            batch.commit().then(() => {
+                alert("✅ Broadcast delivered successfully to all users!");
+                closeAdminPortalModal();
+            }).catch(err => {
+                alert("❌ Error sending broadcast: " + err.message);
             });
         }
 
