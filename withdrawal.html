@@ -235,6 +235,7 @@
             });
         }
 
+        // Realtime Listener for User Withdrawals (Live Updates Status Approved / Success / Pending)
         function loadHistory() {
             db.collection("users").doc(currentUser.uid).collection("history")
               .orderBy("timestamp", "desc")
@@ -248,7 +249,15 @@
                   let h = "";
                   snap.forEach(doc => {
                       const data = doc.data();
-                      const statusColor = data.status === 'Pending' ? 'text-amber-400' : (data.status === 'Success' ? 'text-emerald-400' : 'text-red-400');
+                      const statusUpper = (data.status || 'Pending').toUpperCase();
+                      let statusClass = "text-amber-400";
+                      
+                      if (statusUpper === 'SUCCESS' || statusUpper === 'APPROVED') {
+                          statusClass = "text-emerald-400";
+                      } else if (statusUpper === 'REJECTED' || statusUpper === 'FAILED') {
+                          statusClass = "text-red-400";
+                      }
+
                       h += `
                         <div class="flex justify-between items-center p-2 rounded-xl bg-black/50 border border-white/5">
                             <div>
@@ -256,7 +265,7 @@
                                 <p class="text-[8px] text-gray-500">${data.payoutDetails || 'Mailbox Deliver'}</p>
                             </div>
                             <div class="text-right">
-                                <span class="${statusColor} font-bold uppercase text-[9px]">${data.status}</span>
+                                <span class="${statusClass} font-bold uppercase text-[9px]">${data.status}</span>
                                 <p class="text-[8px] text-gray-500">-${data.coinsUsed} Coins</p>
                             </div>
                         </div>
@@ -397,8 +406,9 @@
             const batch = db.batch();
 
             const userRef = db.collection("users").doc(currentUser.uid);
-            const globalWithdrawalRef = db.collection("withdrawals").doc(); // Unique ID generated for both
+            const globalWithdrawalRef = db.collection("withdrawals").doc(); // Generates single synced ID
             const userHistoryRef = userRef.collection("history").doc(globalWithdrawalRef.id);
+            const coinHistoryRef = userRef.collection("coin_history").doc(globalWithdrawalRef.id);
 
             const transactionData = {
                 uid: currentUser.uid,
@@ -411,16 +421,26 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
+            const coinHistoryData = {
+                title: selectedItemName,
+                amount: selectedCost,
+                type: "debit",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
             // 1. Coins Deduct
             batch.update(userRef, {
                 coins: firebase.firestore.FieldValue.increment(-selectedCost)
             });
 
-            // 2. Global Withdrawals Entry (Admin Dashboard)
+            // 2. Global Withdrawals Entry (For Admin Dashboard)
             batch.set(globalWithdrawalRef, transactionData);
 
-            // 3. User Specific History Entry (In-App User History)
+            // 3. User Specific History Entry (For Live Status in withdrawal.html)
             batch.set(userHistoryRef, transactionData);
+
+            // 4. Coin History Subcollection Entry (For Minus Red Log in history.html)
+            batch.set(coinHistoryRef, coinHistoryData);
 
             // Execute Batch Action
             batch.commit().then(() => {
