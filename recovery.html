@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -20,6 +21,7 @@
 
     <div class="max-w-md mx-auto w-full space-y-4">
         
+        <!-- Header Panel -->
         <div class="flex items-center justify-between p-3 rounded-2xl premium-panel shadow-lg">
             <a href="homepage.html" class="px-3 py-1.5 bg-purple-950/60 border border-purple-800/40 rounded-xl text-purple-300 text-xs font-bold flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> Home
@@ -30,6 +32,7 @@
             </div>
         </div>
 
+        <!-- Main Recovery Box -->
         <div class="p-5 rounded-3xl premium-panel space-y-4 shadow-2xl">
             <div class="text-center space-y-1">
                 <h2 class="text-sm font-black uppercase text-white tracking-wider">PIN & DOB Manual Recovery</h2>
@@ -61,6 +64,7 @@
     </div>
 
     <script>
+        // Firebase Configuration
         const firebaseConfig = {
           apiKey: "AIzaSyD0AZG6D8H-OZOJK0s5sDyVJ6BLJJKVszc",
           authDomain: "mir-free-rewards-log-and-earn.firebaseapp.com",
@@ -72,10 +76,13 @@
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth(), db = firebase.firestore();
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        let uid = null, userState = {};
+        let uid = null;
+        let userState = {};
 
+        // Track Coin Transactions
         function recordCoinTransaction(amount, type, title) {
             if (!uid) return;
             db.collection("users").doc(uid).collection("coin_history").add({
@@ -86,6 +93,7 @@
             }).catch(err => console.error("Coin history log error:", err));
         }
 
+        // Authentication State Listener
         auth.onAuthStateChanged((user) => {
             if (user) {
                 uid = user.uid;
@@ -100,9 +108,11 @@
             }
         });
 
-        function submitRecoveryRequest() {
+        // Recovery Request Logic Connected with Admin DB
+        async function submitRecoveryRequest() {
             const userInput = document.getElementById("recoverInput").value.trim();
             const userNote = document.getElementById("recoverNote").value.trim();
+            const submitBtn = document.getElementById("submitReqBtn");
 
             if (!userInput || !userNote) {
                 alert("❌ Please fill in all fields.");
@@ -115,29 +125,44 @@
                 return;
             }
 
-            document.getElementById("submitReqBtn").disabled = true;
+            // Disable Button to avoid double submission
+            submitBtn.disabled = true;
+            submitBtn.innerText = "PROCESSING...";
 
-            db.collection("users").doc(uid).update({
-                coins: firebase.firestore.FieldValue.increment(-500)
-            }).then(() => {
+            try {
+                // 1. Deduct 500 Coins from User Account
+                await db.collection("users").doc(uid).update({
+                    coins: firebase.firestore.FieldValue.increment(-500)
+                });
+
+                // 2. Log History
                 recordCoinTransaction(500, "debit", "Account Credentials Recovery Fee");
-                
-                db.collection("recovery_requests").add({
+
+                // 3. Data to send to Admin Dashboard
+                const requestPayload = {
                     userId: uid,
                     userEmail: userState.email || "N/A",
                     username: userState.username || "N/A",
                     providedInput: userInput,
                     issueNote: userNote,
-                    status: "Pending",
+                    status: "Pending", // Status for Admin: Pending, Approved, Rejected
+                    type: "PIN_DOB_RECOVERY",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    alert("✅ Request Submitted Successfully! 500 Coins Deducted. Check your System Mailbox within 48 Hours.");
-                    window.location.href = "homepage.html";
-                });
-            }).catch(() => {
-                alert("⚠️ Request failed. Try again.");
-                document.getElementById("submitReqBtn").disabled = false;
-            });
+                };
+
+                // Send to both collections so Admin can manage easily
+                await db.collection("recovery_requests").add(requestPayload);
+                await db.collection("admin_requests").add(requestPayload);
+
+                alert("✅ Request Submitted Successfully! 500 Coins Deducted. Admin will review and respond to your System Mailbox within 48 Hours.");
+                window.location.href = "homepage.html";
+
+            } catch (error) {
+                console.error("Error submitting request:", error);
+                alert("⚠️ Request failed. Please check your connection and try again.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "PAY 500 COINS & SUBMIT REQUEST";
+            }
         }
     </script>
 </body>
