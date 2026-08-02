@@ -150,7 +150,7 @@
             }
         }
 
-        // Fetch Coins History (Using the exact collection used across all pages: coin_history)
+        // Fetch Coins History (Supports both Credit and Debit / Withdrawal entries)
         function loadCoinsHistory() {
             const coinsList = document.getElementById("coinsList");
             
@@ -179,15 +179,16 @@
                           });
                       }
 
-                      const isCredit = item.type === "credit";
-                      const amountVal = item.amount || 0;
-                      const titleText = item.title || 'Coins Activity';
+                      // Check if entry is debit/withdrawal vs credit
+                      const isCredit = item.type === "credit" || (item.amount > 0 && item.type !== "debit");
+                      const amountVal = Math.abs(item.amount || item.coinsUsed || 0);
+                      const titleText = item.title || item.rewardName || 'Coins Activity';
 
                       html += `
                           <div class="p-3 rounded-xl bg-black/60 border border-purple-900/30 flex justify-between items-center">
                               <div class="flex items-center gap-3">
                                   <div class="w-8 h-8 rounded-lg bg-purple-950 border border-purple-800/40 flex items-center justify-center text-purple-400">
-                                      <i class="${isCredit ? 'fa-solid fa-coins text-amber-400' : 'fa-solid fa-receipt text-red-400'} text-xs"></i>
+                                      <i class="${isCredit ? 'fa-solid fa-coins text-amber-400' : 'fa-solid fa-arrow-down-left text-red-400'} text-xs"></i>
                                   </div>
                                   <div>
                                       <p class="text-xs font-bold text-white">${titleText}</p>
