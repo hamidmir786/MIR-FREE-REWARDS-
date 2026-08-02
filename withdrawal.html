@@ -236,8 +236,7 @@
         }
 
         function loadHistory() {
-            db.collection("withdrawals")
-              .where("uid", "==", currentUser.uid)
+            db.collection("users").doc(currentUser.uid).collection("history")
               .orderBy("timestamp", "desc")
               .limit(5)
               .onSnapshot((snap) => {
@@ -382,8 +381,7 @@
             let isVerified = false;
             if (dbPin && pin === dbPin) isVerified = true;
             if (dbDob && dob === dbDob) isVerified = true;
-
-            if (!dbPin && !dbDob) isVerified = true; // Safety check if user hasn't set credentials yet
+            if (!dbPin && !dbDob) isVerified = true;
 
             if (!isVerified) {
                 alert("Invalid PIN or Date of Birth. Please check and try again.");
@@ -395,20 +393,37 @@
                 payoutInfo = document.getElementById("userUpiId").value.trim();
             }
 
-            // Deduct Coins & Create Withdrawal Request
-            db.collection("users").doc(currentUser.uid).update({
+            // Atomic Batch Initialization
+            const batch = db.batch();
+
+            const userRef = db.collection("users").doc(currentUser.uid);
+            const globalWithdrawalRef = db.collection("withdrawals").doc(); // Unique ID generated for both
+            const userHistoryRef = userRef.collection("history").doc(globalWithdrawalRef.id);
+
+            const transactionData = {
+                uid: currentUser.uid,
+                rewardName: selectedItemName,
+                coinsUsed: selectedCost,
+                amountRupees: selectedRupees,
+                payoutDetails: payoutInfo,
+                type: "Withdrawal",
+                status: "Pending",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // 1. Coins Deduct
+            batch.update(userRef, {
                 coins: firebase.firestore.FieldValue.increment(-selectedCost)
-            }).then(() => {
-                return db.collection("withdrawals").add({
-                    uid: currentUser.uid,
-                    rewardName: selectedItemName,
-                    coinsUsed: selectedCost,
-                    amountRupees: selectedRupees,
-                    payoutDetails: payoutInfo,
-                    status: "Pending",
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            }).then(() => {
+            });
+
+            // 2. Global Withdrawals Entry (Admin Dashboard)
+            batch.set(globalWithdrawalRef, transactionData);
+
+            // 3. User Specific History Entry (In-App User History)
+            batch.set(userHistoryRef, transactionData);
+
+            // Execute Batch Action
+            batch.commit().then(() => {
                 alert("Withdrawal Request Submitted Successfully!");
                 closeModal('securityModal');
                 document.getElementById("inputPin").value = "";
