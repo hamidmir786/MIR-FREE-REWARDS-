@@ -19,45 +19,51 @@
             background-color: #000;
         }
 
-        /* Screen Wrapper */
+        /* Full Screen Container */
         .welcome-screen {
-            position: relative;
             width: 100vw;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            background-color: #000;
+        }
+
+        /* Image Wrapper - Takes top area and resizes image safely */
+        .image-wrapper {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
             align-items: center;
+            padding: 10px;
+            overflow: hidden;
         }
 
-        /* Responsive Background Image */
+        /* Responsive Image - Fits completely without overlapping buttons */
         .bg-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            z-index: 1;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
         }
 
-        /* Button Container at Bottom */
+        /* Dedicated Solid Black Bottom Bar for Buttons */
         .button-container {
-            position: relative;
-            z-index: 2;
+            height: 85px;
             width: 100%;
-            padding: 20px 25px 40px 25px;
+            background-color: #000;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+            padding: 0 25px 15px 25px;
+            border-top: 1px solid #1a1a1a;
+            z-index: 10;
         }
 
         /* Buttons Styling */
         .btn {
             padding: 12px 28px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             text-transform: uppercase;
             border: 2px solid;
@@ -65,12 +71,12 @@
             cursor: pointer;
             text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
         }
 
         /* EXIT Button (Left Side) */
         .btn-exit {
-            background-color: rgba(255, 0, 0, 0.2);
+            background-color: rgba(255, 0, 0, 0.15);
             color: #ff4d4d;
             border-color: #ff4d4d;
         }
@@ -82,7 +88,7 @@
 
         /* CONTINUE Button (Right Side) */
         .btn-continue {
-            background-color: rgba(0, 210, 255, 0.2);
+            background-color: rgba(0, 210, 255, 0.15);
             color: #00d2ff;
             border-color: #00d2ff;
         }
@@ -96,7 +102,9 @@
 <body>
 
     <div class="welcome-screen">
-        <img src="https://i.ibb.co/fVtYcHsR/1785921594929.png" alt="1785921594929" class="bg-image">
+        <div class="image-wrapper">
+            <img src="https://i.ibb.co/fVtYcHsR/1785921594929.png" alt="Mir Free Rewards" class="bg-image">
+        </div>
 
         <div class="button-container">
             <button class="btn btn-exit" onclick="exitApp()">EXIT</button>
