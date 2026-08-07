@@ -40,7 +40,7 @@
             overflow: hidden;
         }
 
-        /* Responsive Image - Fits completely without overlapping buttons */
+        /* Responsive Image */
         .bg-image {
             max-width: 100%;
             max-height: 100%;
@@ -48,50 +48,48 @@
             border-radius: 8px;
         }
 
-        /* Dedicated Solid Black Bottom Bar for Buttons */
+        /* Dedicated Bottom Bar raised slightly for better visibility */
         .button-container {
-            height: 85px;
             width: 100%;
             background-color: #000;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            padding: 0 25px 15px 25px;
+            justify-content: center;
+            padding: 15px 25px 35px 25px; /* Bottom padding increased so button moves UP */
             border-top: 1px solid #1a1a1a;
             z-index: 10;
         }
 
-        /* Buttons Styling */
-        .btn {
-            padding: 12px 28px;
-            font-size: 15px;
+        /* Text above the button */
+        .process-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* Full-width Single CONTINUE Button */
+        .btn-continue {
+            width: 100%;
+            max-width: 320px;
+            padding: 14px 20px;
+            font-size: 16px;
             font-weight: bold;
             text-transform: uppercase;
-            border: 2px solid;
+            border: 2px solid #00d2ff;
             border-radius: 25px;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-        }
-
-        /* EXIT Button (Left Side) */
-        .btn-exit {
-            background-color: rgba(255, 0, 0, 0.15);
-            color: #ff4d4d;
-            border-color: #ff4d4d;
-        }
-
-        .btn-exit:hover {
-            background-color: #ff4d4d;
-            color: #fff;
-        }
-
-        /* CONTINUE Button (Right Side) */
-        .btn-continue {
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
             background-color: rgba(0, 210, 255, 0.15);
             color: #00d2ff;
-            border-color: #00d2ff;
+            text-align: center;
+            display: block;
         }
 
         .btn-continue:hover {
@@ -103,26 +101,17 @@
 <body>
 
     <div class="welcome-screen">
+        <!-- Main Image -->
         <div class="image-wrapper">
             <img src="https://i.ibb.co/fVtYcHsR/1785921594929.png" alt="Mir Free Rewards" class="bg-image">
         </div>
 
+        <!-- Raised Bottom Bar with Text and Single Button -->
         <div class="button-container">
-            <button class="btn btn-exit" onclick="exitApp()">EXIT</button>
-            <a href="login.html" class="btn btn-continue">CONTINUE</a>
+            <div class="process-title">Continue To Process</div>
+            <a href="login.html" class="btn-continue">CONTINUE</a>
         </div>
     </div>
-
-    <script>
-        // Exit Functionality for Web and Mobile WebView
-        function exitApp() {
-            if (navigator.app && navigator.app.exitApp) {
-                navigator.app.exitApp(); // For Android WebView/Cordova
-            } else {
-                window.close(); // For standard Web Browsers
-            }
-        }
-    </script>
 
 </body>
 </html>
